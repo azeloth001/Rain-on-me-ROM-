@@ -1,2 +1,2 @@
 # Rain-on-me-ROM-
-Tradeview indicatir
+Tradeview indicatior v6
