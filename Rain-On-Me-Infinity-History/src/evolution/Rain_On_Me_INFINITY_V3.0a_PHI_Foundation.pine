@@ -1,0 +1,518 @@
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+// If a copy of the MPL was not distributed with this file, You can obtain one at
+// https://mozilla.org/MPL/2.0/
+//
+// Original concept: © RickSimpson — "Rain On Me V2"
+// V3.0a reconstruction: integrity-first Pine v6 foundation.
+//
+// This derivative preserves the ROM legacy Fibonacci ratios as an explicit mode.
+// Rebuilt sections are marked and are not intended to imply endorsement by the
+// original author.
+
+//@version=6
+indicator(title="Rain On Me ∞ V3.0a — PHI Foundation",
+     shorttitle="ROM 3.0a",
+     overlay=true,
+     max_bars_back=1500,
+     max_lines_count=200,
+     max_labels_count=100,
+     max_boxes_count=100)
+
+// ╔════════════════════════════════════════════════════════════════════════════╗
+// ║ V3.0a — PHI FOUNDATION                                                    ║
+// ║ • Confirmed previous-period Fibonacci data; stable during active period.  ║
+// ║ • ROM Legacy, Canonical and Hybrid ratio families.                        ║
+// ║ • Persistent lines, labels and zones; no create/delete churn every bar.   ║
+// ║ • Repaired dominant-cycle trendline with Confirmed/Developing MTF modes.  ║
+// ║ • Safe Pressure Flow replacing the mathematically unsafe legacy “VPT”.    ║
+// ║ • Clean ATR trail, bar-close event gates and bounded visual lifecycle.    ║
+// ║ • Diagnostic foundation field only; final signal council comes in V3.0c. ║
+// ╚════════════════════════════════════════════════════════════════════════════╝
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Constants and input groups
+// ─────────────────────────────────────────────────────────────────────────────
+
+const string GROUP_SYSTEM   = "00 — System & Integrity"
+const string GROUP_FIB      = "01 — PHI Lattice"
+const string GROUP_TREND    = "02 — Dominant-Cycle Trend"
+const string GROUP_PRESSURE = "03 — Pressure Flow"
+const string GROUP_ATR      = "04 — ATR Trail"
+const string GROUP_VISUAL   = "05 — Visual Spectrum"
+const string GROUP_ALERTS   = "06 — Events & Alerts"
+
+displayMode = input.string("Spectrum", "Display Mode",
+     options=["Focus", "Spectrum", "Legacy ROM", "Research Lab"],
+     tooltip="Focus shows the structural PHI levels. Spectrum shows the complete field. Legacy ROM preserves the old red/green lattice identity. Research Lab exposes diagnostics.",
+     group=GROUP_SYSTEM)
+theme = input.string("Ocean Neon", "Theme",
+     options=["Ocean Neon", "Royal Gold", "Zeiierman Night"], group=GROUP_SYSTEM)
+dashboardEnabled = input.bool(true, "Dashboard", group=GROUP_SYSTEM)
+dashboardMode = input.string("Professional", "Dashboard Mode",
+     options=["Compact", "Professional"], group=GROUP_SYSTEM)
+confirmedEventsOnly = input.bool(true, "Confirm Events On Bar Close",
+     tooltip="Recommended integrity setting. Visual calculations may develop intrabar, but event markers and alerts wait for bar close.",
+     group=GROUP_SYSTEM)
+
+showFib = input.bool(true, "Show PHI Lattice", group=GROUP_FIB)
+fibTimeframe = input.timeframe("D", "Anchor Period",
+     tooltip="For BTC/ETH intraday use, D is the primary default. The anchor period must not be lower than the chart timeframe.",
+     group=GROUP_FIB)
+ratioMode = input.string("ROM Legacy", "Ratio Family",
+     options=["ROM Legacy", "Canonical", "Hybrid"],
+     tooltip="ROM Legacy preserves 0.235/0.728/1.235/1.328 exactly. Canonical uses common Fibonacci ratios. Hybrid keeps the strongest shared and experimental levels.",
+     group=GROUP_FIB)
+rangeMode = input.string("Previous Range", "Lattice Scale",
+     options=["Previous Range", "Previous True Range", "Robust Blend"],
+     tooltip="Previous Range reproduces the original geometry. Robust Blend takes the median of prior range, prior true range and the remembered average range.",
+     group=GROUP_FIB)
+rangeMemory = input.int(20, "Robust Range Memory", minval=5, maxval=100, group=GROUP_FIB)
+showFibZones = input.bool(true, "Show ATR Resonance Zones", group=GROUP_FIB)
+zoneAtrWidth = input.float(0.08, "Zone Half-Width × ATR", minval=0.01, maxval=0.50, step=0.01, group=GROUP_FIB)
+showFibLabels = input.bool(true, "Show Level Labels", group=GROUP_FIB)
+fibLabelOffset = input.int(16, "Label Offset (bars)", minval=2, maxval=100, group=GROUP_FIB)
+
+showCycleTrend = input.bool(true, "Show Dominant-Cycle Trend", group=GROUP_TREND)
+trendTimeframe = input.timeframe("", "Trend Timeframe (blank = chart)", group=GROUP_TREND)
+trendMtfMode = input.string("Confirmed", "MTF Integrity Mode",
+     options=["Confirmed", "Developing"],
+     tooltip="Confirmed uses the last completed higher-timeframe value. Developing is more responsive but can change before the HTF candle closes.",
+     group=GROUP_TREND)
+trendDeadbandAtr = input.float(0.06, "Trend Deadband × ATR", minval=0.0, maxval=0.50, step=0.01, group=GROUP_TREND)
+
+showPressure = input.bool(true, "Show Pressure Guide", group=GROUP_PRESSURE)
+pressureFlowLength = input.int(14, "Flow Detrend Length", minval=3, maxval=100, group=GROUP_PRESSURE)
+pressureZLength = input.int(28, "Flow Normalization Length", minval=10, maxval=200, group=GROUP_PRESSURE)
+pressureVolumeLength = input.int(34, "Relative Volume Length", minval=5, maxval=200, group=GROUP_PRESSURE)
+pressureGuideLength = input.int(8, "Price Guide Smoothing", minval=1, maxval=50, group=GROUP_PRESSURE)
+pressurePriceScale = input.float(0.75, "Guide Displacement × ATR", minval=0.10, maxval=3.00, step=0.05, group=GROUP_PRESSURE)
+
+showAtrTrail = input.bool(true, "Show ATR Trail", group=GROUP_ATR)
+atrLength = input.int(14, "ATR Length", minval=1, maxval=200, group=GROUP_ATR)
+atrMultiplier = input.float(2.0, "ATR Multiplier", minval=0.25, maxval=20.0, step=0.05, group=GROUP_ATR)
+
+showFieldAura = input.bool(true, "Foundation Field Aura", group=GROUP_VISUAL)
+colorCandles = input.bool(false, "Color Candles By Foundation Field", group=GROUP_VISUAL)
+showTrendTurns = input.bool(false, "Show Cycle Trend Turns", group=GROUP_VISUAL)
+showAtrTurns = input.bool(false, "Show ATR Turns", group=GROUP_VISUAL)
+showFibInteractions = input.bool(true, "Show PHI Rejection Pulses", group=GROUP_VISUAL)
+
+alertsEnabled = input.bool(true, "Enable Event Conditions", group=GROUP_ALERTS)
+alertFibRejections = input.bool(true, "PHI Rejections", group=GROUP_ALERTS)
+alertTrendTurns = input.bool(true, "Cycle Trend Turns", group=GROUP_ALERTS)
+alertAtrTurns = input.bool(false, "ATR Trail Turns", group=GROUP_ALERTS)
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Utility functions
+// ─────────────────────────────────────────────────────────────────────────────
+
+f_clamp(float value, float lower, float upper) =>
+    math.min(math.max(value, lower), upper)
+
+f_safeDiv(float numerator, float denominator, float fallback) =>
+    math.abs(denominator) > 1e-10 ? numerator / denominator : fallback
+
+f_tanh(float value) =>
+    float bounded = f_clamp(value, -10.0, 10.0)
+    float exp2x = math.exp(2.0 * bounded)
+    (exp2x - 1.0) / (exp2x + 1.0)
+
+f_median3(float a, float b, float c) =>
+    float av = nz(a, nz(b, c))
+    float bv = nz(b, av)
+    float cv = nz(c, av)
+    av + bv + cv - math.min(av, math.min(bv, cv)) - math.max(av, math.max(bv, cv))
+
+f_isNear(float value, float target) =>
+    math.abs(value - target) <= 0.002
+
+f_isMajorRatio(float ratio) =>
+    f_isNear(ratio, 0.382) or f_isNear(ratio, 0.500) or
+     f_isNear(ratio, 0.618) or f_isNear(ratio, 1.000) or
+     f_isNear(ratio, 1.618)
+
+f_eventGate(bool condition) =>
+    condition and (not confirmedEventsOnly or barstate.isconfirmed)
+
+f_loadRatios(array<float> ratios, string mode) =>
+    array.clear(ratios)
+    if mode == "ROM Legacy"
+        array.push(ratios, 0.235)
+        array.push(ratios, 0.382)
+        array.push(ratios, 0.500)
+        array.push(ratios, 0.618)
+        array.push(ratios, 0.728)
+        array.push(ratios, 1.000)
+        array.push(ratios, 1.235)
+        array.push(ratios, 1.328)
+        array.push(ratios, 1.500)
+        array.push(ratios, 1.618)
+    else if mode == "Canonical"
+        array.push(ratios, 0.236)
+        array.push(ratios, 0.382)
+        array.push(ratios, 0.500)
+        array.push(ratios, 0.618)
+        array.push(ratios, 0.786)
+        array.push(ratios, 1.000)
+        array.push(ratios, 1.272)
+        array.push(ratios, 1.382)
+        array.push(ratios, 1.618)
+        array.push(ratios, 2.000)
+    else
+        array.push(ratios, 0.236)
+        array.push(ratios, 0.382)
+        array.push(ratios, 0.500)
+        array.push(ratios, 0.618)
+        array.push(ratios, 0.728)
+        array.push(ratios, 0.786)
+        array.push(ratios, 1.000)
+        array.push(ratios, 1.272)
+        array.push(ratios, 1.500)
+        array.push(ratios, 1.618)
+
+f_levelForIndex(int index, float pivot, float scale, array<float> ratios) =>
+    float result = pivot
+    if index > 0 and index <= 10
+        result := pivot + scale * array.get(ratios, index - 1)
+    else if index > 10
+        result := pivot - scale * array.get(ratios, index - 11)
+    result
+
+f_ratioForIndex(int index, array<float> ratios) =>
+    index == 0 ? 0.0 : index <= 10 ? array.get(ratios, index - 1) : array.get(ratios, index - 11)
+
+f_levelTag(int index, float ratio) =>
+    string prefix = index == 0 ? "PP" : index <= 10 ? "R" + str.tostring(index) : "S" + str.tostring(index - 10)
+    index == 0 ? prefix : prefix + "  " + str.tostring(ratio, "#.###")
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Theme
+// ─────────────────────────────────────────────────────────────────────────────
+
+color bullColor = theme == "Royal Gold" ? color.rgb(42, 220, 150) : theme == "Zeiierman Night" ? color.rgb(0, 232, 255) : color.rgb(0, 224, 190)
+color bearColor = theme == "Royal Gold" ? color.rgb(255, 79, 112) : theme == "Zeiierman Night" ? color.rgb(255, 54, 126) : color.rgb(255, 72, 126)
+color pivotColor = theme == "Royal Gold" ? color.rgb(255, 196, 64) : theme == "Zeiierman Night" ? color.rgb(255, 206, 84) : color.rgb(255, 191, 64)
+color neutralColor = theme == "Royal Gold" ? color.rgb(166, 153, 126) : color.rgb(128, 151, 178)
+color panelColor = color.rgb(10, 16, 28)
+color textColor = color.rgb(224, 235, 247)
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Shared volatility foundation
+// ─────────────────────────────────────────────────────────────────────────────
+
+float atrValue = ta.atr(atrLength)
+float safeAtr = math.max(nz(atrValue, syminfo.mintick), syminfo.mintick)
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 01 — Confirmed PHI lattice
+// ─────────────────────────────────────────────────────────────────────────────
+
+[previousOpen, previousHigh, previousLow, previousClose, previousTrueRange, previousMeanRange] = request.security(
+     syminfo.tickerid,
+     fibTimeframe,
+     [open[1], high[1], low[1], close[1], ta.tr(true)[1], ta.rma(high - low, rangeMemory)[1]],
+     gaps=barmerge.gaps_off,
+     lookahead=barmerge.lookahead_on)
+
+float chartSeconds = timeframe.in_seconds(timeframe.period)
+float fibSeconds = timeframe.in_seconds(fibTimeframe)
+bool fibTimeframeValid = na(chartSeconds) or na(fibSeconds) or fibSeconds >= chartSeconds
+float previousRange = previousHigh - previousLow
+float robustRange = f_median3(previousRange, previousTrueRange, previousMeanRange)
+float selectedRange = rangeMode == "Previous True Range" ? previousTrueRange : rangeMode == "Robust Blend" ? robustRange : previousRange
+float fibScale = math.max(nz(selectedRange, previousRange), syminfo.mintick)
+float fibPivot = (previousHigh + previousLow + previousClose) / 3.0
+bool fibReady = fibTimeframeValid and not na(fibPivot) and not na(fibScale) and fibScale > syminfo.mintick
+float fibZoneWidth = math.max(safeAtr * zoneAtrWidth, syminfo.mintick * 2.0)
+
+var array<float> fibRatios = array.new<float>()
+if barstate.isfirst
+    f_loadRatios(fibRatios, ratioMode)
+
+var int fibStartBar = bar_index
+if timeframe.change(fibTimeframe)
+    fibStartBar := bar_index
+
+var array<line> fibLines = array.new<line>()
+var array<box> fibZones = array.new<box>()
+var array<label> fibLabels = array.new<label>()
+
+if barstate.isfirst
+    for index = 0 to 20
+        line newLine = line.new(bar_index, close, bar_index + 1, close,
+             xloc=xloc.bar_index, extend=extend.right, color=color.new(neutralColor, 100))
+        box newZone = box.new(left=bar_index, top=close, right=bar_index + 1, bottom=close,
+             xloc=xloc.bar_index, border_color=color.new(neutralColor, 100), bgcolor=color.new(neutralColor, 100))
+        label newLabel = label.new(bar_index, close, "", xloc=xloc.bar_index, yloc=yloc.price,
+             style=label.style_label_left, color=color.new(panelColor, 100), textcolor=color.new(textColor, 100), size=size.tiny)
+        array.push(fibLines, newLine)
+        array.push(fibZones, newZone)
+        array.push(fibLabels, newLabel)
+
+bool focusMode = displayMode == "Focus"
+bool legacyVisual = displayMode == "Legacy ROM"
+bool researchMode = displayMode == "Research Lab"
+
+if barstate.islast
+    for index = 0 to 20
+        float level = fibReady ? f_levelForIndex(index, fibPivot, fibScale, fibRatios) : close
+        float ratio = f_ratioForIndex(index, fibRatios)
+        bool isPivot = index == 0
+        bool isResistance = index > 0 and index <= 10
+        bool majorLevel = isPivot or f_isMajorRatio(ratio)
+        bool levelVisible = showFib and fibReady and (not focusMode or majorLevel)
+        color sideColor = isPivot ? pivotColor : isResistance ? bullColor : bearColor
+        color legacyColor = isPivot ? color.gray : isResistance ? color.green : color.red
+        color levelColor = legacyVisual ? legacyColor : sideColor
+        int lineTransparency = isPivot ? 4 : majorLevel ? 14 : 48
+        int zoneTransparency = majorLevel ? 88 : 94
+        int lineWidth = isPivot ? 3 : majorLevel ? 2 : 1
+        line levelLine = array.get(fibLines, index)
+        box levelZone = array.get(fibZones, index)
+        label levelLabel = array.get(fibLabels, index)
+
+        line.set_xy1(levelLine, fibStartBar, level)
+        line.set_xy2(levelLine, bar_index + fibLabelOffset, level)
+        line.set_extend(levelLine, extend.right)
+        line.set_style(levelLine, isPivot ? line.style_dashed : line.style_solid)
+        line.set_width(levelLine, lineWidth)
+        line.set_color(levelLine, levelVisible ? color.new(levelColor, lineTransparency) : color.new(levelColor, 100))
+
+        box.set_left(levelZone, fibStartBar)
+        box.set_right(levelZone, bar_index + fibLabelOffset)
+        box.set_top(levelZone, level + fibZoneWidth)
+        box.set_bottom(levelZone, level - fibZoneWidth)
+        box.set_border_color(levelZone, color.new(levelColor, 100))
+        box.set_bgcolor(levelZone, levelVisible and showFibZones and not legacyVisual ? color.new(levelColor, zoneTransparency) : color.new(levelColor, 100))
+
+        string levelText = f_levelTag(index, ratio) + "  ·  " + str.tostring(level, format.mintick)
+        label.set_x(levelLabel, bar_index + fibLabelOffset)
+        label.set_y(levelLabel, level)
+        label.set_text(levelLabel, levelVisible and showFibLabels ? levelText : "")
+        label.set_color(levelLabel, levelVisible and showFibLabels ? color.new(panelColor, 18) : color.new(panelColor, 100))
+        label.set_textcolor(levelLabel, levelVisible and showFibLabels ? color.new(levelColor, 0) : color.new(levelColor, 100))
+
+// Nearest-level geometry and PHI interaction state.
+float nearestFibLevel = na
+float nearestFibRatio = na
+float nearestFibDistance = 1e20
+int nearestFibIndex = 0
+
+if fibReady
+    for index = 0 to 20
+        float candidateLevel = f_levelForIndex(index, fibPivot, fibScale, fibRatios)
+        float candidateDistance = math.abs(close - candidateLevel)
+        if candidateDistance < nearestFibDistance
+            nearestFibDistance := candidateDistance
+            nearestFibLevel := candidateLevel
+            nearestFibRatio := f_ratioForIndex(index, fibRatios)
+            nearestFibIndex := index
+
+float phiCoordinate = fibReady ? f_safeDiv(close - fibPivot, fibScale, 0.0) : 0.0
+float phiBias = fibReady ? f_tanh(phiCoordinate) : 0.0
+float phiAffinity = fibReady ? math.exp(-0.5 * math.pow(f_safeDiv(nearestFibDistance, fibZoneWidth, 10.0), 2.0)) : 0.0
+bool phiTouch = fibReady and high >= nearestFibLevel - fibZoneWidth and low <= nearestFibLevel + fibZoneWidth
+
+float candleBody = math.abs(close - open)
+float lowerWick = math.min(open, close) - low
+float upperWick = high - math.max(open, close)
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 02 — Repaired dominant-cycle trendline
+// ─────────────────────────────────────────────────────────────────────────────
+
+float trendSourceConfirmed = request.security(syminfo.tickerid, trendTimeframe, hl2[1],
+     gaps=barmerge.gaps_off, lookahead=barmerge.lookahead_on)
+float trendSourceDeveloping = request.security(syminfo.tickerid, trendTimeframe, hl2,
+     gaps=barmerge.gaps_off, lookahead=barmerge.lookahead_off)
+float trendSource = trendTimeframe == "" ? hl2 : trendMtfMode == "Confirmed" ? trendSourceConfirmed : trendSourceDeveloping
+
+var float dominantPeriod = 20.0
+float priorDominantPeriod = nz(dominantPeriod[1], 20.0)
+float cycleSmooth = (4.0 * trendSource + 3.0 * nz(trendSource[1], trendSource) + 2.0 * nz(trendSource[2], trendSource) + nz(trendSource[3], trendSource)) / 10.0
+float cycleScale = 0.075 * priorDominantPeriod + 0.54
+float detrender = (0.0962 * cycleSmooth + 0.5769 * nz(cycleSmooth[2]) - 0.5769 * nz(cycleSmooth[4]) - 0.0962 * nz(cycleSmooth[6])) * cycleScale
+float quadrature1 = (0.0962 * detrender + 0.5769 * nz(detrender[2]) - 0.5769 * nz(detrender[4]) - 0.0962 * nz(detrender[6])) * cycleScale
+float inPhase1 = nz(detrender[3])
+float jInPhase = (0.0962 * inPhase1 + 0.5769 * nz(inPhase1[2]) - 0.5769 * nz(inPhase1[4]) - 0.0962 * nz(inPhase1[6])) * cycleScale
+float jQuadrature = (0.0962 * quadrature1 + 0.5769 * nz(quadrature1[2]) - 0.5769 * nz(quadrature1[4]) - 0.0962 * nz(quadrature1[6])) * cycleScale
+float inPhase2Raw = inPhase1 - jQuadrature
+float quadrature2Raw = quadrature1 + jInPhase
+var float inPhase2 = 0.0
+var float quadrature2 = 0.0
+inPhase2 := 0.2 * inPhase2Raw + 0.8 * nz(inPhase2[1])
+quadrature2 := 0.2 * quadrature2Raw + 0.8 * nz(quadrature2[1])
+
+float realRaw = inPhase2 * nz(inPhase2[1]) + quadrature2 * nz(quadrature2[1])
+float imagRaw = inPhase2 * nz(quadrature2[1]) - quadrature2 * nz(inPhase2[1])
+var float realPart = 0.0
+var float imagPart = 0.0
+realPart := 0.2 * realRaw + 0.8 * nz(realPart[1])
+imagPart := 0.2 * imagRaw + 0.8 * nz(imagPart[1])
+
+float phaseAngle = math.abs(realPart) > 1e-10 ? math.atan(imagPart / realPart) : 0.0
+float rawDominantPeriod = math.abs(phaseAngle) > 1e-6 ? 2.0 * math.pi / math.abs(phaseAngle) : priorDominantPeriod
+float relativeLimitedPeriod = math.min(math.max(rawDominantPeriod, 0.67 * priorDominantPeriod), 1.50 * priorDominantPeriod)
+float absoluteLimitedPeriod = f_clamp(relativeLimitedPeriod, 6.0, 50.0)
+dominantPeriod := 0.2 * absoluteLimitedPeriod + 0.8 * priorDominantPeriod
+
+var float smoothedDominantPeriod = 20.0
+smoothedDominantPeriod := 0.33 * dominantPeriod + 0.67 * nz(smoothedDominantPeriod[1], dominantPeriod)
+int cycleLength = int(f_clamp(math.round(smoothedDominantPeriod), 6.0, 50.0))
+
+float cycleSum = 0.0
+int cycleCount = 0
+for lookback = 0 to 49
+    if lookback < cycleLength and not na(trendSource[lookback])
+        cycleSum += trendSource[lookback]
+        cycleCount += 1
+
+float cycleMean = cycleCount > 0 ? cycleSum / cycleCount : trendSource
+float cycleTrend = (4.0 * cycleMean + 3.0 * nz(cycleMean[1], cycleMean) + 2.0 * nz(cycleMean[2], cycleMean) + nz(cycleMean[3], cycleMean)) / 10.0
+float trendDistance = f_safeDiv(trendSource - cycleTrend, safeAtr, 0.0)
+float trendSlope = f_safeDiv(cycleTrend - nz(cycleTrend[1], cycleTrend), safeAtr, 0.0)
+float trendScore = f_tanh(1.35 * trendDistance + 2.25 * trendSlope)
+float trendDeadband = trendDeadbandAtr
+int trendState = trendDistance > trendDeadband ? 1 : trendDistance < -trendDeadband ? -1 : 0
+color trendColor = trendState > 0 ? bullColor : trendState < 0 ? bearColor : neutralColor
+
+bool trendBullTurnRaw = ta.crossover(trendScore, 0.0)
+bool trendBearTurnRaw = ta.crossunder(trendScore, 0.0)
+bool trendBullTurn = f_eventGate(trendBullTurnRaw)
+bool trendBearTurn = f_eventGate(trendBearTurnRaw)
+
+plot(showCycleTrend ? cycleTrend : na, "Cycle Trend — Aura", color=color.new(trendColor, 91), linewidth=4)
+plot(showCycleTrend ? cycleTrend : na, "Cycle Trend — Glow", color=color.new(trendColor, 70), linewidth=3)
+plot(showCycleTrend ? cycleTrend : na, "Cycle Trend — Core", color=color.new(trendColor, 2), linewidth=2)
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 03 — Safe Pressure Flow
+// ─────────────────────────────────────────────────────────────────────────────
+
+float candleRange = math.max(high - low, syminfo.mintick)
+float bodyPressure = f_safeDiv(close - open, candleRange, 0.0)
+float closeLocationPressure = f_safeDiv(2.0 * close - high - low, candleRange, 0.0)
+bool hasUsableVolume = not na(volume) and volume > 0
+float volumeBase = ta.ema(volume, pressureVolumeLength)
+float relativeVolume = hasUsableVolume ? f_safeDiv(volume, volumeBase, 1.0) : 1.0
+float volumeImpulse = math.log(1.0 + math.max(relativeVolume, 0.0))
+float rawPressure = (0.55 * bodyPressure + 0.45 * closeLocationPressure) * volumeImpulse
+float cumulativePressure = ta.cum(nz(rawPressure))
+float pressureBaseline = ta.ema(cumulativePressure, pressureFlowLength)
+float pressureResidual = cumulativePressure - pressureBaseline
+float pressureDeviation = ta.stdev(pressureResidual, pressureZLength)
+float pressureZ = f_clamp(f_safeDiv(pressureResidual, pressureDeviation, 0.0), -4.0, 4.0)
+float pressureScore = f_tanh(pressureZ / 1.75)
+float pressureGuideRaw = hl2 + pressureScore * safeAtr * pressurePriceScale
+float pressureGuide = ta.ema(pressureGuideRaw, pressureGuideLength)
+color pressureColor = pressureScore > 0.08 ? bullColor : pressureScore < -0.08 ? bearColor : neutralColor
+
+plot(showPressure ? pressureGuide : na, "Pressure Guide — Glow", color=color.new(pressureColor, 84), linewidth=4)
+plot(showPressure ? pressureGuide : na, "Pressure Guide — Core", color=color.new(pressureColor, 12), linewidth=2)
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 04 — Clean ATR trail
+// ─────────────────────────────────────────────────────────────────────────────
+
+float atrLoss = atrMultiplier * safeAtr
+var float atrTrail = na
+float previousAtrTrail = nz(atrTrail[1], close)
+
+if na(atrTrail[1])
+    atrTrail := close - atrLoss
+else if close > previousAtrTrail and close[1] > previousAtrTrail
+    atrTrail := math.max(previousAtrTrail, close - atrLoss)
+else if close < previousAtrTrail and close[1] < previousAtrTrail
+    atrTrail := math.min(previousAtrTrail, close + atrLoss)
+else
+    atrTrail := close > previousAtrTrail ? close - atrLoss : close + atrLoss
+
+var int atrDirection = 0
+atrDirection := close > atrTrail ? 1 : close < atrTrail ? -1 : nz(atrDirection[1], 0)
+color atrTrailColor = atrDirection > 0 ? bullColor : atrDirection < 0 ? bearColor : neutralColor
+bool atrBullTurn = f_eventGate(ta.crossover(close, atrTrail))
+bool atrBearTurn = f_eventGate(ta.crossunder(close, atrTrail))
+
+plot(showAtrTrail ? atrTrail : na, "ATR Trail — Glow", color=color.new(atrTrailColor, 86), linewidth=4)
+plot(showAtrTrail ? atrTrail : na, "ATR Trail — Core", color=color.new(atrTrailColor, 10), linewidth=2)
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Foundation field — diagnostic, not the final signal council
+// ─────────────────────────────────────────────────────────────────────────────
+
+float foundationField = f_clamp(0.50 * trendScore + 0.35 * pressureScore + 0.15 * phiBias, -1.0, 1.0)
+color fieldColor = color.from_gradient(foundationField, -1.0, 1.0, bearColor, bullColor)
+
+bool phiBullRejectRaw = phiTouch and low <= nearestFibLevel and close > nearestFibLevel + fibZoneWidth * 0.15 and close > open and lowerWick >= candleBody * 0.35 and foundationField > -0.25
+bool phiBearRejectRaw = phiTouch and high >= nearestFibLevel and close < nearestFibLevel - fibZoneWidth * 0.15 and close < open and upperWick >= candleBody * 0.35 and foundationField < 0.25
+bool phiBullReject = f_eventGate(phiBullRejectRaw and not phiBullRejectRaw[1])
+bool phiBearReject = f_eventGate(phiBearRejectRaw and not phiBearRejectRaw[1])
+
+bgcolor(showFieldAura and not legacyVisual ? color.new(fieldColor, researchMode ? 91 : 95) : na, title="Foundation Field Aura")
+barcolor(colorCandles ? color.new(fieldColor, 12) : na, title="Foundation Field Candles")
+
+plotshape(showTrendTurns and trendBullTurn, title="Cycle Trend Bull Turn", style=shape.circle, location=location.belowbar, color=color.new(bullColor, 5), size=size.tiny)
+plotshape(showTrendTurns and trendBearTurn, title="Cycle Trend Bear Turn", style=shape.circle, location=location.abovebar, color=color.new(bearColor, 5), size=size.tiny)
+plotshape(showAtrTurns and atrBullTurn, title="ATR Bull Turn", style=shape.triangleup, location=location.belowbar, color=color.new(bullColor, 0), size=size.tiny)
+plotshape(showAtrTurns and atrBearTurn, title="ATR Bear Turn", style=shape.triangledown, location=location.abovebar, color=color.new(bearColor, 0), size=size.tiny)
+plotshape(showFibInteractions and phiBullReject, title="PHI Bull Rejection", style=shape.diamond, location=location.belowbar, color=color.new(pivotColor, 0), size=size.tiny)
+plotshape(showFibInteractions and phiBearReject, title="PHI Bear Rejection", style=shape.diamond, location=location.abovebar, color=color.new(pivotColor, 0), size=size.tiny)
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Dashboard
+// ─────────────────────────────────────────────────────────────────────────────
+
+var table dashboard = table.new(position.top_right, 2, 9,
+     bgcolor=color.new(panelColor, 14), frame_color=color.new(neutralColor, 60), frame_width=1,
+     border_color=color.new(neutralColor, 78), border_width=1)
+
+if barstate.isfirst
+    table.merge_cells(dashboard, 0, 0, 1, 0)
+
+if barstate.islast
+    table.clear(dashboard, 0, 0, 1, 8)
+    if dashboardEnabled
+        string phiStatus = not fibTimeframeValid ? "INVALID TF" : not fibReady ? "WAITING" : f_levelTag(nearestFibIndex, nearestFibRatio)
+        string interactionState = phiBullReject ? "BULL REJECT" : phiBearReject ? "BEAR REJECT" : phiTouch ? "IN ZONE" : phiAffinity > 0.25 ? "APPROACH" : "FREE"
+        string trendStatus = trendState > 0 ? "BULL" : trendState < 0 ? "BEAR" : "NEUTRAL"
+        string pressureStatus = pressureScore > 0.08 ? "POSITIVE" : pressureScore < -0.08 ? "NEGATIVE" : "BALANCED"
+        string fieldStatus = foundationField > 0.18 ? "BULL FIELD" : foundationField < -0.18 ? "BEAR FIELD" : "NEUTRAL FIELD"
+        string integrityStatus = not fibTimeframeValid ? "ANCHOR TF ERROR" : trendMtfMode == "Confirmed" ? "CONFIRMED MTF" : "DEVELOPING MTF"
+
+        table.cell(dashboard, 0, 0, "ROM ∞  V3.0a  ·  PHI FOUNDATION", text_color=pivotColor, bgcolor=color.new(panelColor, 4), text_size=size.small)
+        table.cell(dashboard, 0, 1, "PHI", text_color=neutralColor, text_halign=text.align_left)
+        table.cell(dashboard, 1, 1, phiStatus, text_color=fibTimeframeValid ? textColor : bearColor, text_halign=text.align_right)
+        table.cell(dashboard, 0, 2, "Coordinate", text_color=neutralColor, text_halign=text.align_left)
+        table.cell(dashboard, 1, 2, fibReady ? str.tostring(phiCoordinate, "#.###") + " R" : "—", text_color=phiCoordinate >= 0 ? bullColor : bearColor, text_halign=text.align_right)
+        table.cell(dashboard, 0, 3, "Interaction", text_color=neutralColor, text_halign=text.align_left)
+        table.cell(dashboard, 1, 3, interactionState, text_color=phiTouch ? pivotColor : textColor, text_halign=text.align_right)
+        table.cell(dashboard, 0, 4, "Foundation", text_color=neutralColor, text_halign=text.align_left)
+        table.cell(dashboard, 1, 4, fieldStatus + "  " + str.tostring(foundationField * 100.0, "#.0"), text_color=fieldColor, text_halign=text.align_right)
+
+        if dashboardMode == "Professional"
+            table.cell(dashboard, 0, 5, "Cycle Trend", text_color=neutralColor, text_halign=text.align_left)
+            table.cell(dashboard, 1, 5, trendStatus + "  P" + str.tostring(cycleLength), text_color=trendColor, text_halign=text.align_right)
+            table.cell(dashboard, 0, 6, "Pressure", text_color=neutralColor, text_halign=text.align_left)
+            table.cell(dashboard, 1, 6, pressureStatus + "  " + str.tostring(pressureScore * 100.0, "#.0"), text_color=pressureColor, text_halign=text.align_right)
+            table.cell(dashboard, 0, 7, "Geometry", text_color=neutralColor, text_halign=text.align_left)
+            table.cell(dashboard, 1, 7, ratioMode + " / " + rangeMode, text_color=textColor, text_halign=text.align_right, text_size=size.tiny)
+            table.cell(dashboard, 0, 8, "Integrity", text_color=neutralColor, text_halign=text.align_left)
+            table.cell(dashboard, 1, 8, integrityStatus, text_color=trendMtfMode == "Confirmed" and fibTimeframeValid ? bullColor : pivotColor, text_halign=text.align_right, text_size=size.tiny)
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Alerts — event conditions remain independent of display toggles
+// ─────────────────────────────────────────────────────────────────────────────
+
+alertcondition(alertsEnabled and alertFibRejections and phiBullReject, title="ROM PHI Bull Rejection", message="ROM V3.0a: confirmed bullish PHI rejection")
+alertcondition(alertsEnabled and alertFibRejections and phiBearReject, title="ROM PHI Bear Rejection", message="ROM V3.0a: confirmed bearish PHI rejection")
+alertcondition(alertsEnabled and alertTrendTurns and trendBullTurn, title="ROM Cycle Trend Bull Turn", message="ROM V3.0a: dominant-cycle trend turned bullish")
+alertcondition(alertsEnabled and alertTrendTurns and trendBearTurn, title="ROM Cycle Trend Bear Turn", message="ROM V3.0a: dominant-cycle trend turned bearish")
+alertcondition(alertsEnabled and alertAtrTurns and atrBullTurn, title="ROM ATR Bull Turn", message="ROM V3.0a: ATR trail turned bullish")
+alertcondition(alertsEnabled and alertAtrTurns and atrBearTurn, title="ROM ATR Bear Turn", message="ROM V3.0a: ATR trail turned bearish")
+
+// Data-window diagnostics for V3.0a testing. Hidden from the chart.
+plot(phiCoordinate, "ROM Diagnostics — PHI Coordinate", color=color.new(color.white, 100), display=display.data_window)
+plot(phiAffinity, "ROM Diagnostics — PHI Affinity", color=color.new(color.white, 100), display=display.data_window)
+plot(trendScore, "ROM Diagnostics — Trend Score", color=color.new(color.white, 100), display=display.data_window)
+plot(pressureScore, "ROM Diagnostics — Pressure Score", color=color.new(color.white, 100), display=display.data_window)
+plot(foundationField, "ROM Diagnostics — Foundation Field", color=color.new(color.white, 100), display=display.data_window)

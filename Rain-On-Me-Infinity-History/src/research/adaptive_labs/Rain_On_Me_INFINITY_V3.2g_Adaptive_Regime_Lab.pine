@@ -1,0 +1,2367 @@
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+// If a copy of the MPL was not distributed with this file, You can obtain one at
+// https://mozilla.org/MPL/2.0/
+//
+// Original concept: © RickSimpson — "Rain On Me V2"
+// V3.2g reconstruction: controlled adaptive-regime challenger and cycle-health lab.
+//
+// This derivative preserves the ROM legacy Fibonacci ratios as an explicit mode.
+// Rebuilt sections are marked and are not intended to imply endorsement by the
+// original author.
+
+//@version=6
+indicator(title="Rain On Me ∞ V3.2g — Adaptive Regime Lab",
+     shorttitle="ROM 3.2g",
+     overlay=true,
+     max_bars_back=1500,
+     max_lines_count=200,
+     max_labels_count=100,
+     max_boxes_count=100)
+
+// ╔════════════════════════════════════════════════════════════════════════════╗
+// ║ V3.2g — ADAPTIVE REGIME LAB                                                 ║
+// ║ • Preserves every V3.0a integrity and PHI-foundation contract.            ║
+// ║ • Adds confirmed primary/secondary PHI geometry and cluster detection.    ║
+// ║ • Gaussian resonance intensity avoids binary line-cross logic.            ║
+// ║ • Adds Approach, Touch, Reject, Accept and Retest interaction states.      ║
+// ║ • Adds persistent confluence beam plus bounded secondary-level visuals.   ║
+// ║ • Bright rose–purple bear spectra improve readability on dark charts.    ║
+// ║ • Guided hierarchy translates dense mathematics into trading language.   ║
+// ║ • Four continuous-spectrum engine tiles expose agreement at a glance.    ║
+// ║ • Compact, Research and Diagnostic views preserve every information tier.║
+// ║ • Four independent families vote: Cycle, Flow, ATR and PHI Geometry.      ║
+// ║ • Dispersion, breadth and resonance produce a bounded confidence score.  ║
+// ║ • Council events are bar-close gated, agreement filtered and cooled down.║
+// ║ • Prospective reaction studies measure MFE, MAE and ATR response.         ║
+// ║ • Empirical climate priors replace the false 50/50 clean-route assumption.║
+// ║ • Confidence bands adapt to the observed, frozen confidence distribution.║
+// ║ • Utility credits profitable round trips without relabeling them CLEAN.   ║
+// ║ • ROM Legacy and Canonical grids are compared on identical events.       ║
+// ║ • 0.728 and 1.328 receive dedicated hidden-gem evidence tracking.         ║
+// ║ • Trend/chop cohorts expose regime dependence instead of one pooled mean.║
+// ║ • Evidence-weighted glow rewards tested levels without changing signals. ║
+// ║ • Dynamic final alerts protect the 64-plot budget.                        ║
+// ║ • Four event types are separated into bullish and bearish cohorts.        ║
+// ║ • Fast, medium and final horizons expose response stability through time. ║
+// ║ • Bayesian shrinkage and Wilson bounds prevent small-sample overconfidence.║
+// ║ • Event-recency weighting follows regime change without erasing history.  ║
+// ║ • Evidence quality combines probability, MFE, MAE and final response.     ║
+// ║ • EARLY, DEVELOPING and TRUSTED tiers translate statistical maturity.     ║
+// ║ • ATR warm-up gating prevents tick-denominator contamination.             ║
+// ║ • Horizon-scaled robust statistics preserve truth without outlier capture.║
+// ║ • Completed cohorts route PHI events into FOLLOW, FADE, WAIT or LEARN.     ║
+// ║ • Regime-aware ATR expectancy remains advisory unless confirmation is set.║
+// ║ • Concurrent audits freeze each mature route before any future bars exist. ║
+// ║ • Router, original PHI and actionable Council directions share one horizon.║
+// ║ • FOLLOW, FADE, WAIT, horizons and confidence bands are scored separately. ║
+// ║ • Ordered passage separates clean wins, round trips, losses and ambiguity. ║
+// ║ • Raw observations are shown, while de-clustered events drive edge claims. ║
+// ║ • WAIT measures useful abstention versus missed clean directional movement. ║
+// ║ • Frozen pre-event forecasts give Brier calibration genuine forward truth. ║
+// ║ • Frozen climatology exposes real Brier skill instead of raw score theatre. ║
+// ║ • Clean, round-trip, loss, whipsaw and quiet form one calibrated forecast.  ║
+// ║ • Timestamp geometry keeps weekly anchors safe on one-minute chart history. ║
+// ║ • FOLLOW and FADE keep independent fast, medium and final horizon curves.  ║
+// ║ • Round trips separate profitable recoveries from damaging reversals.       ║
+// ║ • Welford moments stabilize online confidence-band variance.                 ║
+// ║ • A frozen recent-regime challenger is scored beside the trusted control.    ║
+// ║ • Directional PHI permeability is researched without deforming geometry.     ║
+// ║ • Cycle rail, jitter and phase-validity telemetry diagnose the Ehlers core.   ║
+// ║ • The challenger cannot alter routes, signals, drawings or candle colors.    ║
+// ╚════════════════════════════════════════════════════════════════════════════╝
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Constants and input groups
+// ─────────────────────────────────────────────────────────────────────────────
+
+const string GROUP_SYSTEM   = "00 — System & Integrity"
+const string GROUP_FIB      = "01 — PHI Lattice"
+const string GROUP_RESONANCE = "02 — MTF Resonance Field"
+const string GROUP_TREND    = "03 — Dominant-Cycle Trend"
+const string GROUP_PRESSURE = "04 — Pressure Flow"
+const string GROUP_ATR      = "05 — ATR Trail"
+const string GROUP_COUNCIL  = "06 — Adaptive Signal Council"
+const string GROUP_RESEARCH = "07 — Reaction Research"
+const string GROUP_ROUTER   = "08 — Adaptive Edge Router"
+const string GROUP_VISUAL   = "09 — Visual Spectrum"
+const string GROUP_ALERTS   = "10 — Events & Alerts"
+
+displayMode = input.string("Spectrum", "Display Mode",
+     options=["Focus", "Spectrum", "Legacy ROM", "Research Lab"],
+     tooltip="Focus shows the structural PHI levels. Spectrum shows the complete field. Legacy ROM preserves the old red/green lattice identity. Research Lab exposes diagnostics.",
+     group=GROUP_SYSTEM)
+theme = input.string("Ocean Deep", "Theme",
+     options=["Aurora", "Ocean Deep", "Ocean Neon", "Royal Gold", "Zeiierman Night"],
+     tooltip="Aurora and Ocean Deep are multi-stop spectral palettes. Colors transition continuously with field strength.", group=GROUP_SYSTEM)
+dashboardEnabled = input.bool(true, "Dashboard", group=GROUP_SYSTEM)
+dashboardMode = input.string("Guided", "Dashboard Mode",
+     options=["Guided", "Compact", "Research", "Diagnostic"],
+     tooltip="Guided is the intuitive decision card. Compact preserves its essentials. Research exposes evidence. Diagnostic preserves raw engineering notation.", group=GROUP_SYSTEM)
+dashboardPosition = input.string("Top Right", "Dashboard Position",
+     options=["Top Right", "Top Left", "Bottom Right", "Bottom Left"], group=GROUP_SYSTEM)
+dashboardTransparency = input.int(28, "Dashboard Transparency", minval=0, maxval=90,
+     tooltip="Tiny typography keeps every mode mobile-friendly. Higher transparency reveals more chart behind the panel.", group=GROUP_SYSTEM)
+confirmedEventsOnly = input.bool(true, "Confirm Events On Bar Close",
+     tooltip="Recommended integrity setting. Visual calculations may develop intrabar, but event markers and alerts wait for bar close.",
+     group=GROUP_SYSTEM)
+
+showFib = input.bool(true, "Show PHI Lattice", group=GROUP_FIB)
+fibTimeframe = input.timeframe("D", "Anchor Period",
+     tooltip="For BTC/ETH intraday use, D is the primary default. The anchor period must not be lower than the chart timeframe.",
+     group=GROUP_FIB)
+ratioMode = input.string("ROM Legacy", "Ratio Family",
+     options=["ROM Legacy", "Canonical", "Hybrid"],
+     tooltip="ROM Legacy preserves 0.235/0.728/1.235/1.328 exactly. Canonical uses common Fibonacci ratios. Hybrid keeps the strongest shared and experimental levels.",
+     group=GROUP_FIB)
+rangeMode = input.string("Previous Range", "Lattice Scale",
+     options=["Previous Range", "Previous True Range", "Robust Blend"],
+     tooltip="Previous Range reproduces the original geometry. Robust Blend takes the median of prior range, prior true range and the remembered average range.",
+     group=GROUP_FIB)
+rangeMemory = input.int(20, "Robust Range Memory", minval=5, maxval=100, group=GROUP_FIB)
+showFibZones = input.bool(true, "Show ATR Resonance Zones", group=GROUP_FIB)
+zoneAtrWidth = input.float(0.08, "Zone Half-Width × ATR", minval=0.01, maxval=0.50, step=0.01, group=GROUP_FIB)
+showFibLabels = input.bool(true, "Show Level Labels", group=GROUP_FIB)
+fibLabelOffset = input.int(16, "Label Offset (bars)", minval=2, maxval=100, group=GROUP_FIB)
+
+secondaryTimeframe = input.timeframe("W", "Secondary Anchor Period",
+     tooltip="D/W is the primary intraday resonance pair. The secondary anchor must be higher than the primary PHI anchor.",
+     group=GROUP_RESONANCE)
+secondaryDisplay = input.string("Major Levels", "Secondary Lattice Display",
+     options=["Confluence Only", "Major Levels", "All Levels"], group=GROUP_RESONANCE)
+showConfluenceBeam = input.bool(true, "Show MTF Confluence Beam", group=GROUP_RESONANCE)
+confluenceAtrDistance = input.float(0.22, "Cluster Distance × ATR", minval=0.05, maxval=1.00, step=0.01, group=GROUP_RESONANCE)
+secondaryResonanceWeight = input.float(0.70, "Secondary Resonance Weight", minval=0.10, maxval=1.00, step=0.05, group=GROUP_RESONANCE)
+resonanceRadiusAtr = input.float(0.85, "Resonance Radius × ATR", minval=0.15, maxval=3.00, step=0.05,
+     tooltip="Continuous Gaussian influence radius. This is intentionally wider than the precise PHI touch zone.", group=GROUP_RESONANCE)
+approachZoneMultiple = input.float(3.0, "Approach Radius × Zone", minval=1.25, maxval=8.0, step=0.25, group=GROUP_RESONANCE)
+acceptanceBuffer = input.float(0.35, "Acceptance Buffer × Zone", minval=0.0, maxval=2.0, step=0.05, group=GROUP_RESONANCE)
+retestMemoryBars = input.int(40, "Retest Memory (bars)", minval=5, maxval=200, group=GROUP_RESONANCE)
+
+showCycleTrend = input.bool(true, "Show Dominant-Cycle Trend", group=GROUP_TREND)
+trendTimeframe = input.timeframe("", "Trend Timeframe (blank = chart)", group=GROUP_TREND)
+trendMtfMode = input.string("Confirmed", "MTF Integrity Mode",
+     options=["Confirmed", "Developing"],
+     tooltip="Confirmed uses the last completed higher-timeframe value. Developing is more responsive but can change before the HTF candle closes.",
+     group=GROUP_TREND)
+trendDeadbandAtr = input.float(0.06, "Trend Deadband × ATR", minval=0.0, maxval=0.50, step=0.01, group=GROUP_TREND)
+
+showPressure = input.bool(true, "Show Pressure Guide", group=GROUP_PRESSURE)
+pressureFlowLength = input.int(14, "Flow Detrend Length", minval=3, maxval=100, group=GROUP_PRESSURE)
+pressureZLength = input.int(28, "Flow Normalization Length", minval=10, maxval=200, group=GROUP_PRESSURE)
+pressureVolumeLength = input.int(34, "Relative Volume Length", minval=5, maxval=200, group=GROUP_PRESSURE)
+pressureGuideLength = input.int(8, "Price Guide Smoothing", minval=1, maxval=50, group=GROUP_PRESSURE)
+pressurePriceScale = input.float(0.75, "Guide Displacement × ATR", minval=0.10, maxval=3.00, step=0.05, group=GROUP_PRESSURE)
+
+showAtrTrail = input.bool(true, "Show ATR Trail", group=GROUP_ATR)
+atrLength = input.int(14, "ATR Length", minval=1, maxval=200, group=GROUP_ATR)
+atrMultiplier = input.float(2.0, "ATR Multiplier", minval=0.25, maxval=20.0, step=0.05, group=GROUP_ATR)
+
+showCouncilGuide = input.bool(true, "Show Council Guide", group=GROUP_COUNCIL)
+showCouncilSignals = input.bool(true, "Show Council Signals", group=GROUP_COUNCIL)
+councilPreset = input.string("Balanced", "Council Weighting",
+     options=["Balanced", "PHI First", "Trend First"],
+     tooltip="Balanced avoids duplicate dominance. PHI First emphasizes lattice interaction. Trend First emphasizes cycle and ATR structure.", group=GROUP_COUNCIL)
+councilTrigger = input.float(0.42, "Signal Threshold", minval=0.15, maxval=0.85, step=0.01, group=GROUP_COUNCIL)
+councilStrong = input.float(0.68, "Strong Signal Threshold", minval=0.35, maxval=0.95, step=0.01, group=GROUP_COUNCIL)
+councilMinAgreement = input.int(3, "Minimum Family Agreement", minval=2, maxval=4, group=GROUP_COUNCIL)
+councilMinConfidence = input.float(0.52, "Minimum Confidence", minval=0.20, maxval=0.90, step=0.01, group=GROUP_COUNCIL)
+councilCooldown = input.int(8, "Signal Cooldown (bars)", minval=0, maxval=100, group=GROUP_COUNCIL)
+interactionMemory = input.int(13, "PHI Event Memory (bars)", minval=2, maxval=100, group=GROUP_COUNCIL)
+
+researchEnabled = input.bool(true, "Enable Reaction Research", group=GROUP_RESEARCH)
+includeStandaloneTouchStudies = input.bool(false, "Include Standalone Touch Cohort",
+     tooltip="Off by default because raw touches are frequent and can monopolize the non-overlapping study lane. Touch counts remain visible either way.", group=GROUP_RESEARCH)
+researchHorizon = input.int(20, "Evaluation Horizon (bars)", minval=3, maxval=200,
+     tooltip="Each confirmed PHI event is followed prospectively for this many bars. Overlapping studies are deliberately excluded.", group=GROUP_RESEARCH)
+researchTargetAtr = input.float(0.60, "Successful Excursion × ATR", minval=0.10, maxval=5.00, step=0.05,
+     tooltip="A reaction succeeds when maximum favourable excursion reaches this ATR multiple inside the evaluation horizon.", group=GROUP_RESEARCH)
+researchExcursionEnvelope = input.float(3.0, "Robust Excursion Envelope × √H", minval=1.0, maxval=10.0, step=0.25,
+     tooltip="Aggregate MFE, MAE and response are Winsorized at this horizon-scaled envelope. Raw event success and live study telemetry remain unchanged.", group=GROUP_RESEARCH)
+researchTrendThreshold = input.float(0.35, "Trend/Chop Boundary", minval=0.10, maxval=0.90, step=0.05,
+     tooltip="Absolute dominant-cycle score above this boundary starts a Trend cohort; lower values start a Chop cohort.", group=GROUP_RESEARCH)
+researchSpacingBars = input.int(3, "Minimum Spacing After Study (bars)", minval=0, maxval=50,
+     tooltip="Prevents a completed study and its immediate aftershock from becoming two nearly identical observations.", group=GROUP_RESEARCH)
+minimumEvidenceSamples = input.int(12, "Developing Evidence Samples", minval=3, maxval=100,
+     tooltip="Below this count evidence is labelled EARLY and cannot become a confirmed evidence edge.", group=GROUP_RESEARCH)
+trustedEvidenceSamples = input.int(55, "Trusted Evidence Samples", minval=20, maxval=300,
+     tooltip="At this independent-sample count, evidence can earn TRUSTED status when its quality also supports the result.", group=GROUP_RESEARCH)
+evidencePriorStrength = input.float(8.0, "Neutral Prior Strength", minval=0.0, maxval=50.0, step=0.5,
+     tooltip="Adds neutral virtual observations around 50%. This stops a few early wins or losses from looking conclusive.", group=GROUP_RESEARCH)
+evidenceRecencyDecay = input.float(0.97, "Event Recency Decay", minval=0.80, maxval=1.00, step=0.01,
+     tooltip="Applied when a study completes. Lower values adapt faster; 1.00 disables event-recency decay.", group=GROUP_RESEARCH)
+evidenceConfidenceBand = input.string("90%", "Wilson Confidence Band", options=["80%", "90%", "95%"],
+     tooltip="The displayed lower bound asks how strong the probability remains after accounting for sample uncertainty.", group=GROUP_RESEARCH)
+evidenceEdgeProbability = input.float(0.60, "Calibrated Edge Probability", minval=0.50, maxval=0.95, step=0.01,
+     tooltip="A PHI ratio needs this adjusted probability, enough samples and a Wilson lower bound above 50% before it earns an evidence-edge event.", group=GROUP_RESEARCH)
+evidenceGlow = input.bool(true, "Evidence-Weighted PHI Glow", tooltip="Level brightness increases gradually with sample confidence and observed reaction probability.", group=GROUP_RESEARCH)
+
+edgeRouterMode = input.string("Advisory", "Evidence Router Mode",
+     options=["Off", "Advisory", "Confirm Council"],
+     tooltip="Advisory explains the statistically favoured response without changing signals. Confirm Council only permits new council signals when a mature recent route agrees.", group=GROUP_ROUTER)
+routerMinimumSamples = input.int(20, "Minimum Cohort Samples", minval=3, maxval=300,
+     tooltip="Below this number the router says LEARN instead of pretending that an immature cohort is tradeable.", group=GROUP_ROUTER)
+routerMinimumEdgeAtr = input.float(0.10, "Minimum Directional Edge × ATR", minval=0.01, maxval=2.00, step=0.01,
+     tooltip="Absolute regime-adjusted expectancy required before FOLLOW or FADE is allowed.", group=GROUP_ROUTER)
+routerMinimumConfidence = input.float(0.30, "Council Confirmation Confidence", minval=0.05, maxval=0.95, step=0.01,
+     tooltip="Used only by Confirm Council. Advisory routes remain visible below this value.", group=GROUP_ROUTER)
+routerMemoryBars = input.int(20, "Route Memory (bars)", minval=1, maxval=200,
+     tooltip="How long the most recent confirmed PHI route remains relevant on the dashboard and for optional council confirmation.", group=GROUP_ROUTER)
+routerAuditEnabled = input.bool(true, "Prospective Router Auditor",
+     tooltip="Freezes every mature FOLLOW, FADE and WAIT route, then measures future performance without changing signals.", group=GROUP_ROUTER)
+auditTerminalConfirmAtr = input.float(0.10, "Terminal Confirmation × ATR", minval=0.0, maxval=1.0, step=0.05,
+     tooltip="A favourable first passage is CLEAN only when the horizon also closes at least this far in the routed direction and never reaches the adverse barrier. Failed holds become ROUND TRIP.", group=GROUP_ROUTER)
+auditRegimeDecay = input.float(0.97, "Adaptive Regime Decay", minval=0.80, maxval=1.00, step=0.01,
+     tooltip="Recent FOLLOW and FADE outcomes decay independently. This only trains the V3.2g challenger; live V3.2f-compatible routes remain unchanged.", group=GROUP_ROUTER)
+auditRegimeBlend = input.float(0.35, "Adaptive Regime Blend", minval=0.00, maxval=0.75, step=0.05,
+     tooltip="Maximum influence of reliable recent-regime evidence in the frozen challenger forecast. Zero reproduces the control forecast before PHI permeability.", group=GROUP_ROUTER)
+auditPermeabilityWeight = input.float(0.08, "PHI Permeability Weight", minval=0.00, maxval=0.25, step=0.01,
+     tooltip="Research-only probability adjustment for pressure pushing through or reinforcing the nearest PHI level. It never moves a level or changes a signal.", group=GROUP_ROUTER)
+researchDashboardPage = input.string("Router Audit", "Research Dashboard Page",
+     options=["Router Audit", "Adaptive Lab", "Calibration"],
+     tooltip="Router Audit shows trusted control performance. Adaptive Lab compares the frozen recent-regime + PHI challenger without changing decisions. Calibration preserves the evidence laboratory.", group=GROUP_ROUTER)
+
+showFieldAura = input.bool(true, "PHI Resonance Aura", group=GROUP_VISUAL)
+colorCandles = input.bool(true, "Theme-Color Candles", group=GROUP_VISUAL)
+candleColorMode = input.string("Spectral Flow", "Candle Theme Mode",
+     options=["Spectral Flow", "Soft Spectral Flow"],
+     tooltip="Both modes use all seven theme colors. Soft Spectral Flow adds transparency near the neutral center without becoming binary.",
+     group=GROUP_VISUAL)
+gradientLength = input.int(5, "Color Transition Smoothing", minval=1, maxval=34,
+     tooltip="Smooths movement through the seven-color spectrum. Higher values create slower, silkier transitions.", group=GROUP_VISUAL)
+showTrendTurns = input.bool(false, "Show Cycle Trend Turns", group=GROUP_VISUAL)
+showAtrTurns = input.bool(false, "Show ATR Turns", group=GROUP_VISUAL)
+showFibInteractions = input.bool(true, "Show PHI Interaction Pulses", group=GROUP_VISUAL)
+
+alertsEnabled = input.bool(true, "Enable Event Conditions", group=GROUP_ALERTS)
+alertFibRejections = input.bool(true, "PHI Rejections", group=GROUP_ALERTS)
+alertFibAcceptance = input.bool(true, "PHI Acceptance & Retests", group=GROUP_ALERTS)
+alertTrendTurns = input.bool(true, "Cycle Trend Turns", group=GROUP_ALERTS)
+alertAtrTurns = input.bool(false, "ATR Trail Turns", group=GROUP_ALERTS)
+alertCouncilSignals = input.bool(true, "Signal Council Events", group=GROUP_ALERTS)
+alertResearchResults = input.bool(true, "Completed Reaction Studies", group=GROUP_ALERTS)
+alertEvidenceEdges = input.bool(true, "New Evidence Edges", group=GROUP_ALERTS)
+alertEvidenceRoutes = input.bool(true, "New FOLLOW / FADE Routes", group=GROUP_ALERTS)
+alertRouterAuditResults = input.bool(false, "Completed Router Audits", group=GROUP_ALERTS)
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Utility functions
+// ─────────────────────────────────────────────────────────────────────────────
+
+f_clamp(float value, float lower, float upper) =>
+    math.min(math.max(value, lower), upper)
+
+f_safeDiv(float numerator, float denominator, float fallback) =>
+    math.abs(denominator) > 1e-10 ? numerator / denominator : fallback
+
+f_tanh(float value) =>
+    float bounded = f_clamp(value, -10.0, 10.0)
+    float exp2x = math.exp(2.0 * bounded)
+    (exp2x - 1.0) / (exp2x + 1.0)
+
+f_median3(float a, float b, float c) =>
+    float av = nz(a, nz(b, c))
+    float bv = nz(b, av)
+    float cv = nz(c, av)
+    av + bv + cv - math.min(av, math.min(bv, cv)) - math.max(av, math.max(bv, cv))
+
+f_isNear(float value, float target) =>
+    math.abs(value - target) <= 0.002
+
+f_isMajorRatio(float ratio) =>
+    f_isNear(ratio, 0.382) or f_isNear(ratio, 0.500) or
+     f_isNear(ratio, 0.618) or f_isNear(ratio, 1.000) or
+     f_isNear(ratio, 1.618)
+
+f_eventGate(bool condition) =>
+    condition and (not confirmedEventsOnly or barstate.isconfirmed)
+
+f_meter5(float normalizedValue) =>
+    int filled = int(math.round(f_clamp(normalizedValue, 0.0, 1.0) * 5.0))
+    string meter = ""
+    for index = 1 to 5
+        meter := meter + (index <= filled ? "▰" : "▱")
+    meter
+
+f_voteGlyph(float value) =>
+    math.abs(value) < 0.10 ? "•" : value > 0.0 ? "↑" : "↓"
+
+f_voteText(float value) =>
+    f_voteGlyph(value) + str.tostring(math.abs(value) * 100.0, "#")
+
+f_wilsonLower(int successes, int samples, float zScore) =>
+    float result = 0.0
+    if samples > 0
+        float n = float(samples)
+        float p = float(successes) / n
+        float z2 = zScore * zScore
+        float denominator = 1.0 + z2 / n
+        float center = p + z2 / (2.0 * n)
+        float margin = zScore * math.sqrt((p * (1.0 - p) + z2 / (4.0 * n)) / n)
+        result := f_clamp((center - margin) / denominator, 0.0, 1.0)
+    result
+
+f_bayesianProbability(float successes, float samples, float priorStrength) =>
+    float priorSuccesses = priorStrength * 0.50
+    f_safeDiv(successes + priorSuccesses, samples + priorStrength, 0.50)
+
+// Empirical-Bayes shrinkage. The prior mean is learned only from completed,
+// horizon-separated routes, so rare CLEAN passages are never treated as a
+// synthetic 50/50 event and the current route cannot train its own forecast.
+f_hierarchicalProbability(float successes, float samples, float priorMean, float priorStrength) =>
+    float safePriorMean = f_clamp(priorMean, 0.0, 1.0)
+    f_safeDiv(successes + priorStrength * safePriorMean, samples + priorStrength, safePriorMean)
+
+// Confidence terciles become data-adaptive once enough independent routes
+// exist. Until then, conservative fixed gates keep cold-start behaviour stable.
+f_adaptiveConfidenceBucket(float confidence, int samples, float confidenceMean, float confidenceM2, int minimumSamples) =>
+    int bucket = confidence < 0.30 ? 0 : confidence < 0.55 ? 1 : 2
+    if samples >= minimumSamples
+        // Population variance preserves V3.2f's exact gate contract while
+        // Welford's M2 avoids cancellation in sum-of-squares arithmetic.
+        float variance = samples > 0 ? math.max(confidenceM2 / float(samples), 0.0) : 0.0
+        float deviation = math.sqrt(variance)
+        float lowerGate = f_clamp(confidenceMean - 0.43 * deviation, 0.02, 0.96)
+        float upperGate = f_clamp(confidenceMean + 0.43 * deviation, lowerGate + 0.01, 0.98)
+        bucket := confidence < lowerGate ? 0 : confidence < upperGate ? 1 : 2
+    bucket
+
+f_adaptiveConfidenceGates(int samples, float confidenceMean, float confidenceM2, int minimumSamples) =>
+    float lowerGate = 0.30
+    float upperGate = 0.55
+    if samples >= minimumSamples
+        float variance = samples > 0 ? math.max(confidenceM2 / float(samples), 0.0) : 0.0
+        float deviation = math.sqrt(variance)
+        lowerGate := f_clamp(confidenceMean - 0.43 * deviation, 0.02, 0.96)
+        upperGate := f_clamp(confidenceMean + 0.43 * deviation, lowerGate + 0.01, 0.98)
+    [lowerGate, upperGate]
+
+f_dirichletProbability(float classCount, float samples, float priorStrength, int classCountTotal) =>
+    float classPrior = classCountTotal > 0 ? priorStrength / float(classCountTotal) : 0.0
+    f_safeDiv(classCount + classPrior, samples + priorStrength, classCountTotal > 0 ? 1.0 / float(classCountTotal) : 0.0)
+
+f_sampleReliability(float samples, int trustedSamples) =>
+    trustedSamples > 0 ? f_clamp(1.0 - math.exp(-3.0 * samples / trustedSamples), 0.0, 1.0) : 1.0
+
+f_calibratedProbability(int successes, int samples, float recentSuccesses, float recentSamples, float priorStrength, int trustedSamples) =>
+    float posterior = f_bayesianProbability(float(successes), float(samples), priorStrength)
+    float recentProbability = f_safeDiv(recentSuccesses, recentSamples, posterior)
+    float recencyInfluence = 0.35 * f_sampleReliability(recentSamples, trustedSamples)
+    posterior * (1.0 - recencyInfluence) + recentProbability * recencyInfluence
+
+f_evidenceQuality(float probability, float averageMfe, float averageMae, float averageResponse, float targetAtr, float reliability) =>
+    float safeTarget = math.max(targetAtr, 0.10)
+    float probabilityEdge = f_clamp((probability - 0.50) * 2.0, -1.0, 1.0)
+    float excursionEdge = f_tanh((averageMfe - averageMae) / safeTarget)
+    float responseEdge = f_tanh(averageResponse / safeTarget)
+    f_clamp((0.50 * probabilityEdge + 0.25 * excursionEdge + 0.25 * responseEdge) * reliability, -1.0, 1.0)
+
+f_evidenceTier(int samples, float quality, int developingSamples, int trustedSamples) =>
+    samples < developingSamples ? "EARLY" :
+     samples < trustedSamples ? "DEVELOPING" :
+     quality >= 0.12 ? "TRUSTED EDGE" : quality <= -0.12 ? "TRUSTED WEAK" : "TRUSTED MIXED"
+
+f_eventName(int eventType) =>
+    eventType == 1 ? "TOUCH" : eventType == 2 ? "REJECT" : eventType == 3 ? "ACCEPT" : eventType == 4 ? "RETEST" : "WAIT"
+
+f_directionName(int direction) =>
+    direction > 0 ? "BULL" : direction < 0 ? "BEAR" : "NEUTRAL"
+
+f_recordHorizon(array<int> samples, array<int> successes, array<float> mfeSums, array<float> maeSums,
+     array<float> responseSums, int index, bool success, float mfe, float mae, float response) =>
+    array.set(samples, index, array.get(samples, index) + 1)
+    array.set(successes, index, array.get(successes, index) + (success ? 1 : 0))
+    array.set(mfeSums, index, array.get(mfeSums, index) + mfe)
+    array.set(maeSums, index, array.get(maeSums, index) + mae)
+    array.set(responseSums, index, array.get(responseSums, index) + response)
+    array.get(samples, index)
+
+f_excursionCap(int horizonBars, float targetAtr, float envelope) =>
+    float diffusionScale = envelope * math.sqrt(float(math.max(horizonBars, 1)))
+    math.max(targetAtr * 2.0, diffusionScale)
+
+f_robustExcursion(float value, int horizonBars, float targetAtr, float envelope) =>
+    math.min(math.max(value, 0.0), f_excursionCap(horizonBars, targetAtr, envelope))
+
+f_robustResponse(float value, int horizonBars, float targetAtr, float envelope) =>
+    float cap = f_excursionCap(horizonBars, targetAtr, envelope)
+    f_clamp(value, -cap, cap)
+
+f_directionalMfe(int direction, float entry, float highestAfter, float lowestAfter, float entryAtr) =>
+    float move = direction > 0 ? highestAfter - entry : entry - lowestAfter
+    math.max(move / math.max(entryAtr, syminfo.mintick), 0.0)
+
+f_directionalMae(int direction, float entry, float highestAfter, float lowestAfter, float entryAtr) =>
+    float move = direction > 0 ? entry - lowestAfter : highestAfter - entry
+    math.max(move / math.max(entryAtr, syminfo.mintick), 0.0)
+
+f_directionalResponse(int direction, float entry, float exitPrice, float entryAtr) =>
+    direction * (exitPrice - entry) / math.max(entryAtr, syminfo.mintick)
+
+// Ordered, mutually exclusive first-passage outcomes:
+// 1 CLEAN       favourable barrier first, no later adverse barrier, terminal hold.
+// 2 ROUND TRIP  favourable barrier first, then reversal or failed terminal hold.
+// 3 LOSS        adverse barrier first.
+// 4 WHIPSAW     both barriers first touched on the same candle; OHLC cannot order it.
+// 5 QUIET       neither barrier touched.
+f_outcomeCode(int direction, int upHitBar, int downHitBar, float terminalResponse, float terminalConfirmAtr) =>
+    int favourableHit = direction > 0 ? upHitBar : downHitBar
+    int adverseHit = direction > 0 ? downHitBar : upHitBar
+    bool sameBarAmbiguity = favourableHit >= 0 and adverseHit >= 0 and favourableHit == adverseHit
+    bool favourableFirst = favourableHit >= 0 and (adverseHit < 0 or favourableHit < adverseHit)
+    bool adverseFirst = adverseHit >= 0 and (favourableHit < 0 or adverseHit < favourableHit)
+    bool continuationHeld = terminalResponse >= terminalConfirmAtr
+    sameBarAmbiguity ? 4 : favourableFirst ? (adverseHit >= 0 or not continuationHeld ? 2 : 1) : adverseFirst ? 3 : 5
+
+f_outcomeName(int outcomeCode) =>
+    outcomeCode == 1 ? "CLEAN" : outcomeCode == 2 ? "ROUND TRIP" : outcomeCode == 3 ? "LOSS" :
+     outcomeCode == 4 ? "WHIPSAW" : "QUIET"
+
+f_outcomeCompactName(int outcomeCode) =>
+    outcomeCode == 1 ? "CLEAN" : outcomeCode == 2 ? "ROUNDTRIP" : outcomeCode == 3 ? "LOSS" :
+     outcomeCode == 4 ? "WHIP" : "QUIET"
+
+f_favourableHitBar(int direction, int upHitBar, int downHitBar) =>
+    direction > 0 ? upHitBar : downHitBar
+
+f_loadRatios(array<float> ratios, string mode) =>
+    array.clear(ratios)
+    if mode == "ROM Legacy"
+        array.push(ratios, 0.235)
+        array.push(ratios, 0.382)
+        array.push(ratios, 0.500)
+        array.push(ratios, 0.618)
+        array.push(ratios, 0.728)
+        array.push(ratios, 1.000)
+        array.push(ratios, 1.235)
+        array.push(ratios, 1.328)
+        array.push(ratios, 1.500)
+        array.push(ratios, 1.618)
+    else if mode == "Canonical"
+        array.push(ratios, 0.236)
+        array.push(ratios, 0.382)
+        array.push(ratios, 0.500)
+        array.push(ratios, 0.618)
+        array.push(ratios, 0.786)
+        array.push(ratios, 1.000)
+        array.push(ratios, 1.272)
+        array.push(ratios, 1.382)
+        array.push(ratios, 1.618)
+        array.push(ratios, 2.000)
+    else
+        array.push(ratios, 0.236)
+        array.push(ratios, 0.382)
+        array.push(ratios, 0.500)
+        array.push(ratios, 0.618)
+        array.push(ratios, 0.728)
+        array.push(ratios, 0.786)
+        array.push(ratios, 1.000)
+        array.push(ratios, 1.272)
+        array.push(ratios, 1.500)
+        array.push(ratios, 1.618)
+
+f_levelForIndex(int index, float pivot, float scale, array<float> ratios) =>
+    float result = pivot
+    if index > 0 and index <= 10
+        result := pivot + scale * array.get(ratios, index - 1)
+    else if index > 10
+        result := pivot - scale * array.get(ratios, index - 11)
+    result
+
+f_ratioForIndex(int index, array<float> ratios) =>
+    index == 0 ? 0.0 : index <= 10 ? array.get(ratios, index - 1) : array.get(ratios, index - 11)
+
+f_levelTag(int index, float ratio) =>
+    string prefix = index == 0 ? "PP" : index <= 10 ? "R" + str.tostring(index) : "S" + str.tostring(index - 10)
+    index == 0 ? prefix : prefix + "  " + str.tostring(ratio, "#.###")
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Theme
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Seven ordered stops: extreme bear → soft bear → transition → neutral →
+// transition → soft bull → extreme bull.  The original directional endpoints
+// remain intact, while the intermediate stops restore the gradual personality
+// of the Ultra Candles palette model.
+[theme0, theme1, theme2, theme3, theme4, theme5, theme6] = switch theme
+    "Aurora" => [#FF78B7, #F06BDB, #C56CFF, #8790D8, #42BFE8, #3DE7F2, #78FFD6]
+    "Ocean Deep" => [#FF68A9, #EA68DA, #B96CFF, #7187A3, #2B9EB3, #22D3EE, #70FFF0]
+    "Royal Gold" => [#FF315F, #FF6B5B, #F59E42, #A6997E, #E9C46A, #72D6A0, #2ADC96]
+    "Zeiierman Night" => [#FF367E, #D946EF, #8B5CF6, #8097B2, #22A6F2, #00E8FF, #6EFFF2]
+    => [#FF487E, #D946EF, #7C4DFF, #8097B2, #00A6B8, #00E0BE, #7DFFCF]
+
+f_spectralColor(float value) =>
+    float v = f_clamp(value, -1.0, 1.0)
+    v <= -0.6666667 ? color.from_gradient(v, -1.0, -0.6666667, theme0, theme1) :
+     v <= -0.3333333 ? color.from_gradient(v, -0.6666667, -0.3333333, theme1, theme2) :
+     v <= 0.0 ? color.from_gradient(v, -0.3333333, 0.0, theme2, theme3) :
+     v <= 0.3333333 ? color.from_gradient(v, 0.0, 0.3333333, theme3, theme4) :
+     v <= 0.6666667 ? color.from_gradient(v, 0.3333333, 0.6666667, theme4, theme5) :
+     color.from_gradient(v, 0.6666667, 1.0, theme5, theme6)
+
+color bearColor = theme0
+color neutralColor = theme3
+color bullColor = theme6
+color pivotColor = theme == "Aurora" ? #FFD166 : theme == "Ocean Deep" ? #FFC857 : theme == "Royal Gold" ? #FFC440 : theme == "Zeiierman Night" ? #FFCE54 : #FFBF40
+color panelColor = theme == "Aurora" ? #090716 : theme == "Ocean Deep" ? #03131C : color.rgb(10, 16, 28)
+color textColor = theme == "Aurora" ? #E8F8FF : theme == "Ocean Deep" ? #D9F7FA : color.rgb(224, 235, 247)
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Shared volatility foundation
+// ─────────────────────────────────────────────────────────────────────────────
+
+float atrValue = ta.atr(atrLength)
+float safeAtr = math.max(nz(atrValue, syminfo.mintick), syminfo.mintick)
+float resonanceRadius = math.max(safeAtr * resonanceRadiusAtr, safeAtr * zoneAtrWidth * 2.0)
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 01 — Confirmed PHI lattice
+// ─────────────────────────────────────────────────────────────────────────────
+
+[previousOpen, previousHigh, previousLow, previousClose, previousTrueRange, previousMeanRange] = request.security(
+     syminfo.tickerid,
+     fibTimeframe,
+     [open[1], high[1], low[1], close[1], ta.tr(true)[1], ta.rma(high - low, rangeMemory)[1]],
+     gaps=barmerge.gaps_off,
+     lookahead=barmerge.lookahead_on)
+
+float chartSeconds = timeframe.in_seconds(timeframe.period)
+float fibSeconds = timeframe.in_seconds(fibTimeframe)
+bool fibTimeframeValid = na(chartSeconds) or na(fibSeconds) or fibSeconds >= chartSeconds
+float previousRange = previousHigh - previousLow
+float robustRange = f_median3(previousRange, previousTrueRange, previousMeanRange)
+float selectedRange = rangeMode == "Previous True Range" ? previousTrueRange : rangeMode == "Robust Blend" ? robustRange : previousRange
+float fibScale = math.max(nz(selectedRange, previousRange), syminfo.mintick)
+float fibPivot = (previousHigh + previousLow + previousClose) / 3.0
+bool fibReady = fibTimeframeValid and not na(fibPivot) and not na(fibScale) and fibScale > syminfo.mintick
+float fibZoneWidth = math.max(safeAtr * zoneAtrWidth, syminfo.mintick * 2.0)
+
+[secondaryHigh, secondaryLow, secondaryClose, secondaryTrueRange, secondaryMeanRange] = request.security(
+     syminfo.tickerid,
+     secondaryTimeframe,
+     [high[1], low[1], close[1], ta.tr(true)[1], ta.rma(high - low, rangeMemory)[1]],
+     gaps=barmerge.gaps_off,
+     lookahead=barmerge.lookahead_on)
+
+float secondarySeconds = timeframe.in_seconds(secondaryTimeframe)
+bool secondaryTimeframeValid = (na(secondarySeconds) or na(fibSeconds) or secondarySeconds > fibSeconds) and
+     (na(secondarySeconds) or na(chartSeconds) or secondarySeconds >= chartSeconds)
+float secondaryRange = secondaryHigh - secondaryLow
+float secondaryRobustRange = f_median3(secondaryRange, secondaryTrueRange, secondaryMeanRange)
+float secondarySelectedRange = rangeMode == "Previous True Range" ? secondaryTrueRange : rangeMode == "Robust Blend" ? secondaryRobustRange : secondaryRange
+float secondaryScale = math.max(nz(secondarySelectedRange, secondaryRange), syminfo.mintick)
+float secondaryPivot = (secondaryHigh + secondaryLow + secondaryClose) / 3.0
+bool secondaryReady = secondaryTimeframeValid and not na(secondaryPivot) and not na(secondaryScale) and secondaryScale > syminfo.mintick
+
+var array<float> fibRatios = array.new<float>()
+var array<float> romControlRatios = array.new<float>()
+var array<float> canonicalControlRatios = array.new<float>()
+
+// Index 0 is PP. Indices 1–10 combine resistance/support observations by
+// absolute ratio so each family receives a meaningful two-sided sample.
+var array<int> ratioSamples = array.new_int(11, 0)
+var array<int> ratioSuccesses = array.new_int(11, 0)
+var array<float> ratioResponseSum = array.new_float(11, 0.0)
+var array<float> ratioRecentSamples = array.new_float(11, 0.0)
+var array<float> ratioRecentSuccesses = array.new_float(11, 0.0)
+
+// Eight independent event cohorts: TOUCH/REJECT/ACCEPT/RETEST × BULL/BEAR.
+// Three horizon buckets: FAST, MEDIUM and FINAL.
+var array<int> cohortSamples = array.new_int(8, 0)
+var array<int> cohortSuccesses = array.new_int(8, 0)
+var array<float> cohortMfeSum = array.new_float(8, 0.0)
+var array<float> cohortMaeSum = array.new_float(8, 0.0)
+var array<float> cohortResponseSum = array.new_float(8, 0.0)
+var array<float> cohortRecentSamples = array.new_float(8, 0.0)
+var array<float> cohortRecentSuccesses = array.new_float(8, 0.0)
+var array<float> cohortRecentMfe = array.new_float(8, 0.0)
+var array<float> cohortRecentMae = array.new_float(8, 0.0)
+var array<float> cohortRecentResponse = array.new_float(8, 0.0)
+var array<int> horizonSamples = array.new_int(3, 0)
+var array<int> horizonSuccesses = array.new_int(3, 0)
+var array<float> horizonMfeSum = array.new_float(3, 0.0)
+var array<float> horizonMaeSum = array.new_float(3, 0.0)
+var array<float> horizonResponseSum = array.new_float(3, 0.0)
+
+// Prospective router audits may overlap. Each event is frozen at its own close,
+// then updated only from later bars so no event can inspect its birth candle.
+var array<int> auditStartBars = array.new_int()
+var array<float> auditEntries = array.new_float()
+var array<float> auditEntryAtrs = array.new_float()
+var array<int> auditActions = array.new_int()
+var array<int> auditRouteDirections = array.new_int()
+var array<int> auditPhiDirections = array.new_int()
+var array<int> auditCouncilDirections = array.new_int()
+var array<int> auditEventTypes = array.new_int()
+var array<float> auditConfidences = array.new_float()
+// Bucket identity is frozen at event birth. Later distribution changes cannot
+// move an already-open route into a different confidence band.
+var array<int> auditConfidenceBuckets = array.new_int()
+var array<float> auditHighestAfter = array.new_float()
+var array<float> auditLowestAfter = array.new_float()
+var array<bool> auditFastCaptured = array.new_bool()
+var array<bool> auditMediumCaptured = array.new_bool()
+var array<int> auditUpHitBars = array.new_int()
+var array<int> auditDownHitBars = array.new_int()
+var array<bool> auditIndependent = array.new_bool()
+// The probability is frozen when the audit begins. No future outcome or
+// confidence value can rewrite it, so Brier score is genuinely prequential.
+var array<float> auditFrozenProbabilities = array.new_float()
+var array<float> auditFrozenAdaptiveProbabilities = array.new_float()
+var array<float> auditFrozenReferenceProbabilities = array.new_float()
+var array<float> auditFrozenRoundTripProbabilities = array.new_float()
+var array<float> auditFrozenLossProbabilities = array.new_float()
+var array<float> auditFrozenWhipsawProbabilities = array.new_float()
+var array<float> auditFrozenQuietProbabilities = array.new_float()
+var int lastIndependentRouterAuditBar = na
+
+// FOLLOW and FADE action buckets.
+var array<int> auditActionSamples = array.new_int(2, 0)
+var array<int> auditActionSuccesses = array.new_int(2, 0)
+var array<float> auditActionMfeSum = array.new_float(2, 0.0)
+var array<float> auditActionMaeSum = array.new_float(2, 0.0)
+var array<float> auditActionResponseSum = array.new_float(2, 0.0)
+
+// Edge claims use only de-clustered observations separated by a complete
+// evaluation horizon. Raw overlapping routes remain visible as telemetry.
+var array<int> auditEffectiveActionSamples = array.new_int(2, 0)
+var array<int> auditEffectiveActionSuccesses = array.new_int(2, 0)
+var array<float> auditEffectiveActionMfeSum = array.new_float(2, 0.0)
+var array<float> auditEffectiveActionMaeSum = array.new_float(2, 0.0)
+var array<float> auditEffectiveActionResponseSum = array.new_float(2, 0.0)
+// Utility is deliberately separate from CLEAN probability: CLEAN = 1.0,
+// profitable ROUND TRIP = 0.5, every other terminal class = 0.0.
+var array<float> auditEffectiveActionUtilitySum = array.new_float(2, 0.0)
+// CLEAN, ROUND TRIP, LOSS, same-bar WHIPSAW and QUIET on independent audits.
+var array<int> auditOutcomeCounts = array.new_int(5, 0)
+// The same five outcomes split by FOLLOW (0..4) and FADE (5..9). These counts
+// seed the frozen multiclass forecast before each new independent event.
+var array<int> auditEffectiveActionOutcomeCounts = array.new_int(10, 0)
+var int auditProfitableRoundTrips = 0
+var int auditDamagingRoundTrips = 0
+
+// Same routed events, same entry and same horizon: original PHI at index 0,
+// actionable Council setup at index 1, and the router on that exact Council
+// subset at index 2. The paired bucket prevents an all-router/subset-Council
+// comparison from manufacturing a false edge.
+var array<int> auditBaselineSamples = array.new_int(3, 0)
+var array<int> auditBaselineSuccesses = array.new_int(3, 0)
+var array<float> auditBaselineMfeSum = array.new_float(3, 0.0)
+var array<float> auditBaselineMaeSum = array.new_float(3, 0.0)
+var array<float> auditBaselineResponseSum = array.new_float(3, 0.0)
+
+// Route performance at fast, medium and final horizons, plus low/medium/high
+// confidence calibration at the final horizon.
+var array<int> auditHorizonSamples = array.new_int(3, 0)
+var array<int> auditHorizonSuccesses = array.new_int(3, 0)
+var array<float> auditHorizonMfeSum = array.new_float(3, 0.0)
+var array<float> auditHorizonMaeSum = array.new_float(3, 0.0)
+var array<float> auditHorizonResponseSum = array.new_float(3, 0.0)
+// FOLLOW fast/medium/final occupy 0..2; FADE occupies 3..5.
+var array<int> auditActionHorizonSamples = array.new_int(6, 0)
+var array<int> auditActionHorizonSuccesses = array.new_int(6, 0)
+var array<float> auditActionHorizonMfeSum = array.new_float(6, 0.0)
+var array<float> auditActionHorizonMaeSum = array.new_float(6, 0.0)
+var array<float> auditActionHorizonResponseSum = array.new_float(6, 0.0)
+var array<int> auditConfidenceSamples = array.new_int(3, 0)
+var array<int> auditConfidenceSuccesses = array.new_int(3, 0)
+var array<float> auditConfidenceMfeSum = array.new_float(3, 0.0)
+var array<float> auditConfidenceMaeSum = array.new_float(3, 0.0)
+var array<float> auditConfidenceResponseSum = array.new_float(3, 0.0)
+var int auditConfidenceDistributionSamples = 0
+var float auditConfidenceDistributionMean = 0.0
+var float auditConfidenceDistributionM2 = 0.0
+
+// Fractional recent-regime memory for FOLLOW and FADE. These statistics are
+// updated only after an independent audit completes, never before its forecast.
+var array<float> auditRecentActionSamples = array.new_float(2, 0.0)
+var array<float> auditRecentActionSuccesses = array.new_float(2, 0.0)
+
+var int auditWaitSamples = 0
+var int auditWaitGoodSkips = 0
+var int auditEffectiveWaitSamples = 0
+var int auditEffectiveWaitGoodSkips = 0
+var float auditBrierSum = 0.0
+var float auditAdaptiveBrierSum = 0.0
+var float auditReferenceBrierSum = 0.0
+var float auditMulticlassBrierSum = 0.0
+var array<float> auditClassForecastSums = array.new_float(5, 0.0)
+var int auditBrierSamples = 0
+var float auditFirstPassBarsSum = 0.0
+var int auditFirstPassSamples = 0
+var string lastRouterAuditText = "AWAIT COMPLETION"
+var string lastAdaptiveAuditText = "AWAIT CHALLENGER COMPLETION"
+
+var int researchTouches = 0
+var int researchRejections = 0
+var int researchBreakouts = 0
+var int researchRetests = 0
+var int successfulRetests = 0
+var int researchSamples = 0
+var int researchSuccesses = 0
+var float researchMfeSum = 0.0
+var float researchMaeSum = 0.0
+var float researchResponseSum = 0.0
+var float researchRecentSamples = 0.0
+var float researchRecentSuccesses = 0.0
+var float researchRecentMfe = 0.0
+var float researchRecentMae = 0.0
+var float researchRecentResponse = 0.0
+var int lastCompletedCohort = na
+var int lastResearchEndBar = na
+var int trendSamples = 0
+var int trendSuccesses = 0
+var float trendResponseSum = 0.0
+var int chopSamples = 0
+var int chopSuccesses = 0
+var float chopResponseSum = 0.0
+var int romGridSamples = 0
+var int romGridSuccesses = 0
+var float romGridResponseSum = 0.0
+var int canonicalGridSamples = 0
+var int canonicalGridSuccesses = 0
+var float canonicalGridResponseSum = 0.0
+var int gem728Samples = 0
+var int gem728Successes = 0
+var float gem728ResponseSum = 0.0
+var int gem1328Samples = 0
+var int gem1328Successes = 0
+var float gem1328ResponseSum = 0.0
+
+if barstate.isfirst
+    f_loadRatios(fibRatios, ratioMode)
+    f_loadRatios(romControlRatios, "ROM Legacy")
+    f_loadRatios(canonicalControlRatios, "Canonical")
+
+// Persistent lattice objects use timestamps instead of bar indexes. A weekly
+// anchor spans as many as 10,080 bars on a 1-minute crypto chart, which can
+// exceed Pine's historical coordinate buffer even though no series requests
+// that much history. Time coordinates preserve the complete anchor period.
+var int fibStartTime = time
+if timeframe.change(fibTimeframe)
+    fibStartTime := time
+
+var int secondaryStartTime = time
+if timeframe.change(secondaryTimeframe)
+    secondaryStartTime := time
+
+var array<line> fibLines = array.new<line>()
+var array<box> fibZones = array.new<box>()
+var array<label> fibLabels = array.new<label>()
+var array<line> secondaryLines = array.new<line>()
+
+var line confluenceLine = line.new(time, close, time_close, close,
+     xloc=xloc.bar_time, extend=extend.right, color=color.new(pivotColor, 100), width=3)
+var box confluenceBox = box.new(left=time, top=close, right=time_close, bottom=close,
+     xloc=xloc.bar_time, border_color=color.new(pivotColor, 100), bgcolor=color.new(pivotColor, 100))
+var label confluenceLabel = label.new(time, close, "", xloc=xloc.bar_time, yloc=yloc.price,
+     style=label.style_label_left, color=color.new(panelColor, 100), textcolor=color.new(pivotColor, 100), size=size.tiny)
+
+if barstate.isfirst
+    for index = 0 to 20
+        line newLine = line.new(time, close, time_close, close,
+             xloc=xloc.bar_time, extend=extend.right, color=color.new(neutralColor, 100))
+        box newZone = box.new(left=time, top=close, right=time_close, bottom=close,
+             xloc=xloc.bar_time, border_color=color.new(neutralColor, 100), bgcolor=color.new(neutralColor, 100))
+        label newLabel = label.new(time, close, "", xloc=xloc.bar_time, yloc=yloc.price,
+             style=label.style_label_left, color=color.new(panelColor, 100), textcolor=color.new(textColor, 100), size=size.tiny)
+        array.push(fibLines, newLine)
+        array.push(fibZones, newZone)
+        array.push(fibLabels, newLabel)
+        line secondaryLine = line.new(time, close, time_close, close,
+             xloc=xloc.bar_time, extend=extend.right, color=color.new(neutralColor, 100), style=line.style_dotted)
+        array.push(secondaryLines, secondaryLine)
+
+bool focusMode = displayMode == "Focus"
+bool legacyVisual = displayMode == "Legacy ROM"
+bool researchMode = displayMode == "Research Lab"
+
+if barstate.islast
+    int drawingStepMs = math.max(time - nz(time[1], time), 1)
+    int drawingRightTime = time + drawingStepMs * fibLabelOffset
+    for index = 0 to 20
+        float level = fibReady ? f_levelForIndex(index, fibPivot, fibScale, fibRatios) : close
+        float ratio = f_ratioForIndex(index, fibRatios)
+        bool isPivot = index == 0
+        bool isResistance = index > 0 and index <= 10
+        bool majorLevel = isPivot or f_isMajorRatio(ratio)
+        bool levelVisible = showFib and fibReady and (not focusMode or majorLevel)
+        float spectralCoordinate = isPivot ? 0.0 : (isResistance ? 1.0 : -1.0) * math.min(ratio / 1.618, 1.0)
+        color sideColor = isPivot ? pivotColor : f_spectralColor(spectralCoordinate)
+        color legacyColor = isPivot ? color.gray : isResistance ? color.green : color.red
+        color levelColor = legacyVisual ? legacyColor : sideColor
+        int evidenceIndex = index == 0 ? 0 : index <= 10 ? index : index - 10
+        int evidenceSamples = array.get(ratioSamples, evidenceIndex)
+        int evidenceSuccesses = array.get(ratioSuccesses, evidenceIndex)
+        float evidenceRecentN = array.get(ratioRecentSamples, evidenceIndex)
+        float evidenceRecentWins = array.get(ratioRecentSuccesses, evidenceIndex)
+        float evidenceProbability = f_calibratedProbability(evidenceSuccesses, evidenceSamples, evidenceRecentWins, evidenceRecentN,
+             evidencePriorStrength, trustedEvidenceSamples)
+        float evidenceMaturity = f_sampleReliability(float(evidenceSamples), trustedEvidenceSamples)
+        float evidenceStrength = evidenceGlow ? evidenceMaturity * (0.20 + 0.80 * evidenceProbability) : 0.0
+        int baseLineTransparency = isPivot ? 4 : majorLevel ? 14 : 48
+        int lineTransparency = math.max(0, baseLineTransparency - int(math.round(evidenceStrength * 22.0)))
+        int zoneTransparency = math.max(72, (majorLevel ? 88 : 94) - int(math.round(evidenceStrength * 12.0)))
+        int lineWidth = math.min(4, (isPivot ? 3 : majorLevel ? 2 : 1) + (evidenceStrength >= 0.55 ? 1 : 0))
+        line levelLine = array.get(fibLines, index)
+        box levelZone = array.get(fibZones, index)
+        label levelLabel = array.get(fibLabels, index)
+
+        line.set_xy1(levelLine, fibStartTime, level)
+        line.set_xy2(levelLine, drawingRightTime, level)
+        line.set_extend(levelLine, extend.right)
+        line.set_style(levelLine, isPivot ? line.style_dashed : line.style_solid)
+        line.set_width(levelLine, lineWidth)
+        line.set_color(levelLine, levelVisible ? color.new(levelColor, lineTransparency) : color.new(levelColor, 100))
+
+        box.set_left(levelZone, fibStartTime)
+        box.set_right(levelZone, drawingRightTime)
+        box.set_top(levelZone, level + fibZoneWidth)
+        box.set_bottom(levelZone, level - fibZoneWidth)
+        box.set_border_color(levelZone, color.new(levelColor, 100))
+        box.set_bgcolor(levelZone, levelVisible and showFibZones and not legacyVisual ? color.new(levelColor, zoneTransparency) : color.new(levelColor, 100))
+
+        string levelText = f_levelTag(index, ratio) + "  ·  " + str.tostring(level, format.mintick)
+        label.set_x(levelLabel, drawingRightTime)
+        label.set_y(levelLabel, level)
+        label.set_text(levelLabel, levelVisible and showFibLabels ? levelText : "")
+        label.set_color(levelLabel, levelVisible and showFibLabels ? color.new(panelColor, 18) : color.new(panelColor, 100))
+        label.set_textcolor(levelLabel, levelVisible and showFibLabels ? color.new(levelColor, 0) : color.new(levelColor, 100))
+
+    for index = 0 to 20
+        float secondaryLevel = secondaryReady ? f_levelForIndex(index, secondaryPivot, secondaryScale, fibRatios) : close
+        float secondaryRatio = f_ratioForIndex(index, fibRatios)
+        bool secondaryPivotLevel = index == 0
+        bool secondaryResistance = index > 0 and index <= 10
+        bool secondaryMajor = secondaryPivotLevel or f_isMajorRatio(secondaryRatio)
+        bool secondaryVisible = showFib and secondaryReady and secondaryDisplay != "Confluence Only" and
+             (secondaryDisplay == "All Levels" or secondaryMajor)
+        float secondarySpectralCoordinate = secondaryPivotLevel ? 0.0 : (secondaryResistance ? 1.0 : -1.0) * math.min(secondaryRatio / 1.618, 1.0)
+        color secondaryThemeColor = secondaryPivotLevel ? pivotColor : f_spectralColor(secondarySpectralCoordinate)
+        color secondaryLegacyColor = secondaryPivotLevel ? color.gray : secondaryResistance ? color.green : color.red
+        color secondarySideColor = legacyVisual ? secondaryLegacyColor : secondaryThemeColor
+        line secondaryLevelLine = array.get(secondaryLines, index)
+        line.set_xy1(secondaryLevelLine, secondaryStartTime, secondaryLevel)
+        line.set_xy2(secondaryLevelLine, drawingRightTime, secondaryLevel)
+        line.set_extend(secondaryLevelLine, extend.right)
+        line.set_style(secondaryLevelLine, secondaryPivotLevel ? line.style_dashed : line.style_dotted)
+        line.set_width(secondaryLevelLine, secondaryPivotLevel ? 2 : 1)
+        line.set_color(secondaryLevelLine, secondaryVisible ? color.new(secondarySideColor, secondaryMajor ? 66 : 82) : color.new(secondarySideColor, 100))
+
+// Nearest-level geometry and PHI interaction state.
+float nearestFibLevel = na
+float nearestFibRatio = na
+float nearestFibDistance = 1e20
+int nearestFibIndex = 0
+float primaryResonance = 0.0
+
+if fibReady
+    for index = 0 to 20
+        float candidateLevel = f_levelForIndex(index, fibPivot, fibScale, fibRatios)
+        float candidateDistance = math.abs(close - candidateLevel)
+        float candidateRatio = f_ratioForIndex(index, fibRatios)
+        float candidateWeight = index == 0 ? 1.20 : f_isMajorRatio(candidateRatio) ? 1.00 : 0.72
+        float candidateAffinity = math.exp(-0.5 * math.pow(f_safeDiv(candidateDistance, resonanceRadius, 10.0), 2.0)) * candidateWeight
+        primaryResonance := math.max(primaryResonance, candidateAffinity)
+        if candidateDistance < nearestFibDistance
+            nearestFibDistance := candidateDistance
+            nearestFibLevel := candidateLevel
+            nearestFibRatio := candidateRatio
+            nearestFibIndex := index
+
+float nearestSecondaryLevel = na
+float nearestSecondaryRatio = na
+float nearestSecondaryDistance = 1e20
+int nearestSecondaryIndex = 0
+float secondaryResonance = 0.0
+
+if secondaryReady
+    for index = 0 to 20
+        float candidateLevel = f_levelForIndex(index, secondaryPivot, secondaryScale, fibRatios)
+        float candidateDistance = math.abs(close - candidateLevel)
+        float candidateRatio = f_ratioForIndex(index, fibRatios)
+        float candidateWeight = index == 0 ? 1.20 : f_isMajorRatio(candidateRatio) ? 1.00 : 0.72
+        float candidateAffinity = math.exp(-0.5 * math.pow(f_safeDiv(candidateDistance, resonanceRadius, 10.0), 2.0)) * candidateWeight
+        secondaryResonance := math.max(secondaryResonance, candidateAffinity)
+        if candidateDistance < nearestSecondaryDistance
+            nearestSecondaryDistance := candidateDistance
+            nearestSecondaryLevel := candidateLevel
+            nearestSecondaryRatio := candidateRatio
+            nearestSecondaryIndex := index
+
+// Identical pivot and scale, different ratio families: this is the control
+// comparison needed to test ROM Legacy geometry against the canonical grid.
+float nearestRomControlDistance = 1e20
+float nearestCanonicalControlDistance = 1e20
+if fibReady
+    for index = 0 to 20
+        float romLevel = f_levelForIndex(index, fibPivot, fibScale, romControlRatios)
+        float canonicalLevel = f_levelForIndex(index, fibPivot, fibScale, canonicalControlRatios)
+        nearestRomControlDistance := math.min(nearestRomControlDistance, math.abs(close - romLevel))
+        nearestCanonicalControlDistance := math.min(nearestCanonicalControlDistance, math.abs(close - canonicalLevel))
+
+float phiCoordinate = fibReady ? f_safeDiv(close - fibPivot, fibScale, 0.0) : 0.0
+float phiBias = fibReady ? f_tanh(phiCoordinate) : 0.0
+float phiAffinity = fibReady ? math.exp(-0.5 * math.pow(f_safeDiv(nearestFibDistance, resonanceRadius, 10.0), 2.0)) : 0.0
+bool phiTouch = fibReady and high >= nearestFibLevel - fibZoneWidth and low <= nearestFibLevel + fibZoneWidth
+bool secondaryTouch = secondaryReady and high >= nearestSecondaryLevel - fibZoneWidth and low <= nearestSecondaryLevel + fibZoneWidth
+float confluenceThreshold = safeAtr * confluenceAtrDistance
+float clusterDistance = fibReady and secondaryReady ? math.abs(nearestFibLevel - nearestSecondaryLevel) : 1e20
+bool confluenceActive = fibReady and secondaryReady and clusterDistance <= confluenceThreshold
+float confluencePrice = confluenceActive ? (nearestFibLevel + nearestSecondaryLevel) / 2.0 : na
+float confluenceStrength = confluenceActive ? math.exp(-0.5 * math.pow(f_safeDiv(clusterDistance, confluenceThreshold, 10.0), 2.0)) : 0.0
+float resonanceStrength = f_clamp(math.max(primaryResonance, secondaryResonance * secondaryResonanceWeight) + confluenceStrength * 0.35, 0.0, 1.0)
+bool phiApproach = fibReady and not phiTouch and nearestFibDistance <= fibZoneWidth * approachZoneMultiple
+
+if barstate.islast
+    bool beamVisible = showConfluenceBeam and confluenceActive
+    float beamPrice = beamVisible ? confluencePrice : close
+    float beamHalfWidth = beamVisible ? math.max(fibZoneWidth, clusterDistance * 0.5 + fibZoneWidth * 0.35) : fibZoneWidth
+    int beamStartTime = math.max(fibStartTime, secondaryStartTime)
+    int beamStepMs = math.max(time - nz(time[1], time), 1)
+    int beamRightTime = time + beamStepMs * fibLabelOffset
+    line.set_xy1(confluenceLine, beamStartTime, beamPrice)
+    line.set_xy2(confluenceLine, beamRightTime, beamPrice)
+    line.set_extend(confluenceLine, extend.right)
+    line.set_color(confluenceLine, beamVisible ? color.new(pivotColor, 10) : color.new(pivotColor, 100))
+    box.set_left(confluenceBox, beamStartTime)
+    box.set_right(confluenceBox, beamRightTime)
+    box.set_top(confluenceBox, beamPrice + beamHalfWidth)
+    box.set_bottom(confluenceBox, beamPrice - beamHalfWidth)
+    box.set_border_color(confluenceBox, color.new(pivotColor, 100))
+    box.set_bgcolor(confluenceBox, beamVisible ? color.new(pivotColor, 86) : color.new(pivotColor, 100))
+    label.set_x(confluenceLabel, beamRightTime)
+    label.set_y(confluenceLabel, beamPrice)
+    label.set_text(confluenceLabel, beamVisible ? "MTF PHI  ·  " + str.tostring(beamPrice, format.mintick) : "")
+    label.set_color(confluenceLabel, beamVisible ? color.new(panelColor, 15) : color.new(panelColor, 100))
+    label.set_textcolor(confluenceLabel, beamVisible ? pivotColor : color.new(pivotColor, 100))
+
+float candleBody = math.abs(close - open)
+float lowerWick = math.min(open, close) - low
+float upperWick = high - math.max(open, close)
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 02 — Repaired dominant-cycle trendline
+// ─────────────────────────────────────────────────────────────────────────────
+
+float trendSourceConfirmed = request.security(syminfo.tickerid, trendTimeframe, hl2[1],
+     gaps=barmerge.gaps_off, lookahead=barmerge.lookahead_on)
+float trendSourceDeveloping = request.security(syminfo.tickerid, trendTimeframe, hl2,
+     gaps=barmerge.gaps_off, lookahead=barmerge.lookahead_off)
+float trendSource = trendTimeframe == "" ? hl2 : trendMtfMode == "Confirmed" ? trendSourceConfirmed : trendSourceDeveloping
+
+var float dominantPeriod = 20.0
+float priorDominantPeriod = nz(dominantPeriod[1], 20.0)
+float cycleSmooth = (4.0 * trendSource + 3.0 * nz(trendSource[1], trendSource) + 2.0 * nz(trendSource[2], trendSource) + nz(trendSource[3], trendSource)) / 10.0
+float cycleScale = 0.075 * priorDominantPeriod + 0.54
+float detrender = (0.0962 * cycleSmooth + 0.5769 * nz(cycleSmooth[2]) - 0.5769 * nz(cycleSmooth[4]) - 0.0962 * nz(cycleSmooth[6])) * cycleScale
+float quadrature1 = (0.0962 * detrender + 0.5769 * nz(detrender[2]) - 0.5769 * nz(detrender[4]) - 0.0962 * nz(detrender[6])) * cycleScale
+float inPhase1 = nz(detrender[3])
+float jInPhase = (0.0962 * inPhase1 + 0.5769 * nz(inPhase1[2]) - 0.5769 * nz(inPhase1[4]) - 0.0962 * nz(inPhase1[6])) * cycleScale
+float jQuadrature = (0.0962 * quadrature1 + 0.5769 * nz(quadrature1[2]) - 0.5769 * nz(quadrature1[4]) - 0.0962 * nz(quadrature1[6])) * cycleScale
+float inPhase2Raw = inPhase1 - jQuadrature
+float quadrature2Raw = quadrature1 + jInPhase
+var float inPhase2 = 0.0
+var float quadrature2 = 0.0
+inPhase2 := 0.2 * inPhase2Raw + 0.8 * nz(inPhase2[1])
+quadrature2 := 0.2 * quadrature2Raw + 0.8 * nz(quadrature2[1])
+
+float realRaw = inPhase2 * nz(inPhase2[1]) + quadrature2 * nz(quadrature2[1])
+float imagRaw = inPhase2 * nz(quadrature2[1]) - quadrature2 * nz(inPhase2[1])
+var float realPart = 0.0
+var float imagPart = 0.0
+realPart := 0.2 * realRaw + 0.8 * nz(realPart[1])
+imagPart := 0.2 * imagRaw + 0.8 * nz(imagPart[1])
+
+float phaseAngle = math.abs(realPart) > 1e-10 ? math.atan(imagPart / realPart) : 0.0
+float rawDominantPeriod = math.abs(phaseAngle) > 1e-6 ? 2.0 * math.pi / math.abs(phaseAngle) : priorDominantPeriod
+float relativeLimitedPeriod = math.min(math.max(rawDominantPeriod, 0.67 * priorDominantPeriod), 1.50 * priorDominantPeriod)
+float absoluteLimitedPeriod = f_clamp(relativeLimitedPeriod, 6.0, 50.0)
+dominantPeriod := 0.2 * absoluteLimitedPeriod + 0.8 * priorDominantPeriod
+
+var float smoothedDominantPeriod = 20.0
+smoothedDominantPeriod := 0.33 * dominantPeriod + 0.67 * nz(smoothedDominantPeriod[1], dominantPeriod)
+int cycleLength = int(f_clamp(math.round(smoothedDominantPeriod), 6.0, 50.0))
+
+// Diagnostic telemetry only. The proven Ehlers path above is deliberately
+// untouched; these exponentially weighted rates reveal when its rails or
+// phase estimator deserve a later controlled challenger.
+float cycleTelemetryAlpha = 2.0 / 101.0
+float cycleRailSample = absoluteLimitedPeriod <= 6.0001 or absoluteLimitedPeriod >= 49.9999 ? 1.0 : 0.0
+float cycleJitterSample = f_clamp(math.abs(absoluteLimitedPeriod - priorDominantPeriod) / math.max(priorDominantPeriod, 1.0), 0.0, 1.0)
+float cyclePhaseValidSample = math.abs(realPart) > 1e-10 and math.abs(phaseAngle) > 1e-6 ? 1.0 : 0.0
+var float cycleRailRate = 0.0
+var float cycleJitterRate = 0.0
+var float cyclePhaseValidity = 0.0
+cycleRailRate := cycleTelemetryAlpha * cycleRailSample + (1.0 - cycleTelemetryAlpha) * nz(cycleRailRate[1], cycleRailSample)
+cycleJitterRate := cycleTelemetryAlpha * cycleJitterSample + (1.0 - cycleTelemetryAlpha) * nz(cycleJitterRate[1], cycleJitterSample)
+cyclePhaseValidity := cycleTelemetryAlpha * cyclePhaseValidSample + (1.0 - cycleTelemetryAlpha) * nz(cyclePhaseValidity[1], cyclePhaseValidSample)
+
+float cycleSum = 0.0
+int cycleCount = 0
+for lookback = 0 to 49
+    if lookback < cycleLength and not na(trendSource[lookback])
+        cycleSum += trendSource[lookback]
+        cycleCount += 1
+
+float cycleMean = cycleCount > 0 ? cycleSum / cycleCount : trendSource
+float cycleTrend = (4.0 * cycleMean + 3.0 * nz(cycleMean[1], cycleMean) + 2.0 * nz(cycleMean[2], cycleMean) + nz(cycleMean[3], cycleMean)) / 10.0
+float trendDistance = f_safeDiv(trendSource - cycleTrend, safeAtr, 0.0)
+float trendSlope = f_safeDiv(cycleTrend - nz(cycleTrend[1], cycleTrend), safeAtr, 0.0)
+float trendScore = f_tanh(1.35 * trendDistance + 2.25 * trendSlope)
+float trendDeadband = trendDeadbandAtr
+int trendState = trendDistance > trendDeadband ? 1 : trendDistance < -trendDeadband ? -1 : 0
+color trendColor = f_spectralColor(trendScore)
+
+bool trendBullTurnRaw = ta.crossover(trendScore, 0.0)
+bool trendBearTurnRaw = ta.crossunder(trendScore, 0.0)
+bool trendBullTurn = f_eventGate(trendBullTurnRaw)
+bool trendBearTurn = f_eventGate(trendBearTurnRaw)
+
+plot(showCycleTrend ? cycleTrend : na, "Cycle Trend — Aura", color=color.new(trendColor, 91), linewidth=4)
+plot(showCycleTrend ? cycleTrend : na, "Cycle Trend — Glow", color=color.new(trendColor, 70), linewidth=3)
+plot(showCycleTrend ? cycleTrend : na, "Cycle Trend — Core", color=color.new(trendColor, 2), linewidth=2)
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 03 — Safe Pressure Flow
+// ─────────────────────────────────────────────────────────────────────────────
+
+float candleRange = math.max(high - low, syminfo.mintick)
+float bodyPressure = f_safeDiv(close - open, candleRange, 0.0)
+float closeLocationPressure = f_safeDiv(2.0 * close - high - low, candleRange, 0.0)
+bool hasUsableVolume = not na(volume) and volume > 0
+float volumeBase = ta.ema(volume, pressureVolumeLength)
+float relativeVolume = hasUsableVolume ? f_safeDiv(volume, volumeBase, 1.0) : 1.0
+float volumeImpulse = math.log(1.0 + math.max(relativeVolume, 0.0))
+float rawPressure = (0.55 * bodyPressure + 0.45 * closeLocationPressure) * volumeImpulse
+float cumulativePressure = ta.cum(nz(rawPressure))
+float pressureBaseline = ta.ema(cumulativePressure, pressureFlowLength)
+float pressureResidual = cumulativePressure - pressureBaseline
+float pressureDeviation = ta.stdev(pressureResidual, pressureZLength)
+float pressureZ = f_clamp(f_safeDiv(pressureResidual, pressureDeviation, 0.0), -4.0, 4.0)
+float pressureScore = f_tanh(pressureZ / 1.75)
+int nearestPhiSide = nearestFibIndex == 0 ? 0 : nearestFibIndex <= 10 ? 1 : -1
+float permeabilityAlignment = nearestPhiSide != 0 ? pressureScore * float(nearestPhiSide) : 0.0
+float phiPermeability = fibReady and nearestPhiSide != 0 ?
+     f_tanh(1.35 * permeabilityAlignment) * (0.35 + 0.65 * phiAffinity) : 0.0
+float pressureGuideRaw = hl2 + pressureScore * safeAtr * pressurePriceScale
+float pressureGuide = ta.ema(pressureGuideRaw, pressureGuideLength)
+color pressureColor = f_spectralColor(pressureScore)
+
+plot(showPressure ? pressureGuide : na, "Pressure Guide — Glow", color=color.new(pressureColor, 84), linewidth=4)
+plot(showPressure ? pressureGuide : na, "Pressure Guide — Core", color=color.new(pressureColor, 12), linewidth=2)
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 05 — Clean ATR trail
+// ─────────────────────────────────────────────────────────────────────────────
+
+float atrLoss = atrMultiplier * safeAtr
+var float atrTrail = na
+float previousAtrTrail = nz(atrTrail[1], close)
+
+if na(atrTrail[1])
+    atrTrail := close - atrLoss
+else if close > previousAtrTrail and close[1] > previousAtrTrail
+    atrTrail := math.max(previousAtrTrail, close - atrLoss)
+else if close < previousAtrTrail and close[1] < previousAtrTrail
+    atrTrail := math.min(previousAtrTrail, close + atrLoss)
+else
+    atrTrail := close > previousAtrTrail ? close - atrLoss : close + atrLoss
+
+var int atrDirection = 0
+atrDirection := close > atrTrail ? 1 : close < atrTrail ? -1 : nz(atrDirection[1], 0)
+float atrTrailScore = f_tanh(2.0 * f_safeDiv(close - atrTrail, safeAtr, 0.0))
+color atrTrailColor = f_spectralColor(atrTrailScore)
+bool atrBullTurn = f_eventGate(ta.crossover(close, atrTrail))
+bool atrBearTurn = f_eventGate(ta.crossunder(close, atrTrail))
+
+plot(showAtrTrail ? atrTrail : na, "ATR Trail — Glow", color=color.new(atrTrailColor, 86), linewidth=4)
+plot(showAtrTrail ? atrTrail : na, "ATR Trail — Core", color=color.new(atrTrailColor, 10), linewidth=2)
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Foundation field — continuous council input
+// ─────────────────────────────────────────────────────────────────────────────
+
+float foundationField = f_clamp(0.50 * trendScore + 0.35 * pressureScore + 0.15 * phiBias, -1.0, 1.0)
+float resonanceField = f_clamp(foundationField * (1.0 + 0.25 * resonanceStrength), -1.0, 1.0)
+float spectralField = ta.ema(resonanceField, gradientLength)
+
+bool phiBullRejectRaw = phiTouch and low <= nearestFibLevel and close > nearestFibLevel + fibZoneWidth * 0.15 and close > open and lowerWick >= candleBody * 0.35 and foundationField > -0.25
+bool phiBearRejectRaw = phiTouch and high >= nearestFibLevel and close < nearestFibLevel - fibZoneWidth * 0.15 and close < open and upperWick >= candleBody * 0.35 and foundationField < 0.25
+bool phiBullReject = f_eventGate(phiBullRejectRaw and not phiBullRejectRaw[1])
+bool phiBearReject = f_eventGate(phiBearRejectRaw and not phiBearRejectRaw[1])
+
+float acceptanceDistance = fibZoneWidth * acceptanceBuffer
+bool phiBullLevelCross = ta.crossover(close, nearestFibLevel + acceptanceDistance)
+bool phiBearLevelCross = ta.crossunder(close, nearestFibLevel - acceptanceDistance)
+bool phiBullAcceptRaw = fibReady and phiBullLevelCross and (phiTouch or phiTouch[1]) and foundationField > 0.10
+bool phiBearAcceptRaw = fibReady and phiBearLevelCross and (phiTouch or phiTouch[1]) and foundationField < -0.10
+bool phiBullAccept = f_eventGate(phiBullAcceptRaw)
+bool phiBearAccept = f_eventGate(phiBearAcceptRaw)
+
+var float acceptedFibLevel = na
+var int acceptedDirection = 0
+var int acceptedBar = na
+
+if phiBullAccept
+    acceptedFibLevel := nearestFibLevel
+    acceptedDirection := 1
+    acceptedBar := bar_index
+else if phiBearAccept
+    acceptedFibLevel := nearestFibLevel
+    acceptedDirection := -1
+    acceptedBar := bar_index
+
+bool acceptanceMemoryActive = acceptedDirection != 0 and not na(acceptedBar) and bar_index - acceptedBar <= retestMemoryBars
+bool phiBullRetestRaw = acceptanceMemoryActive and acceptedDirection == 1 and bar_index > acceptedBar and
+     low <= acceptedFibLevel + fibZoneWidth and close > acceptedFibLevel and close > open and foundationField > 0.0
+bool phiBearRetestRaw = acceptanceMemoryActive and acceptedDirection == -1 and bar_index > acceptedBar and
+     high >= acceptedFibLevel - fibZoneWidth and close < acceptedFibLevel and close < open and foundationField < 0.0
+bool phiBullRetest = f_eventGate(phiBullRetestRaw and not phiBullRetestRaw[1])
+bool phiBearRetest = f_eventGate(phiBearRetestRaw and not phiBearRetestRaw[1])
+
+if phiBullRetest or phiBearRetest or (acceptanceMemoryActive and bar_index - acceptedBar >= retestMemoryBars)
+    acceptedDirection := 0
+    acceptedFibLevel := na
+    acceptedBar := na
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 07 — Prospective reaction research
+// ─────────────────────────────────────────────────────────────────────────────
+
+bool newPhiTouch = f_eventGate(phiTouch and not phiTouch[1])
+if researchEnabled and newPhiTouch
+    researchTouches += 1
+if researchEnabled and (phiBullReject or phiBearReject)
+    researchRejections += 1
+if researchEnabled and (phiBullAccept or phiBearAccept)
+    researchBreakouts += 1
+if researchEnabled and (phiBullRetest or phiBearRetest)
+    researchRetests += 1
+
+bool classifiedPhiEvent = phiBullReject or phiBearReject or phiBullAccept or phiBearAccept or phiBullRetest or phiBearRetest
+bool standalonePhiTouch = newPhiTouch and not classifiedPhiEvent
+bool eligibleStandaloneTouch = includeStandaloneTouchStudies and standalonePhiTouch
+int touchDirection = eligibleStandaloneTouch ? (close > nearestFibLevel ? 1 : close < nearestFibLevel ? -1 : foundationField >= 0.0 ? 1 : -1) : 0
+int researchEventDirection = phiBullRetest ? 1 : phiBearRetest ? -1 :
+     phiBullAccept ? 1 : phiBearAccept ? -1 :
+     phiBullReject ? 1 : phiBearReject ? -1 : touchDirection
+int researchEventType = phiBullRetest or phiBearRetest ? 4 :
+     phiBullAccept or phiBearAccept ? 3 :
+     phiBullReject or phiBearReject ? 2 : eligibleStandaloneTouch ? 1 : 0
+
+var bool researchActive = false
+var int researchStartBar = na
+var float researchEntry = na
+var float researchEntryAtr = na
+var int researchDirection = 0
+var int researchType = 0
+var int researchRatioBin = 0
+var float researchRatio = 0.0
+var bool researchTrendRegime = false
+var bool researchRomAligned = false
+var bool researchCanonicalAligned = false
+var bool researchGem728 = false
+var bool researchGem1328 = false
+var float activeMfe = 0.0
+var float activeMae = 0.0
+var bool researchFastCaptured = false
+var bool researchMediumCaptured = false
+
+int researchFastHorizon = math.max(1, int(math.round(researchHorizon * 0.25)))
+int researchMediumHorizon = math.min(researchHorizon - 1, math.max(researchFastHorizon + 1, int(math.round(researchHorizon * 0.50))))
+int researchWarmupBars = math.max(atrLength * 3, researchHorizon + 1)
+bool researchAtrReady = not na(atrValue) and atrValue >= syminfo.mintick * 2.0 and bar_index >= researchWarmupBars
+bool researchSpacingReady = na(lastResearchEndBar) or bar_index - lastResearchEndBar > researchSpacingBars
+
+bool startResearchStudy = researchEnabled and not researchActive and researchAtrReady and researchSpacingReady and researchEventDirection != 0 and researchEventType != 0 and fibReady
+if startResearchStudy
+    researchActive := true
+    researchStartBar := bar_index
+    researchEntry := close
+    researchEntryAtr := atrValue
+    researchDirection := researchEventDirection
+    researchType := researchEventType
+    researchRatioBin := nearestFibIndex == 0 ? 0 : nearestFibIndex <= 10 ? nearestFibIndex : nearestFibIndex - 10
+    researchRatio := nearestFibRatio
+    researchTrendRegime := math.abs(trendScore) >= researchTrendThreshold
+    float controlRadius = fibZoneWidth * approachZoneMultiple
+    researchRomAligned := nearestRomControlDistance <= controlRadius
+    researchCanonicalAligned := nearestCanonicalControlDistance <= controlRadius
+    researchGem728 := f_isNear(nearestFibRatio, 0.728)
+    researchGem1328 := f_isNear(nearestFibRatio, 1.328)
+    activeMfe := 0.0
+    activeMae := 0.0
+    researchFastCaptured := false
+    researchMediumCaptured := false
+
+bool researchStudyCompleted = false
+bool researchStudySuccess = false
+bool newEvidenceEdge = false
+string researchCompletionMessage = ""
+string evidenceEdgeMessage = ""
+
+if researchActive and bar_index > researchStartBar
+    float favourableMove = researchDirection > 0 ? high - researchEntry : researchEntry - low
+    float adverseMove = researchDirection > 0 ? researchEntry - low : high - researchEntry
+    activeMfe := math.max(activeMfe, math.max(favourableMove / researchEntryAtr, 0.0))
+    activeMae := math.max(activeMae, math.max(adverseMove / researchEntryAtr, 0.0))
+    int elapsedResearchBars = bar_index - researchStartBar
+
+    if elapsedResearchBars >= researchFastHorizon and not researchFastCaptured
+        float fastResponse = researchDirection * (close - researchEntry) / researchEntryAtr
+        bool fastSuccess = activeMfe >= researchTargetAtr
+        float fastRobustMfe = f_robustExcursion(activeMfe, researchFastHorizon, researchTargetAtr, researchExcursionEnvelope)
+        float fastRobustMae = f_robustExcursion(activeMae, researchFastHorizon, researchTargetAtr, researchExcursionEnvelope)
+        float fastRobustResponse = f_robustResponse(fastResponse, researchFastHorizon, researchTargetAtr, researchExcursionEnvelope)
+        f_recordHorizon(horizonSamples, horizonSuccesses, horizonMfeSum, horizonMaeSum, horizonResponseSum,
+             0, fastSuccess, fastRobustMfe, fastRobustMae, fastRobustResponse)
+        researchFastCaptured := true
+
+    if elapsedResearchBars >= researchMediumHorizon and not researchMediumCaptured
+        float mediumResponse = researchDirection * (close - researchEntry) / researchEntryAtr
+        bool mediumSuccess = activeMfe >= researchTargetAtr
+        float mediumRobustMfe = f_robustExcursion(activeMfe, researchMediumHorizon, researchTargetAtr, researchExcursionEnvelope)
+        float mediumRobustMae = f_robustExcursion(activeMae, researchMediumHorizon, researchTargetAtr, researchExcursionEnvelope)
+        float mediumRobustResponse = f_robustResponse(mediumResponse, researchMediumHorizon, researchTargetAtr, researchExcursionEnvelope)
+        f_recordHorizon(horizonSamples, horizonSuccesses, horizonMfeSum, horizonMaeSum, horizonResponseSum,
+             1, mediumSuccess, mediumRobustMfe, mediumRobustMae, mediumRobustResponse)
+        researchMediumCaptured := true
+
+    if elapsedResearchBars >= researchHorizon
+        float finalResponse = researchDirection * (close - researchEntry) / researchEntryAtr
+        float robustMfe = f_robustExcursion(activeMfe, researchHorizon, researchTargetAtr, researchExcursionEnvelope)
+        float robustMae = f_robustExcursion(activeMae, researchHorizon, researchTargetAtr, researchExcursionEnvelope)
+        float robustResponse = f_robustResponse(finalResponse, researchHorizon, researchTargetAtr, researchExcursionEnvelope)
+        researchStudySuccess := activeMfe >= researchTargetAtr
+        researchStudyCompleted := true
+
+        f_recordHorizon(horizonSamples, horizonSuccesses, horizonMfeSum, horizonMaeSum, horizonResponseSum,
+             2, researchStudySuccess, robustMfe, robustMae, robustResponse)
+
+        researchSamples += 1
+        researchSuccesses += researchStudySuccess ? 1 : 0
+        researchMfeSum += robustMfe
+        researchMaeSum += robustMae
+        researchResponseSum += robustResponse
+        researchRecentSamples := researchRecentSamples * evidenceRecencyDecay + 1.0
+        researchRecentSuccesses := researchRecentSuccesses * evidenceRecencyDecay + (researchStudySuccess ? 1.0 : 0.0)
+        researchRecentMfe := researchRecentMfe * evidenceRecencyDecay + robustMfe
+        researchRecentMae := researchRecentMae * evidenceRecencyDecay + robustMae
+        researchRecentResponse := researchRecentResponse * evidenceRecencyDecay + robustResponse
+
+        int completedCohort = (researchType - 1) * 2 + (researchDirection < 0 ? 1 : 0)
+        array.set(cohortSamples, completedCohort, array.get(cohortSamples, completedCohort) + 1)
+        array.set(cohortSuccesses, completedCohort, array.get(cohortSuccesses, completedCohort) + (researchStudySuccess ? 1 : 0))
+        array.set(cohortMfeSum, completedCohort, array.get(cohortMfeSum, completedCohort) + robustMfe)
+        array.set(cohortMaeSum, completedCohort, array.get(cohortMaeSum, completedCohort) + robustMae)
+        array.set(cohortResponseSum, completedCohort, array.get(cohortResponseSum, completedCohort) + robustResponse)
+        array.set(cohortRecentSamples, completedCohort, array.get(cohortRecentSamples, completedCohort) * evidenceRecencyDecay + 1.0)
+        array.set(cohortRecentSuccesses, completedCohort, array.get(cohortRecentSuccesses, completedCohort) * evidenceRecencyDecay + (researchStudySuccess ? 1.0 : 0.0))
+        array.set(cohortRecentMfe, completedCohort, array.get(cohortRecentMfe, completedCohort) * evidenceRecencyDecay + robustMfe)
+        array.set(cohortRecentMae, completedCohort, array.get(cohortRecentMae, completedCohort) * evidenceRecencyDecay + robustMae)
+        array.set(cohortRecentResponse, completedCohort, array.get(cohortRecentResponse, completedCohort) * evidenceRecencyDecay + robustResponse)
+        lastCompletedCohort := completedCohort
+
+        if researchTrendRegime
+            trendSamples += 1
+            trendSuccesses += researchStudySuccess ? 1 : 0
+            trendResponseSum += robustResponse
+        else
+            chopSamples += 1
+            chopSuccesses += researchStudySuccess ? 1 : 0
+            chopResponseSum += robustResponse
+
+        if researchRomAligned
+            romGridSamples += 1
+            romGridSuccesses += researchStudySuccess ? 1 : 0
+            romGridResponseSum += robustResponse
+        if researchCanonicalAligned
+            canonicalGridSamples += 1
+            canonicalGridSuccesses += researchStudySuccess ? 1 : 0
+            canonicalGridResponseSum += robustResponse
+
+        int oldRatioSamples = array.get(ratioSamples, researchRatioBin)
+        int oldRatioSuccesses = array.get(ratioSuccesses, researchRatioBin)
+        float oldRatioRecentN = array.get(ratioRecentSamples, researchRatioBin)
+        float oldRatioRecentWins = array.get(ratioRecentSuccesses, researchRatioBin)
+        float oldRatioProbability = f_calibratedProbability(oldRatioSuccesses, oldRatioSamples, oldRatioRecentWins,
+             oldRatioRecentN, evidencePriorStrength, trustedEvidenceSamples)
+        float oldRatioWilson = f_wilsonLower(oldRatioSuccesses, oldRatioSamples,
+             evidenceConfidenceBand == "80%" ? 1.282 : evidenceConfidenceBand == "95%" ? 1.960 : 1.645)
+        int updatedRatioSamples = oldRatioSamples + 1
+        int updatedRatioSuccesses = oldRatioSuccesses + (researchStudySuccess ? 1 : 0)
+        float updatedRatioRecentN = oldRatioRecentN * evidenceRecencyDecay + 1.0
+        float updatedRatioRecentWins = oldRatioRecentWins * evidenceRecencyDecay + (researchStudySuccess ? 1.0 : 0.0)
+        float updatedRatioProbability = f_calibratedProbability(updatedRatioSuccesses, updatedRatioSamples, updatedRatioRecentWins,
+             updatedRatioRecentN, evidencePriorStrength, trustedEvidenceSamples)
+        float updatedRatioWilson = f_wilsonLower(updatedRatioSuccesses, updatedRatioSamples,
+             evidenceConfidenceBand == "80%" ? 1.282 : evidenceConfidenceBand == "95%" ? 1.960 : 1.645)
+        array.set(ratioSamples, researchRatioBin, updatedRatioSamples)
+        array.set(ratioSuccesses, researchRatioBin, updatedRatioSuccesses)
+        array.set(ratioResponseSum, researchRatioBin, array.get(ratioResponseSum, researchRatioBin) + robustResponse)
+        array.set(ratioRecentSamples, researchRatioBin, updatedRatioRecentN)
+        array.set(ratioRecentSuccesses, researchRatioBin, updatedRatioRecentWins)
+
+        if researchGem728
+            gem728Samples += 1
+            gem728Successes += researchStudySuccess ? 1 : 0
+            gem728ResponseSum += robustResponse
+        if researchGem1328
+            gem1328Samples += 1
+            gem1328Successes += researchStudySuccess ? 1 : 0
+            gem1328ResponseSum += robustResponse
+        if researchType == 4 and researchStudySuccess
+            successfulRetests += 1
+
+        bool oldEvidenceQualified = oldRatioSamples >= minimumEvidenceSamples and oldRatioProbability >= evidenceEdgeProbability and oldRatioWilson >= 0.50
+        bool updatedEvidenceQualified = updatedRatioSamples >= minimumEvidenceSamples and updatedRatioProbability >= evidenceEdgeProbability and updatedRatioWilson >= 0.50
+        newEvidenceEdge := updatedEvidenceQualified and not oldEvidenceQualified
+        string studiedLevel = researchRatioBin == 0 ? "PP" : str.tostring(researchRatio, "#.###")
+        string resultWord = researchStudySuccess ? "SUCCESS" : "FAIL"
+        string studiedCohort = f_eventName(researchType) + " " + f_directionName(researchDirection)
+        researchCompletionMessage := "ROM 3.2g " + studiedCohort + " " + resultWord + " | PHI " + studiedLevel + " | MFE " + str.tostring(activeMfe, "#.##") + " ATR | MAE " + str.tostring(activeMae, "#.##") + " ATR | response " + str.tostring(finalResponse, "#.##") + " ATR"
+        evidenceEdgeMessage := "ROM 3.2g CALIBRATED EDGE | PHI " + studiedLevel + " | N=" + str.tostring(updatedRatioSamples) + " | adjusted=" + str.tostring(updatedRatioProbability * 100.0, "#") + "% | lower=" + str.tostring(updatedRatioWilson * 100.0, "#") + "%"
+
+        researchActive := false
+        lastResearchEndBar := bar_index
+        researchStartBar := na
+        researchEntry := na
+        researchEntryAtr := na
+        researchDirection := 0
+        researchType := 0
+        activeMfe := 0.0
+        activeMae := 0.0
+        researchFastCaptured := false
+        researchMediumCaptured := false
+
+float evidenceZScore = evidenceConfidenceBand == "80%" ? 1.282 : evidenceConfidenceBand == "95%" ? 1.960 : 1.645
+float rawReactionProbability = researchSamples > 0 ? float(researchSuccesses) / researchSamples : 0.50
+float calibratedReactionProbability = f_calibratedProbability(researchSuccesses, researchSamples, researchRecentSuccesses,
+     researchRecentSamples, evidencePriorStrength, trustedEvidenceSamples)
+float calibratedWilsonLower = f_wilsonLower(researchSuccesses, researchSamples, evidenceZScore)
+float calibratedReliability = f_sampleReliability(float(researchSamples), trustedEvidenceSamples)
+float researchRecencyInfluence = 0.35 * f_sampleReliability(researchRecentSamples, trustedEvidenceSamples)
+float historicalAverageMfe = f_safeDiv(researchMfeSum, float(researchSamples), 0.0)
+float historicalAverageMae = f_safeDiv(researchMaeSum, float(researchSamples), 0.0)
+float historicalAverageResponse = f_safeDiv(researchResponseSum, float(researchSamples), 0.0)
+float calibratedAverageMfe = historicalAverageMfe * (1.0 - researchRecencyInfluence) + f_safeDiv(researchRecentMfe, researchRecentSamples, historicalAverageMfe) * researchRecencyInfluence
+float calibratedAverageMae = historicalAverageMae * (1.0 - researchRecencyInfluence) + f_safeDiv(researchRecentMae, researchRecentSamples, historicalAverageMae) * researchRecencyInfluence
+float calibratedAverageResponse = historicalAverageResponse * (1.0 - researchRecencyInfluence) + f_safeDiv(researchRecentResponse, researchRecentSamples, historicalAverageResponse) * researchRecencyInfluence
+float calibratedEvidenceQuality = f_evidenceQuality(calibratedReactionProbability, calibratedAverageMfe, calibratedAverageMae,
+     calibratedAverageResponse, researchTargetAtr, calibratedReliability)
+string calibratedEvidenceTier = f_evidenceTier(researchSamples, calibratedEvidenceQuality, minimumEvidenceSamples, trustedEvidenceSamples)
+
+int fastHorizonN = array.get(horizonSamples, 0)
+int mediumHorizonN = array.get(horizonSamples, 1)
+int finalHorizonN = array.get(horizonSamples, 2)
+float fastHorizonProbability = f_bayesianProbability(float(array.get(horizonSuccesses, 0)), float(fastHorizonN), evidencePriorStrength)
+float mediumHorizonProbability = f_bayesianProbability(float(array.get(horizonSuccesses, 1)), float(mediumHorizonN), evidencePriorStrength)
+float finalHorizonProbability = f_bayesianProbability(float(array.get(horizonSuccesses, 2)), float(finalHorizonN), evidencePriorStrength)
+
+int displayedCohort = researchActive ? (researchType - 1) * 2 + (researchDirection < 0 ? 1 : 0) : nz(lastCompletedCohort, 0)
+bool displayedCohortReady = researchActive or not na(lastCompletedCohort)
+int displayedCohortSamples = displayedCohortReady ? array.get(cohortSamples, displayedCohort) : 0
+int displayedCohortSuccesses = displayedCohortReady ? array.get(cohortSuccesses, displayedCohort) : 0
+float displayedCohortRecentN = displayedCohortReady ? array.get(cohortRecentSamples, displayedCohort) : 0.0
+float displayedCohortRecentWins = displayedCohortReady ? array.get(cohortRecentSuccesses, displayedCohort) : 0.0
+float displayedCohortProbability = f_calibratedProbability(displayedCohortSuccesses, displayedCohortSamples,
+     displayedCohortRecentWins, displayedCohortRecentN, evidencePriorStrength, trustedEvidenceSamples)
+float displayedCohortReliability = f_sampleReliability(float(displayedCohortSamples), trustedEvidenceSamples)
+float displayedCohortRecencyInfluence = 0.35 * f_sampleReliability(displayedCohortRecentN, trustedEvidenceSamples)
+float displayedCohortHistoricalMfe = displayedCohortReady ? f_safeDiv(array.get(cohortMfeSum, displayedCohort), float(displayedCohortSamples), 0.0) : 0.0
+float displayedCohortHistoricalMae = displayedCohortReady ? f_safeDiv(array.get(cohortMaeSum, displayedCohort), float(displayedCohortSamples), 0.0) : 0.0
+float displayedCohortHistoricalResponse = displayedCohortReady ? f_safeDiv(array.get(cohortResponseSum, displayedCohort), float(displayedCohortSamples), 0.0) : 0.0
+float displayedCohortMfe = displayedCohortHistoricalMfe * (1.0 - displayedCohortRecencyInfluence) +
+     (displayedCohortReady ? f_safeDiv(array.get(cohortRecentMfe, displayedCohort), displayedCohortRecentN, displayedCohortHistoricalMfe) : 0.0) * displayedCohortRecencyInfluence
+float displayedCohortMae = displayedCohortHistoricalMae * (1.0 - displayedCohortRecencyInfluence) +
+     (displayedCohortReady ? f_safeDiv(array.get(cohortRecentMae, displayedCohort), displayedCohortRecentN, displayedCohortHistoricalMae) : 0.0) * displayedCohortRecencyInfluence
+float displayedCohortResponse = displayedCohortHistoricalResponse * (1.0 - displayedCohortRecencyInfluence) +
+     (displayedCohortReady ? f_safeDiv(array.get(cohortRecentResponse, displayedCohort), displayedCohortRecentN, displayedCohortHistoricalResponse) : 0.0) * displayedCohortRecencyInfluence
+float displayedCohortQuality = f_evidenceQuality(displayedCohortProbability, displayedCohortMfe, displayedCohortMae,
+     displayedCohortResponse, researchTargetAtr, displayedCohortReliability)
+float displayedCohortWilson = f_wilsonLower(displayedCohortSuccesses, displayedCohortSamples, evidenceZScore)
+int displayedEventType = int(math.floor(displayedCohort / 2.0)) + 1
+int displayedDirection = displayedCohort % 2 == 0 ? 1 : -1
+string displayedCohortName = displayedCohortReady ? f_eventName(displayedEventType) + " " + f_directionName(displayedDirection) : "WAITING"
+string displayedCohortTier = f_evidenceTier(displayedCohortSamples, displayedCohortQuality, minimumEvidenceSamples, trustedEvidenceSamples)
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 08 — Adaptive evidence router
+// Uses only completed prospective studies. The current event is never allowed
+// to contribute its own future result to the decision that routes it.
+// ─────────────────────────────────────────────────────────────────────────────
+
+var int routedBar = na
+var int routedDirection = 0
+var int routedSamples = 0
+var float routedExpectancyAtr = 0.0
+var float routedConfidence = 0.0
+var string routedAction = "AWAIT"
+var string routedCohortName = "AWAIT PHI EVENT"
+var string routedLevelName = "—"
+var string routedRegimeName = "—"
+bool routerDecisionEvent = false
+
+bool routerEventReady = edgeRouterMode != "Off" and researchEventType != 0 and researchEventDirection != 0
+if routerEventReady
+    int routeCohort = (researchEventType - 1) * 2 + (researchEventDirection < 0 ? 1 : 0)
+    int routeSamples = array.get(cohortSamples, routeCohort)
+    int routeSuccesses = array.get(cohortSuccesses, routeCohort)
+    float routeRecentN = array.get(cohortRecentSamples, routeCohort)
+    float routeRecentWins = array.get(cohortRecentSuccesses, routeCohort)
+    float routeProbability = f_calibratedProbability(routeSuccesses, routeSamples, routeRecentWins, routeRecentN,
+         evidencePriorStrength, trustedEvidenceSamples)
+    float routeReliability = f_sampleReliability(float(routeSamples), trustedEvidenceSamples)
+    float routeRecencyInfluence = 0.35 * f_sampleReliability(routeRecentN, trustedEvidenceSamples)
+    float routeHistoricalMfe = f_safeDiv(array.get(cohortMfeSum, routeCohort), float(routeSamples), 0.0)
+    float routeHistoricalMae = f_safeDiv(array.get(cohortMaeSum, routeCohort), float(routeSamples), 0.0)
+    float routeHistoricalResponse = f_safeDiv(array.get(cohortResponseSum, routeCohort), float(routeSamples), 0.0)
+    float routeMfe = routeHistoricalMfe * (1.0 - routeRecencyInfluence) +
+         f_safeDiv(array.get(cohortRecentMfe, routeCohort), routeRecentN, routeHistoricalMfe) * routeRecencyInfluence
+    float routeMae = routeHistoricalMae * (1.0 - routeRecencyInfluence) +
+         f_safeDiv(array.get(cohortRecentMae, routeCohort), routeRecentN, routeHistoricalMae) * routeRecencyInfluence
+    float routeResponse = routeHistoricalResponse * (1.0 - routeRecencyInfluence) +
+         f_safeDiv(array.get(cohortRecentResponse, routeCohort), routeRecentN, routeHistoricalResponse) * routeRecencyInfluence
+
+    bool routeTrendRegime = math.abs(trendScore) >= researchTrendThreshold
+    int routeRegimeSamples = routeTrendRegime ? trendSamples : chopSamples
+    int routeRegimeSuccesses = routeTrendRegime ? trendSuccesses : chopSuccesses
+    float routeRegimeProbability = f_bayesianProbability(float(routeRegimeSuccesses), float(routeRegimeSamples), evidencePriorStrength)
+    float routeRegimeReliability = f_sampleReliability(float(routeRegimeSamples), trustedEvidenceSamples)
+    float routeRegimeBlend = 0.35 * routeRegimeReliability
+    float routeBlendedProbability = routeProbability * (1.0 - routeRegimeBlend) + routeRegimeProbability * routeRegimeBlend
+
+    float routeProbabilityAtr = (routeBlendedProbability * 2.0 - 1.0) * researchTargetAtr
+    float routeExpectancy = 0.50 * routeResponse + 0.30 * (routeMfe - routeMae) + 0.20 * routeProbabilityAtr
+    float routeScale = math.max(researchTargetAtr, 0.10)
+    float routePathCertainty = math.abs(f_tanh(routeExpectancy / routeScale))
+    float routeProbabilityCertainty = math.abs(routeBlendedProbability * 2.0 - 1.0)
+    float routeConfidence = f_clamp(routeReliability * (0.70 * routePathCertainty + 0.30 * routeProbabilityCertainty) *
+         (0.70 + 0.30 * routeRegimeReliability), 0.0, 1.0)
+    bool routeMature = routeSamples >= routerMinimumSamples
+    bool routeDirectional = routeMature and math.abs(routeExpectancy) >= routerMinimumEdgeAtr
+
+    routedBar := bar_index
+    routedSamples := routeSamples
+    routedExpectancyAtr := routeExpectancy
+    routedConfidence := routeConfidence
+    routedDirection := routeDirectional ? (routeExpectancy >= 0.0 ? researchEventDirection : -researchEventDirection) : 0
+    routedAction := not routeMature ? "LEARN" : not routeDirectional ? "WAIT" : routeExpectancy >= 0.0 ? "FOLLOW" : "FADE"
+    routedCohortName := f_eventName(researchEventType) + " " + f_directionName(researchEventDirection)
+    routedLevelName := nearestFibIndex == 0 ? "PP" : (nearestFibIndex <= 10 ? "R" : "S") + str.tostring(nearestFibRatio, "#.###")
+    routedRegimeName := routeTrendRegime ? "TREND" : "CHOP"
+    routerDecisionEvent := routeDirectional
+
+bool routerMemoryActive = edgeRouterMode != "Off" and not na(routedBar) and bar_index - routedBar <= routerMemoryBars
+bool routerConfirmsBull = routerMemoryActive and routedDirection == 1 and routedSamples >= routerMinimumSamples and routedConfidence >= routerMinimumConfidence
+bool routerConfirmsBear = routerMemoryActive and routedDirection == -1 and routedSamples >= routerMinimumSamples and routedConfidence >= routerMinimumConfidence
+float routerField = routerMemoryActive ? routedDirection * routedConfidence : 0.0
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 06 — Adaptive four-family signal council
+// ─────────────────────────────────────────────────────────────────────────────
+
+float phiEventImpulse = phiBullRetest ? 1.00 : phiBearRetest ? -1.00 :
+     phiBullAccept ? 0.86 : phiBearAccept ? -0.86 :
+     phiBullReject ? 0.68 : phiBearReject ? -0.68 : 0.0
+float phiMemoryDecay = math.exp(-1.0 / interactionMemory)
+var float phiEventMemory = 0.0
+phiEventMemory := phiEventImpulse != 0.0 ? phiEventImpulse : nz(phiEventMemory[1], 0.0) * phiMemoryDecay
+
+float phiLevelVote = fibReady ? f_tanh(1.25 * f_safeDiv(close - nearestFibLevel, resonanceRadius, 0.0)) : 0.0
+float geometryFamily = f_clamp((0.55 * phiLevelVote + 0.45 * phiEventMemory) * (0.55 + 0.45 * resonanceStrength), -1.0, 1.0)
+float cycleFamily = trendScore
+float flowFamily = pressureScore
+float atrFamily = atrTrailScore
+
+float weightCycle = councilPreset == "Trend First" ? 0.40 : councilPreset == "PHI First" ? 0.25 : 0.30
+float weightFlow = councilPreset == "Trend First" ? 0.20 : councilPreset == "PHI First" ? 0.20 : 0.25
+float weightAtr = councilPreset == "Trend First" ? 0.25 : councilPreset == "PHI First" ? 0.15 : 0.20
+float weightGeometry = councilPreset == "Trend First" ? 0.15 : councilPreset == "PHI First" ? 0.40 : 0.25
+
+float councilRaw = f_clamp(weightCycle * cycleFamily + weightFlow * flowFamily + weightAtr * atrFamily + weightGeometry * geometryFamily, -1.0, 1.0)
+float familyDeadband = 0.10
+int bullAgreement = (cycleFamily > familyDeadband ? 1 : 0) + (flowFamily > familyDeadband ? 1 : 0) +
+     (atrFamily > familyDeadband ? 1 : 0) + (geometryFamily > familyDeadband ? 1 : 0)
+int bearAgreement = (cycleFamily < -familyDeadband ? 1 : 0) + (flowFamily < -familyDeadband ? 1 : 0) +
+     (atrFamily < -familyDeadband ? 1 : 0) + (geometryFamily < -familyDeadband ? 1 : 0)
+int dominantAgreement = math.max(bullAgreement, bearAgreement)
+float agreementBreadth = dominantAgreement / 4.0
+
+float councilVariance = weightCycle * math.pow(cycleFamily - councilRaw, 2.0) +
+     weightFlow * math.pow(flowFamily - councilRaw, 2.0) +
+     weightAtr * math.pow(atrFamily - councilRaw, 2.0) +
+     weightGeometry * math.pow(geometryFamily - councilRaw, 2.0)
+float councilDispersion = math.sqrt(math.max(councilVariance, 0.0))
+float councilCoherence = f_clamp(1.0 - councilDispersion / 1.25, 0.0, 1.0)
+float councilConfidence = f_clamp(0.50 * math.abs(councilRaw) + 0.25 * agreementBreadth +
+     0.15 * councilCoherence + 0.10 * resonanceStrength, 0.0, 1.0)
+float effectiveStrongThreshold = math.max(councilStrong, councilTrigger + 0.05)
+
+bool bullCouncilSetup = councilRaw >= councilTrigger and bullAgreement >= councilMinAgreement and councilConfidence >= councilMinConfidence
+bool bearCouncilSetup = councilRaw <= -councilTrigger and bearAgreement >= councilMinAgreement and councilConfidence >= councilMinConfidence
+bool strongBullCouncil = bullCouncilSetup and councilRaw >= effectiveStrongThreshold
+bool strongBearCouncil = bearCouncilSetup and councilRaw <= -effectiveStrongThreshold
+
+var int lastCouncilSignalBar = na
+bool councilCooldownReady = na(lastCouncilSignalBar) or bar_index - lastCouncilSignalBar > councilCooldown
+bool rawBullCouncilSignal = f_eventGate(bullCouncilSetup and not bullCouncilSetup[1] and councilCooldownReady)
+bool rawBearCouncilSignal = f_eventGate(bearCouncilSetup and not bearCouncilSetup[1] and councilCooldownReady)
+bool routerConfirmationRequired = edgeRouterMode == "Confirm Council"
+bool bullCouncilSignal = rawBullCouncilSignal and (not routerConfirmationRequired or routerConfirmsBull)
+bool bearCouncilSignal = rawBearCouncilSignal and (not routerConfirmationRequired or routerConfirmsBear)
+
+if bullCouncilSignal or bearCouncilSignal
+    lastCouncilSignalBar := bar_index
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 08b — Ordered first-passage forecast skill
+// Every mature route is frozen before its future path. Overlapping routes remain
+// raw telemetry, while only horizon-separated routes influence evidence claims.
+// ─────────────────────────────────────────────────────────────────────────────
+
+bool routerAuditCompleted = false
+string routerAuditCompletionMessage = ""
+
+if array.size(auditStartBars) > 0
+    for auditIndex = array.size(auditStartBars) - 1 to 0
+        int auditStart = array.get(auditStartBars, auditIndex)
+        if bar_index > auditStart
+            float auditEntry = array.get(auditEntries, auditIndex)
+            float auditAtr = array.get(auditEntryAtrs, auditIndex)
+            float auditHigh = math.max(array.get(auditHighestAfter, auditIndex), high)
+            float auditLow = math.min(array.get(auditLowestAfter, auditIndex), low)
+            int auditAction = array.get(auditActions, auditIndex)
+            int auditRouteDirection = array.get(auditRouteDirections, auditIndex)
+            int auditPhiDirection = array.get(auditPhiDirections, auditIndex)
+            int auditCouncilDirection = array.get(auditCouncilDirections, auditIndex)
+            int auditEventType = array.get(auditEventTypes, auditIndex)
+            float auditConfidence = array.get(auditConfidences, auditIndex)
+            int auditConfidenceBucket = array.get(auditConfidenceBuckets, auditIndex)
+            bool auditIsIndependent = array.get(auditIndependent, auditIndex)
+            float auditFrozenProbability = array.get(auditFrozenProbabilities, auditIndex)
+            float auditFrozenAdaptiveProbability = array.get(auditFrozenAdaptiveProbabilities, auditIndex)
+            float auditFrozenReferenceProbability = array.get(auditFrozenReferenceProbabilities, auditIndex)
+            float auditFrozenRoundTripProbability = array.get(auditFrozenRoundTripProbabilities, auditIndex)
+            float auditFrozenLossProbability = array.get(auditFrozenLossProbabilities, auditIndex)
+            float auditFrozenWhipsawProbability = array.get(auditFrozenWhipsawProbabilities, auditIndex)
+            float auditFrozenQuietProbability = array.get(auditFrozenQuietProbabilities, auditIndex)
+            int auditElapsed = bar_index - auditStart
+            float targetDistance = auditAtr * researchTargetAtr
+            int upHitBar = array.get(auditUpHitBars, auditIndex)
+            int downHitBar = array.get(auditDownHitBars, auditIndex)
+            if upHitBar < 0 and high >= auditEntry + targetDistance
+                upHitBar := auditElapsed
+                array.set(auditUpHitBars, auditIndex, upHitBar)
+            if downHitBar < 0 and low <= auditEntry - targetDistance
+                downHitBar := auditElapsed
+                array.set(auditDownHitBars, auditIndex, downHitBar)
+            array.set(auditHighestAfter, auditIndex, auditHigh)
+            array.set(auditLowestAfter, auditIndex, auditLow)
+
+            if auditIsIndependent and auditRouteDirection != 0 and auditElapsed >= researchFastHorizon and not array.get(auditFastCaptured, auditIndex)
+                float fastRouteMfe = f_directionalMfe(auditRouteDirection, auditEntry, auditHigh, auditLow, auditAtr)
+                float fastRouteMae = f_directionalMae(auditRouteDirection, auditEntry, auditHigh, auditLow, auditAtr)
+                float fastRouteResponse = f_directionalResponse(auditRouteDirection, auditEntry, close, auditAtr)
+                int fastOutcome = f_outcomeCode(auditRouteDirection, upHitBar, downHitBar, fastRouteResponse, auditTerminalConfirmAtr)
+                f_recordHorizon(auditHorizonSamples, auditHorizonSuccesses, auditHorizonMfeSum, auditHorizonMaeSum,
+                     auditHorizonResponseSum, 0, fastOutcome == 1,
+                     f_robustExcursion(fastRouteMfe, researchFastHorizon, researchTargetAtr, researchExcursionEnvelope),
+                     f_robustExcursion(fastRouteMae, researchFastHorizon, researchTargetAtr, researchExcursionEnvelope),
+                     f_robustResponse(fastRouteResponse, researchFastHorizon, researchTargetAtr, researchExcursionEnvelope))
+                int fastActionHorizonBucket = (auditAction - 1) * 3
+                f_recordHorizon(auditActionHorizonSamples, auditActionHorizonSuccesses, auditActionHorizonMfeSum,
+                     auditActionHorizonMaeSum, auditActionHorizonResponseSum, fastActionHorizonBucket, fastOutcome == 1,
+                     f_robustExcursion(fastRouteMfe, researchFastHorizon, researchTargetAtr, researchExcursionEnvelope),
+                     f_robustExcursion(fastRouteMae, researchFastHorizon, researchTargetAtr, researchExcursionEnvelope),
+                     f_robustResponse(fastRouteResponse, researchFastHorizon, researchTargetAtr, researchExcursionEnvelope))
+                array.set(auditFastCaptured, auditIndex, true)
+
+            if auditIsIndependent and auditRouteDirection != 0 and auditElapsed >= researchMediumHorizon and not array.get(auditMediumCaptured, auditIndex)
+                float mediumRouteMfe = f_directionalMfe(auditRouteDirection, auditEntry, auditHigh, auditLow, auditAtr)
+                float mediumRouteMae = f_directionalMae(auditRouteDirection, auditEntry, auditHigh, auditLow, auditAtr)
+                float mediumRouteResponse = f_directionalResponse(auditRouteDirection, auditEntry, close, auditAtr)
+                int mediumOutcome = f_outcomeCode(auditRouteDirection, upHitBar, downHitBar, mediumRouteResponse, auditTerminalConfirmAtr)
+                f_recordHorizon(auditHorizonSamples, auditHorizonSuccesses, auditHorizonMfeSum, auditHorizonMaeSum,
+                     auditHorizonResponseSum, 1, mediumOutcome == 1,
+                     f_robustExcursion(mediumRouteMfe, researchMediumHorizon, researchTargetAtr, researchExcursionEnvelope),
+                     f_robustExcursion(mediumRouteMae, researchMediumHorizon, researchTargetAtr, researchExcursionEnvelope),
+                     f_robustResponse(mediumRouteResponse, researchMediumHorizon, researchTargetAtr, researchExcursionEnvelope))
+                int mediumActionHorizonBucket = (auditAction - 1) * 3 + 1
+                f_recordHorizon(auditActionHorizonSamples, auditActionHorizonSuccesses, auditActionHorizonMfeSum,
+                     auditActionHorizonMaeSum, auditActionHorizonResponseSum, mediumActionHorizonBucket, mediumOutcome == 1,
+                     f_robustExcursion(mediumRouteMfe, researchMediumHorizon, researchTargetAtr, researchExcursionEnvelope),
+                     f_robustExcursion(mediumRouteMae, researchMediumHorizon, researchTargetAtr, researchExcursionEnvelope),
+                     f_robustResponse(mediumRouteResponse, researchMediumHorizon, researchTargetAtr, researchExcursionEnvelope))
+                array.set(auditMediumCaptured, auditIndex, true)
+
+            if auditElapsed >= researchHorizon
+                if auditRouteDirection != 0
+                    float routeMfeRaw = f_directionalMfe(auditRouteDirection, auditEntry, auditHigh, auditLow, auditAtr)
+                    float routeMaeRaw = f_directionalMae(auditRouteDirection, auditEntry, auditHigh, auditLow, auditAtr)
+                    float routeResponseRaw = f_directionalResponse(auditRouteDirection, auditEntry, close, auditAtr)
+                    float routeMfe = f_robustExcursion(routeMfeRaw, researchHorizon, researchTargetAtr, researchExcursionEnvelope)
+                    float routeMae = f_robustExcursion(routeMaeRaw, researchHorizon, researchTargetAtr, researchExcursionEnvelope)
+                    float routeResponse = f_robustResponse(routeResponseRaw, researchHorizon, researchTargetAtr, researchExcursionEnvelope)
+                    int routeOutcome = f_outcomeCode(auditRouteDirection, upHitBar, downHitBar, routeResponseRaw, auditTerminalConfirmAtr)
+                    bool routeClean = routeOutcome == 1
+                    int actionBucket = auditAction - 1
+                    f_recordHorizon(auditActionSamples, auditActionSuccesses, auditActionMfeSum, auditActionMaeSum,
+                         auditActionResponseSum, actionBucket, routeClean, routeMfe, routeMae, routeResponse)
+
+                    float phiMfeRaw = f_directionalMfe(auditPhiDirection, auditEntry, auditHigh, auditLow, auditAtr)
+                    float phiMaeRaw = f_directionalMae(auditPhiDirection, auditEntry, auditHigh, auditLow, auditAtr)
+                    float phiResponseRaw = f_directionalResponse(auditPhiDirection, auditEntry, close, auditAtr)
+                    float councilResponseRaw = 0.0
+                    if auditCouncilDirection != 0
+                        councilResponseRaw := f_directionalResponse(auditCouncilDirection, auditEntry, close, auditAtr)
+
+                    if auditIsIndependent
+                        f_recordHorizon(auditHorizonSamples, auditHorizonSuccesses, auditHorizonMfeSum, auditHorizonMaeSum,
+                             auditHorizonResponseSum, 2, routeClean, routeMfe, routeMae, routeResponse)
+                        f_recordHorizon(auditEffectiveActionSamples, auditEffectiveActionSuccesses, auditEffectiveActionMfeSum,
+                             auditEffectiveActionMaeSum, auditEffectiveActionResponseSum, actionBucket, routeClean, routeMfe, routeMae, routeResponse)
+                        float routeUtility = routeClean ? 1.0 : routeOutcome == 2 and routeResponse > 0.0 ? 0.5 : 0.0
+                        array.set(auditEffectiveActionUtilitySum, actionBucket,
+                             array.get(auditEffectiveActionUtilitySum, actionBucket) + routeUtility)
+                        array.set(auditOutcomeCounts, routeOutcome - 1, array.get(auditOutcomeCounts, routeOutcome - 1) + 1)
+                        int actionOutcomeBucket = actionBucket * 5 + routeOutcome - 1
+                        array.set(auditEffectiveActionOutcomeCounts, actionOutcomeBucket,
+                             array.get(auditEffectiveActionOutcomeCounts, actionOutcomeBucket) + 1)
+                        f_recordHorizon(auditActionHorizonSamples, auditActionHorizonSuccesses, auditActionHorizonMfeSum,
+                             auditActionHorizonMaeSum, auditActionHorizonResponseSum, actionBucket * 3 + 2,
+                             routeClean, routeMfe, routeMae, routeResponse)
+                        if routeOutcome == 2
+                            auditProfitableRoundTrips := auditProfitableRoundTrips + (routeResponse > 0.0 ? 1 : 0)
+                            auditDamagingRoundTrips := auditDamagingRoundTrips + (routeResponse <= 0.0 ? 1 : 0)
+
+                        int phiOutcome = f_outcomeCode(auditPhiDirection, upHitBar, downHitBar, phiResponseRaw, auditTerminalConfirmAtr)
+                        f_recordHorizon(auditBaselineSamples, auditBaselineSuccesses, auditBaselineMfeSum, auditBaselineMaeSum,
+                             auditBaselineResponseSum, 0, phiOutcome == 1,
+                             f_robustExcursion(phiMfeRaw, researchHorizon, researchTargetAtr, researchExcursionEnvelope),
+                             f_robustExcursion(phiMaeRaw, researchHorizon, researchTargetAtr, researchExcursionEnvelope),
+                             f_robustResponse(phiResponseRaw, researchHorizon, researchTargetAtr, researchExcursionEnvelope))
+
+                        if auditCouncilDirection != 0
+                            float councilMfeRaw = f_directionalMfe(auditCouncilDirection, auditEntry, auditHigh, auditLow, auditAtr)
+                            float councilMaeRaw = f_directionalMae(auditCouncilDirection, auditEntry, auditHigh, auditLow, auditAtr)
+                            int councilOutcome = f_outcomeCode(auditCouncilDirection, upHitBar, downHitBar, councilResponseRaw, auditTerminalConfirmAtr)
+                            f_recordHorizon(auditBaselineSamples, auditBaselineSuccesses, auditBaselineMfeSum, auditBaselineMaeSum,
+                                 auditBaselineResponseSum, 1, councilOutcome == 1,
+                                 f_robustExcursion(councilMfeRaw, researchHorizon, researchTargetAtr, researchExcursionEnvelope),
+                                 f_robustExcursion(councilMaeRaw, researchHorizon, researchTargetAtr, researchExcursionEnvelope),
+                                 f_robustResponse(councilResponseRaw, researchHorizon, researchTargetAtr, researchExcursionEnvelope))
+                            f_recordHorizon(auditBaselineSamples, auditBaselineSuccesses, auditBaselineMfeSum, auditBaselineMaeSum,
+                                 auditBaselineResponseSum, 2, routeClean, routeMfe, routeMae, routeResponse)
+
+                        f_recordHorizon(auditConfidenceSamples, auditConfidenceSuccesses, auditConfidenceMfeSum, auditConfidenceMaeSum,
+                             auditConfidenceResponseSum, auditConfidenceBucket, routeClean, routeMfe, routeMae, routeResponse)
+                        auditConfidenceDistributionSamples := auditConfidenceDistributionSamples + 1
+                        float confidenceDelta = auditConfidence - auditConfidenceDistributionMean
+                        auditConfidenceDistributionMean := auditConfidenceDistributionMean + confidenceDelta / float(auditConfidenceDistributionSamples)
+                        float confidenceDelta2 = auditConfidence - auditConfidenceDistributionMean
+                        auditConfidenceDistributionM2 := auditConfidenceDistributionM2 + confidenceDelta * confidenceDelta2
+                        // Score the probability frozen at event birth. This is
+                        // prequential: this event's result never trains itself.
+                        float brierError = auditFrozenProbability - (routeClean ? 1.0 : 0.0)
+                        auditBrierSum := auditBrierSum + brierError * brierError
+                        float adaptiveBrierError = auditFrozenAdaptiveProbability - (routeClean ? 1.0 : 0.0)
+                        auditAdaptiveBrierSum := auditAdaptiveBrierSum + adaptiveBrierError * adaptiveBrierError
+                        float referenceBrierError = auditFrozenReferenceProbability - (routeClean ? 1.0 : 0.0)
+                        auditReferenceBrierSum := auditReferenceBrierSum + referenceBrierError * referenceBrierError
+                        float cleanError = auditFrozenProbability - (routeOutcome == 1 ? 1.0 : 0.0)
+                        float roundTripError = auditFrozenRoundTripProbability - (routeOutcome == 2 ? 1.0 : 0.0)
+                        float lossError = auditFrozenLossProbability - (routeOutcome == 3 ? 1.0 : 0.0)
+                        float whipsawError = auditFrozenWhipsawProbability - (routeOutcome == 4 ? 1.0 : 0.0)
+                        float quietError = auditFrozenQuietProbability - (routeOutcome == 5 ? 1.0 : 0.0)
+                        auditMulticlassBrierSum := auditMulticlassBrierSum +
+                             (cleanError * cleanError + roundTripError * roundTripError + lossError * lossError +
+                             whipsawError * whipsawError + quietError * quietError) / 5.0
+                        array.set(auditClassForecastSums, 0, array.get(auditClassForecastSums, 0) + auditFrozenProbability)
+                        array.set(auditClassForecastSums, 1, array.get(auditClassForecastSums, 1) + auditFrozenRoundTripProbability)
+                        array.set(auditClassForecastSums, 2, array.get(auditClassForecastSums, 2) + auditFrozenLossProbability)
+                        array.set(auditClassForecastSums, 3, array.get(auditClassForecastSums, 3) + auditFrozenWhipsawProbability)
+                        array.set(auditClassForecastSums, 4, array.get(auditClassForecastSums, 4) + auditFrozenQuietProbability)
+                        auditBrierSamples := auditBrierSamples + 1
+                        int favourableHitBar = f_favourableHitBar(auditRouteDirection, upHitBar, downHitBar)
+                        if routeClean and favourableHitBar >= 0
+                            auditFirstPassBarsSum := auditFirstPassBarsSum + favourableHitBar
+                            auditFirstPassSamples := auditFirstPassSamples + 1
+
+                        // Decay and update only after scoring the frozen forecast.
+                        // The current event therefore cannot train its own challenger.
+                        for recentActionIndex = 0 to 1
+                            array.set(auditRecentActionSamples, recentActionIndex,
+                                 array.get(auditRecentActionSamples, recentActionIndex) * auditRegimeDecay)
+                            array.set(auditRecentActionSuccesses, recentActionIndex,
+                                 array.get(auditRecentActionSuccesses, recentActionIndex) * auditRegimeDecay)
+                        array.set(auditRecentActionSamples, actionBucket,
+                             array.get(auditRecentActionSamples, actionBucket) + 1.0)
+                        array.set(auditRecentActionSuccesses, actionBucket,
+                             array.get(auditRecentActionSuccesses, actionBucket) + (routeClean ? 1.0 : 0.0))
+
+                    string auditedAction = auditAction == 1 ? "FOLLOW" : "FADE"
+                    string auditedDirection = f_directionName(auditRouteDirection)
+                    string auditedResult = routeOutcome == 2 ? (routeResponse > 0.0 ? "ROUND TRIP PROFITABLE" : "ROUND TRIP DAMAGING") : f_outcomeName(routeOutcome)
+                    string auditedResultCompact = routeOutcome == 2 ? (routeResponse > 0.0 ? "ROUNDTRIP+" : "ROUNDTRIP−") : f_outcomeCompactName(routeOutcome)
+                    string responseSign = routeResponse >= 0.0 ? "+" : "−"
+                    lastRouterAuditText := auditedAction + " " + auditedDirection + " · " + auditedResultCompact + " · pCL" +
+                         str.tostring(auditFrozenProbability * 100.0, "#") + " · R" + responseSign + str.tostring(math.abs(routeResponse), "#.##")
+                    lastAdaptiveAuditText := auditedAction + " " + auditedDirection + " · " + auditedResultCompact + " · pC" +
+                         str.tostring(auditFrozenProbability * 100.0, "#") + "/pA" + str.tostring(auditFrozenAdaptiveProbability * 100.0, "#")
+                    routerAuditCompletionMessage := routerAuditCompletionMessage + "ROM 3.2g OUTCOME | " + auditedAction + " " +
+                         auditedDirection + " | " + f_eventName(auditEventType) + " " + f_directionName(auditPhiDirection) +
+                         " | " + auditedResult + " | ForecastClean=" + str.tostring(auditFrozenProbability * 100.0, "#") + "% | Router=" + str.tostring(routeResponse, "#.##") +
+                         " ATR | AdaptiveClean=" + str.tostring(auditFrozenAdaptiveProbability * 100.0, "#") + "% | " + (auditIsIndependent ? "EFFECTIVE" : "RAW-ONLY") + " | PHI=" + str.tostring(phiResponseRaw, "#.##") + " ATR" +
+                         (auditCouncilDirection != 0 ? " | Council=" + str.tostring(councilResponseRaw, "#.##") + " ATR" : " | Council=NO CALL") + "\n"
+                else
+                    float waitResponseRaw = math.abs(close - auditEntry) / math.max(auditAtr, syminfo.mintick)
+                    bool upOnly = upHitBar >= 0 and downHitBar < 0
+                    bool downOnly = downHitBar >= 0 and upHitBar < 0
+                    bool bothHit = upHitBar >= 0 and downHitBar >= 0
+                    bool sameBarHit = bothHit and upHitBar == downHitBar
+                    int escapedDirection = upOnly ? 1 : downOnly ? -1 : 0
+                    float escapedResponse = escapedDirection != 0 ? f_directionalResponse(escapedDirection, auditEntry, close, auditAtr) : 0.0
+                    bool missedCleanMove = escapedDirection != 0 and escapedResponse >= auditTerminalConfirmAtr
+                    bool waitGoodSkip = not missedCleanMove
+                    string waitResult = missedCleanMove ? "MISSED " + f_directionName(escapedDirection) :
+                         sameBarHit ? "GOOD WHIP" : bothHit ? "GOOD CHURN" : escapedDirection == 0 ? "GOOD QUIET" : "GOOD ROUND TRIP"
+                    auditWaitSamples := auditWaitSamples + 1
+                    auditWaitGoodSkips := auditWaitGoodSkips + (waitGoodSkip ? 1 : 0)
+                    if auditIsIndependent
+                        auditEffectiveWaitSamples := auditEffectiveWaitSamples + 1
+                        auditEffectiveWaitGoodSkips := auditEffectiveWaitGoodSkips + (waitGoodSkip ? 1 : 0)
+                    lastRouterAuditText := "WAIT · " + waitResult + " · pG" + str.tostring(auditFrozenProbability * 100.0, "#") + " · |R|" + str.tostring(waitResponseRaw, "#.##")
+                    lastAdaptiveAuditText := "WAIT · CONTROL ONLY · pG" + str.tostring(auditFrozenProbability * 100.0, "#")
+                    routerAuditCompletionMessage := routerAuditCompletionMessage + "ROM 3.2g OUTCOME | WAIT | " +
+                         f_eventName(auditEventType) + " " + f_directionName(auditPhiDirection) + " | " +
+                         waitResult + " | ForecastGoodSkip=" + str.tostring(auditFrozenProbability * 100.0, "#") + "% | |R|=" + str.tostring(waitResponseRaw, "#.##") + " ATR | " +
+                         (auditIsIndependent ? "EFFECTIVE" : "RAW-ONLY") + "\n"
+
+                routerAuditCompleted := true
+                array.remove(auditStartBars, auditIndex)
+                array.remove(auditEntries, auditIndex)
+                array.remove(auditEntryAtrs, auditIndex)
+                array.remove(auditActions, auditIndex)
+                array.remove(auditRouteDirections, auditIndex)
+                array.remove(auditPhiDirections, auditIndex)
+                array.remove(auditCouncilDirections, auditIndex)
+                array.remove(auditEventTypes, auditIndex)
+                array.remove(auditConfidences, auditIndex)
+                array.remove(auditConfidenceBuckets, auditIndex)
+                array.remove(auditHighestAfter, auditIndex)
+                array.remove(auditLowestAfter, auditIndex)
+                array.remove(auditFastCaptured, auditIndex)
+                array.remove(auditMediumCaptured, auditIndex)
+                array.remove(auditUpHitBars, auditIndex)
+                array.remove(auditDownHitBars, auditIndex)
+                array.remove(auditIndependent, auditIndex)
+                array.remove(auditFrozenProbabilities, auditIndex)
+                array.remove(auditFrozenAdaptiveProbabilities, auditIndex)
+                array.remove(auditFrozenReferenceProbabilities, auditIndex)
+                array.remove(auditFrozenRoundTripProbabilities, auditIndex)
+                array.remove(auditFrozenLossProbabilities, auditIndex)
+                array.remove(auditFrozenWhipsawProbabilities, auditIndex)
+                array.remove(auditFrozenQuietProbabilities, auditIndex)
+
+int newAuditAction = routedAction == "FOLLOW" ? 1 : routedAction == "FADE" ? 2 : routedAction == "WAIT" ? 3 : 0
+bool startRouterAudit = routerAuditEnabled and routerEventReady and researchAtrReady and fibReady and newAuditAction != 0
+if startRouterAudit
+    int newCouncilDirection = bullCouncilSetup ? 1 : bearCouncilSetup ? -1 : 0
+    bool newAuditIndependent = na(lastIndependentRouterAuditBar) or bar_index - lastIndependentRouterAuditBar >= researchHorizon
+    int newConfidenceBucket = f_adaptiveConfidenceBucket(routedConfidence, auditConfidenceDistributionSamples,
+         auditConfidenceDistributionMean, auditConfidenceDistributionM2, minimumEvidenceSamples)
+    int completedDirectionalSamples = array.get(auditOutcomeCounts, 0) + array.get(auditOutcomeCounts, 1) +
+         array.get(auditOutcomeCounts, 2) + array.get(auditOutcomeCounts, 3) + array.get(auditOutcomeCounts, 4)
+    float globalCleanClimate = f_dirichletProbability(float(array.get(auditOutcomeCounts, 0)), float(completedDirectionalSamples), evidencePriorStrength, 5)
+    float globalRoundTripClimate = f_dirichletProbability(float(array.get(auditOutcomeCounts, 1)), float(completedDirectionalSamples), evidencePriorStrength, 5)
+    float globalLossClimate = f_dirichletProbability(float(array.get(auditOutcomeCounts, 2)), float(completedDirectionalSamples), evidencePriorStrength, 5)
+    float globalWhipsawClimate = f_dirichletProbability(float(array.get(auditOutcomeCounts, 3)), float(completedDirectionalSamples), evidencePriorStrength, 5)
+    float globalQuietClimate = f_dirichletProbability(float(array.get(auditOutcomeCounts, 4)), float(completedDirectionalSamples), evidencePriorStrength, 5)
+    float frozenProbability = globalCleanClimate
+    float frozenReferenceProbability = globalCleanClimate
+    float frozenRoundTripProbability = globalRoundTripClimate
+    float frozenLossProbability = globalLossClimate
+    float frozenWhipsawProbability = globalWhipsawClimate
+    float frozenQuietProbability = globalQuietClimate
+    if newAuditAction <= 2
+        int newActionBucket = newAuditAction - 1
+        int completedActionSamples = array.get(auditEffectiveActionSamples, newActionBucket)
+        int completedActionWins = array.get(auditEffectiveActionSuccesses, newActionBucket)
+        int completedConfidenceSamples = array.get(auditConfidenceSamples, newConfidenceBucket)
+        int completedConfidenceWins = array.get(auditConfidenceSuccesses, newConfidenceBucket)
+        float actionPriorProbability = f_hierarchicalProbability(float(completedActionWins), float(completedActionSamples), globalCleanClimate, evidencePriorStrength)
+        float confidencePriorProbability = f_hierarchicalProbability(float(completedConfidenceWins), float(completedConfidenceSamples), globalCleanClimate, evidencePriorStrength)
+        float confidenceBlend = 0.35 * f_sampleReliability(float(completedConfidenceSamples), trustedEvidenceSamples)
+        frozenProbability := f_clamp(actionPriorProbability * (1.0 - confidenceBlend) + confidencePriorProbability * confidenceBlend, 0.0, 1.0)
+        int actionOutcomeOffset = newActionBucket * 5
+        float baseRoundTripProbability = f_hierarchicalProbability(float(array.get(auditEffectiveActionOutcomeCounts, actionOutcomeOffset + 1)),
+             float(completedActionSamples), globalRoundTripClimate, evidencePriorStrength)
+        float baseLossProbability = f_hierarchicalProbability(float(array.get(auditEffectiveActionOutcomeCounts, actionOutcomeOffset + 2)),
+             float(completedActionSamples), globalLossClimate, evidencePriorStrength)
+        float baseWhipsawProbability = f_hierarchicalProbability(float(array.get(auditEffectiveActionOutcomeCounts, actionOutcomeOffset + 3)),
+             float(completedActionSamples), globalWhipsawClimate, evidencePriorStrength)
+        float baseQuietProbability = f_hierarchicalProbability(float(array.get(auditEffectiveActionOutcomeCounts, actionOutcomeOffset + 4)),
+             float(completedActionSamples), globalQuietClimate, evidencePriorStrength)
+        float baseNonCleanProbability = baseRoundTripProbability + baseLossProbability + baseWhipsawProbability + baseQuietProbability
+        float availableNonCleanProbability = 1.0 - frozenProbability
+        frozenRoundTripProbability := baseNonCleanProbability > 1e-10 ? baseRoundTripProbability * availableNonCleanProbability / baseNonCleanProbability : availableNonCleanProbability * 0.25
+        frozenLossProbability := baseNonCleanProbability > 1e-10 ? baseLossProbability * availableNonCleanProbability / baseNonCleanProbability : availableNonCleanProbability * 0.25
+        frozenWhipsawProbability := baseNonCleanProbability > 1e-10 ? baseWhipsawProbability * availableNonCleanProbability / baseNonCleanProbability : availableNonCleanProbability * 0.25
+        frozenQuietProbability := baseNonCleanProbability > 1e-10 ? baseQuietProbability * availableNonCleanProbability / baseNonCleanProbability : availableNonCleanProbability * 0.25
+    else
+        frozenProbability := f_bayesianProbability(float(auditEffectiveWaitGoodSkips), float(auditEffectiveWaitSamples), evidencePriorStrength)
+        frozenReferenceProbability := frozenProbability
+    float frozenAdaptiveProbability = frozenProbability
+    if newAuditAction <= 2
+        int adaptiveActionBucket = newAuditAction - 1
+        float recentSamples = array.get(auditRecentActionSamples, adaptiveActionBucket)
+        float recentWins = array.get(auditRecentActionSuccesses, adaptiveActionBucket)
+        float recentProbability = f_hierarchicalProbability(recentWins, recentSamples, globalCleanClimate, evidencePriorStrength)
+        float recentReliability = f_sampleReliability(recentSamples, trustedEvidenceSamples)
+        float recentInfluence = auditRegimeBlend * recentReliability
+        float regimeProbability = frozenProbability * (1.0 - recentInfluence) + recentProbability * recentInfluence
+        float routePermeabilityAlignment = routedDirection != 0 and nearestPhiSide != 0 ?
+             phiPermeability * float(routedDirection * nearestPhiSide) : 0.0
+        frozenAdaptiveProbability := f_clamp(regimeProbability + auditPermeabilityWeight * routePermeabilityAlignment, 0.02, 0.98)
+    if newAuditIndependent
+        lastIndependentRouterAuditBar := bar_index
+    array.push(auditStartBars, bar_index)
+    array.push(auditEntries, close)
+    array.push(auditEntryAtrs, atrValue)
+    array.push(auditActions, newAuditAction)
+    array.push(auditRouteDirections, routedDirection)
+    array.push(auditPhiDirections, researchEventDirection)
+    array.push(auditCouncilDirections, newCouncilDirection)
+    array.push(auditEventTypes, researchEventType)
+    array.push(auditConfidences, routedConfidence)
+    array.push(auditConfidenceBuckets, newConfidenceBucket)
+    array.push(auditHighestAfter, close)
+    array.push(auditLowestAfter, close)
+    array.push(auditFastCaptured, false)
+    array.push(auditMediumCaptured, false)
+    array.push(auditUpHitBars, -1)
+    array.push(auditDownHitBars, -1)
+    array.push(auditIndependent, newAuditIndependent)
+    array.push(auditFrozenProbabilities, frozenProbability)
+    array.push(auditFrozenAdaptiveProbabilities, frozenAdaptiveProbability)
+    array.push(auditFrozenReferenceProbabilities, frozenReferenceProbability)
+    array.push(auditFrozenRoundTripProbabilities, frozenRoundTripProbability)
+    array.push(auditFrozenLossProbabilities, frozenLossProbability)
+    array.push(auditFrozenWhipsawProbabilities, frozenWhipsawProbability)
+    array.push(auditFrozenQuietProbabilities, frozenQuietProbability)
+
+int rawAuditFollowSamples = array.get(auditActionSamples, 0)
+int rawAuditFadeSamples = array.get(auditActionSamples, 1)
+int rawRouterAuditSamples = rawAuditFollowSamples + rawAuditFadeSamples
+int auditFollowSamples = array.get(auditEffectiveActionSamples, 0)
+int auditFadeSamples = array.get(auditEffectiveActionSamples, 1)
+int routerAuditSamples = auditFollowSamples + auditFadeSamples
+int auditCleanCount = array.get(auditOutcomeCounts, 0)
+int auditRoundTripCount = array.get(auditOutcomeCounts, 1)
+int auditLossCount = array.get(auditOutcomeCounts, 2)
+int auditWhipsawCount = array.get(auditOutcomeCounts, 3)
+int auditQuietCount = array.get(auditOutcomeCounts, 4)
+float auditCleanClimate = f_dirichletProbability(float(auditCleanCount), float(routerAuditSamples), evidencePriorStrength, 5)
+int routerAuditSuccesses = array.get(auditEffectiveActionSuccesses, 0) + array.get(auditEffectiveActionSuccesses, 1)
+float routerAuditMfeSum = array.get(auditEffectiveActionMfeSum, 0) + array.get(auditEffectiveActionMfeSum, 1)
+float routerAuditMaeSum = array.get(auditEffectiveActionMaeSum, 0) + array.get(auditEffectiveActionMaeSum, 1)
+float routerAuditResponseSum = array.get(auditEffectiveActionResponseSum, 0) + array.get(auditEffectiveActionResponseSum, 1)
+float routerAuditUtilitySum = array.get(auditEffectiveActionUtilitySum, 0) + array.get(auditEffectiveActionUtilitySum, 1)
+float routerAuditProbability = f_hierarchicalProbability(float(routerAuditSuccesses), float(routerAuditSamples), auditCleanClimate, evidencePriorStrength)
+float routerAuditUtility = f_safeDiv(routerAuditUtilitySum, float(routerAuditSamples), 0.0)
+float routerAuditAverageMfe = f_safeDiv(routerAuditMfeSum, float(routerAuditSamples), 0.0)
+float routerAuditAverageMae = f_safeDiv(routerAuditMaeSum, float(routerAuditSamples), 0.0)
+float routerAuditAverageResponse = f_safeDiv(routerAuditResponseSum, float(routerAuditSamples), 0.0)
+float auditFollowProbability = f_hierarchicalProbability(float(array.get(auditEffectiveActionSuccesses, 0)), float(auditFollowSamples), auditCleanClimate, evidencePriorStrength)
+float auditFadeProbability = f_hierarchicalProbability(float(array.get(auditEffectiveActionSuccesses, 1)), float(auditFadeSamples), auditCleanClimate, evidencePriorStrength)
+float auditFollowUtility = f_safeDiv(array.get(auditEffectiveActionUtilitySum, 0), float(auditFollowSamples), 0.0)
+float auditFadeUtility = f_safeDiv(array.get(auditEffectiveActionUtilitySum, 1), float(auditFadeSamples), 0.0)
+float auditWaitGoodProbability = f_bayesianProbability(float(auditEffectiveWaitGoodSkips), float(auditEffectiveWaitSamples), evidencePriorStrength)
+float auditBrierScore = f_safeDiv(auditBrierSum, float(auditBrierSamples), 0.0)
+float auditAdaptiveBrierScore = f_safeDiv(auditAdaptiveBrierSum, float(auditBrierSamples), 0.0)
+float auditAdaptiveSkillVsControl = auditBrierScore > 1e-10 ? 1.0 - auditAdaptiveBrierScore / auditBrierScore : 0.0
+float auditReferenceBrierScore = f_safeDiv(auditReferenceBrierSum, float(auditBrierSamples), 0.0)
+float auditBrierSkill = auditReferenceBrierScore > 1e-10 ? 1.0 - auditBrierScore / auditReferenceBrierScore : 0.0
+float auditMulticlassBrierScore = f_safeDiv(auditMulticlassBrierSum, float(auditBrierSamples), 0.0)
+float auditConfidenceVariance = auditConfidenceDistributionSamples > 0 ?
+     math.max(auditConfidenceDistributionM2 / float(auditConfidenceDistributionSamples), 0.0) : 0.0
+float auditConfidenceDeviation = math.sqrt(auditConfidenceVariance)
+[adaptiveConfidenceLowerGate, adaptiveConfidenceUpperGate] = f_adaptiveConfidenceGates(auditConfidenceDistributionSamples,
+     auditConfidenceDistributionMean, auditConfidenceDistributionM2, minimumEvidenceSamples)
+float recentFollowSamples = array.get(auditRecentActionSamples, 0)
+float recentFadeSamples = array.get(auditRecentActionSamples, 1)
+float recentFollowProbability = f_hierarchicalProbability(array.get(auditRecentActionSuccesses, 0), recentFollowSamples,
+     auditCleanClimate, evidencePriorStrength)
+float recentFadeProbability = f_hierarchicalProbability(array.get(auditRecentActionSuccesses, 1), recentFadeSamples,
+     auditCleanClimate, evidencePriorStrength)
+float auditAverageFirstPassBars = f_safeDiv(auditFirstPassBarsSum, float(auditFirstPassSamples), 0.0)
+float auditForecastClean = f_safeDiv(array.get(auditClassForecastSums, 0), float(auditBrierSamples), 0.0)
+float auditForecastRoundTrip = f_safeDiv(array.get(auditClassForecastSums, 1), float(auditBrierSamples), 0.0)
+float auditForecastLoss = f_safeDiv(array.get(auditClassForecastSums, 2), float(auditBrierSamples), 0.0)
+float auditActualClean = f_safeDiv(float(auditCleanCount), float(auditBrierSamples), 0.0)
+float auditActualRoundTrip = f_safeDiv(float(auditRoundTripCount), float(auditBrierSamples), 0.0)
+float auditActualLoss = f_safeDiv(float(auditLossCount), float(auditBrierSamples), 0.0)
+int auditPhiSamples = array.get(auditBaselineSamples, 0)
+int auditCouncilSamples = array.get(auditBaselineSamples, 1)
+int auditCouncilMatchedRouterSamples = array.get(auditBaselineSamples, 2)
+float auditPhiProbability = f_hierarchicalProbability(float(array.get(auditBaselineSuccesses, 0)), float(auditPhiSamples), auditCleanClimate, evidencePriorStrength)
+float auditCouncilProbability = f_hierarchicalProbability(float(array.get(auditBaselineSuccesses, 1)), float(auditCouncilSamples), auditCleanClimate, evidencePriorStrength)
+float auditPhiResponse = f_safeDiv(array.get(auditBaselineResponseSum, 0), float(auditPhiSamples), 0.0)
+float auditCouncilResponse = f_safeDiv(array.get(auditBaselineResponseSum, 1), float(auditCouncilSamples), 0.0)
+float auditCouncilMatchedRouterResponse = f_safeDiv(array.get(auditBaselineResponseSum, 2), float(auditCouncilMatchedRouterSamples), 0.0)
+float auditEdgeVsPhi = routerAuditAverageResponse - auditPhiResponse
+float auditEdgeVsCouncil = auditCouncilMatchedRouterResponse - auditCouncilResponse
+int activeRouterAudits = array.size(auditStartBars)
+
+string councilShort = strongBullCouncil ? "B++" : bullCouncilSetup ? "B+" :
+     strongBearCouncil ? "S--" : bearCouncilSetup ? "S-" : "N"
+float councilGuide = hl2 + councilRaw * safeAtr * 0.45
+color councilColor = f_spectralColor(councilRaw)
+float councilVisualField = f_clamp(0.65 * spectralField + 0.35 * councilRaw, -1.0, 1.0)
+
+plot(showCouncilGuide ? councilGuide : na, "Council Guide — Glow", color=color.new(councilColor, 72), linewidth=3)
+plot(showCouncilGuide ? councilGuide : na, "Council Guide — Core", color=color.new(councilColor, 5), linewidth=1)
+
+int auraTransparency = int(math.round(f_clamp(97.0 - resonanceStrength * 4.0 - councilConfidence * 3.0, 89.0, 97.0)))
+color spectralCandle = f_spectralColor(councilVisualField)
+int softCandleTransparency = int(math.round((1.0 - math.abs(councilVisualField)) * 18.0))
+color themedCandle = candleColorMode == "Soft Spectral Flow" ? color.new(spectralCandle, softCandleTransparency) : spectralCandle
+
+bgcolor(showFieldAura and not legacyVisual ? color.new(f_spectralColor(councilVisualField), researchMode ? math.max(87, auraTransparency - 2) : auraTransparency) : na, title="PHI Council Aura")
+barcolor(colorCandles ? themedCandle : na, title="Theme Resonance Candles")
+
+plotshape(showTrendTurns and trendBullTurn, title="Cycle Trend Bull Turn", style=shape.circle, location=location.belowbar, color=color.new(bullColor, 5), size=size.tiny)
+plotshape(showTrendTurns and trendBearTurn, title="Cycle Trend Bear Turn", style=shape.circle, location=location.abovebar, color=color.new(bearColor, 5), size=size.tiny)
+plotshape(showAtrTurns and atrBullTurn, title="ATR Bull Turn", style=shape.triangleup, location=location.belowbar, color=color.new(bullColor, 0), size=size.tiny)
+plotshape(showAtrTurns and atrBearTurn, title="ATR Bear Turn", style=shape.triangledown, location=location.abovebar, color=color.new(bearColor, 0), size=size.tiny)
+plotshape(showFibInteractions and phiBullReject, title="PHI Bull Rejection", style=shape.diamond, location=location.belowbar, color=color.new(pivotColor, 0), size=size.tiny)
+plotshape(showFibInteractions and phiBearReject, title="PHI Bear Rejection", style=shape.diamond, location=location.abovebar, color=color.new(pivotColor, 0), size=size.tiny)
+plotshape(showFibInteractions and phiBullAccept, title="PHI Bull Acceptance", style=shape.square, location=location.belowbar, color=color.new(bullColor, 0), size=size.tiny)
+plotshape(showFibInteractions and phiBearAccept, title="PHI Bear Acceptance", style=shape.square, location=location.abovebar, color=color.new(bearColor, 0), size=size.tiny)
+plotshape(showFibInteractions and phiBullRetest, title="PHI Bull Retest", style=shape.circle, location=location.belowbar, color=color.new(bullColor, 0), size=size.tiny)
+plotshape(showFibInteractions and phiBearRetest, title="PHI Bear Retest", style=shape.circle, location=location.abovebar, color=color.new(bearColor, 0), size=size.tiny)
+plotshape(showCouncilSignals and bullCouncilSignal, title="Council Bull Halo", style=shape.circle, location=location.belowbar, color=color.new(bullColor, 70), size=size.small)
+plotshape(showCouncilSignals and bearCouncilSignal, title="Council Bear Halo", style=shape.circle, location=location.abovebar, color=color.new(bearColor, 70), size=size.small)
+plotshape(showCouncilSignals and bullCouncilSignal, title="Council Buy", text="C", textcolor=panelColor, style=shape.triangleup, location=location.belowbar, color=color.new(bullColor, 0), size=size.tiny)
+plotshape(showCouncilSignals and bearCouncilSignal, title="Council Sell", text="C", textcolor=panelColor, style=shape.triangledown, location=location.abovebar, color=color.new(bearColor, 0), size=size.tiny)
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Dashboard
+// ─────────────────────────────────────────────────────────────────────────────
+
+string dashboardPositionValue = dashboardPosition == "Top Left" ? position.top_left :
+     dashboardPosition == "Bottom Right" ? position.bottom_right :
+     dashboardPosition == "Bottom Left" ? position.bottom_left : position.top_right
+var table dashboard = table.new(dashboardPositionValue, 5, 11,
+     bgcolor=color.new(panelColor, dashboardTransparency), frame_color=color.new(neutralColor, 60), frame_width=1,
+     border_color=color.new(neutralColor, 78), border_width=1)
+
+if barstate.isfirst
+    table.merge_cells(dashboard, 0, 0, 1, 0)
+    table.merge_cells(dashboard, 2, 0, 4, 0)
+    table.merge_cells(dashboard, 1, 1, 4, 1)
+    table.merge_cells(dashboard, 1, 2, 4, 2)
+    table.merge_cells(dashboard, 1, 3, 4, 3)
+    table.merge_cells(dashboard, 1, 4, 4, 4)
+    table.merge_cells(dashboard, 1, 7, 4, 7)
+    table.merge_cells(dashboard, 1, 8, 4, 8)
+    table.merge_cells(dashboard, 1, 9, 4, 9)
+    table.merge_cells(dashboard, 1, 10, 4, 10)
+
+if barstate.islast
+    table.clear(dashboard, 0, 0, 4, 10)
+    if dashboardEnabled
+        string phiLevelShort = not fibTimeframeValid ? "TIMEFRAME ERROR" : not fibReady ? "WARMING UP" :
+             nearestFibIndex == 0 ? "PIVOT" : nearestFibIndex <= 10 ? "R" + str.tostring(nearestFibIndex) : "S" + str.tostring(nearestFibIndex - 10)
+        float nearestAtrDistance = fibReady ? nearestFibDistance / safeAtr : na
+        string locationSide = not fibReady ? "" : close >= nearestFibLevel ? " above" : " below"
+        string locationText = fibReady ? phiLevelShort + " · " + str.tostring(nearestFibRatio, "#.###") + " · " +
+             str.tostring(nearestAtrDistance, "#.##") + " ATR" + locationSide : phiLevelShort
+        string interactionWord = phiBullRetest ? "BULL RETEST" : phiBearRetest ? "BEAR RETEST" :
+             phiBullAccept ? "BULL ACCEPT" : phiBearAccept ? "BEAR ACCEPT" :
+             phiBullReject ? "BULL REJECT" : phiBearReject ? "BEAR REJECT" :
+             confluenceActive and (phiTouch or secondaryTouch) ? "MTF TOUCH" :
+             phiTouch ? "TOUCH" : secondaryTouch ? "HTF TOUCH" : phiApproach ? "APPROACH" : "FREE"
+        string clusterWord = confluenceActive ? "MTF cluster" : secondaryReady ? fibTimeframe + "/" + secondaryTimeframe + " separate" : "secondary unavailable"
+        string interactionText = interactionWord + " · Resonance " + str.tostring(resonanceStrength * 100.0, "#") + "% · " + clusterWord
+        string integrityWord = not fibTimeframeValid ? "Primary TF invalid" : not secondaryTimeframeValid ? "Secondary TF invalid" :
+             trendMtfMode == "Confirmed" ? "MTF ✓" : "MTF developing"
+        string ratioWord = ratioMode == "ROM Legacy" ? "ROM Legacy" : ratioMode
+        string rangeWord = rangeMode == "Previous Range" ? "Prev Range" : rangeMode == "Previous True Range" ? "Prev True Range" : "Robust Blend"
+        string geometryText = ratioWord + " · " + rangeWord + " · " + fibTimeframe + "/" + secondaryTimeframe + " · " + integrityWord
+        string marketState = strongBullCouncil ? "STRONG BULL" : strongBearCouncil ? "STRONG BEAR" :
+             councilRaw > 0.18 ? "BULLISH" : councilRaw < -0.18 ? "BEARISH" : "NEUTRAL"
+        string councilAction = bullCouncilSetup ? "BUY" : bearCouncilSetup ? "SELL" :
+             councilRaw > 0.18 ? "BULL BIAS" : councilRaw < -0.18 ? "BEAR BIAS" : "WAIT"
+        string councilGuided = councilAction + " " + str.tostring(math.abs(councilRaw) * 100.0, "#") + "/100 · " +
+             str.tostring(dominantAgreement) + " of 4 agree"
+        string qualityGuided = f_meter5(councilConfidence) + "  Confidence " + str.tostring(councilConfidence * 100.0, "#") +
+             "% · Coherence " + str.tostring(councilCoherence * 100.0, "#") + "%"
+        string fieldDirection = councilVisualField > 0.10 ? "BULL" : councilVisualField < -0.10 ? "BEAR" : "NEUTRAL"
+        string fieldGuided = fieldDirection + " field " + str.tostring(math.abs(councilVisualField) * 100.0, "#") +
+             "% · Cycle " + (trendState > 0 ? "UP" : trendState < 0 ? "DOWN" : "FLAT") + " P" + str.tostring(cycleLength)
+        color stateColor = f_spectralColor(councilRaw)
+        color interactionColor = phiTouch or phiApproach or secondaryTouch ? pivotColor : textColor
+
+        float reactionProbability = calibratedReactionProbability
+        float averageMfe = calibratedAverageMfe
+        float averageMae = calibratedAverageMae
+        float averageResponse = calibratedAverageResponse
+        float trendProbability = f_bayesianProbability(float(trendSuccesses), float(trendSamples), evidencePriorStrength)
+        float chopProbability = f_bayesianProbability(float(chopSuccesses), float(chopSamples), evidencePriorStrength)
+        float romProbability = f_bayesianProbability(float(romGridSuccesses), float(romGridSamples), evidencePriorStrength)
+        float canonicalProbability = f_bayesianProbability(float(canonicalGridSuccesses), float(canonicalGridSamples), evidencePriorStrength)
+        float romResponse = romGridSamples > 0 ? romGridResponseSum / romGridSamples : 0.0
+        float canonicalResponse = canonicalGridSamples > 0 ? canonicalGridResponseSum / canonicalGridSamples : 0.0
+        float gem728Probability = f_bayesianProbability(float(gem728Successes), float(gem728Samples), evidencePriorStrength)
+        float gem1328Probability = f_bayesianProbability(float(gem1328Successes), float(gem1328Samples), evidencePriorStrength)
+        float gem728Response = gem728Samples > 0 ? gem728ResponseSum / gem728Samples : 0.0
+        float gem1328Response = gem1328Samples > 0 ? gem1328ResponseSum / gem1328Samples : 0.0
+        float reactionEvidenceField = calibratedEvidenceQuality
+        float trendEvidenceField = trendSamples > 0 ? trendProbability * 2.0 - 1.0 : 0.0
+        float chopEvidenceField = chopSamples > 0 ? chopProbability * 2.0 - 1.0 : 0.0
+        float romEvidenceField = romGridSamples > 0 ? romProbability * 2.0 - 1.0 : 0.0
+        float canonicalEvidenceField = canonicalGridSamples > 0 ? canonicalProbability * 2.0 - 1.0 : 0.0
+        float gem728EvidenceField = gem728Samples > 0 ? gem728Probability * 2.0 - 1.0 : 0.0
+        float gem1328EvidenceField = gem1328Samples > 0 ? gem1328Probability * 2.0 - 1.0 : 0.0
+        string reactionProbabilityText = researchSamples > 0 ? str.tostring(reactionProbability * 100.0, "#") + "%" : "—"
+        string rawReactionProbabilityText = researchSamples > 0 ? str.tostring(rawReactionProbability * 100.0, "#") + "%" : "—"
+        string romResponseText = romGridSamples > 0 ? str.tostring(romResponse, "#.##") : "—"
+        string canonicalResponseText = canonicalGridSamples > 0 ? str.tostring(canonicalResponse, "#.##") : "—"
+        string gem728ProbabilityText = gem728Samples > 0 ? str.tostring(gem728Probability * 100.0, "#") + "%" : "—"
+        string gem1328ProbabilityText = gem1328Samples > 0 ? str.tostring(gem1328Probability * 100.0, "#") + "%" : "—"
+        string gem728ResponseText = gem728Samples > 0 ? str.tostring(gem728Response, "#.##") : "—"
+        string gem1328ResponseText = gem1328Samples > 0 ? str.tostring(gem1328Response, "#.##") : "—"
+        string evidenceText = calibratedEvidenceTier + " · Adj " + reactionProbabilityText + " · LB " +
+             (researchSamples > 0 ? str.tostring(calibratedWilsonLower * 100.0, "#") + "%" : "—") + " · N" + str.tostring(researchSamples)
+        string researchStatus = researchActive ? displayedCohortName + " · " + str.tostring(bar_index - researchStartBar) + "/" +
+             str.tostring(researchHorizon) + " · MFE " + str.tostring(activeMfe, "#.##") + " · MAE " + str.tostring(activeMae, "#.##") :
+             displayedCohortName + " · " + displayedCohortTier + " · Adj " +
+             (displayedCohortSamples > 0 ? str.tostring(displayedCohortProbability * 100.0, "#") + "%" : "—")
+        string routerArrow = routedDirection > 0 ? "↑" : routedDirection < 0 ? "↓" : ""
+        string routerEdgeSign = routedExpectancyAtr >= 0.0 ? "+" : "−"
+        string routerEdgeText = routerEdgeSign + str.tostring(math.abs(routedExpectancyAtr), "#.##")
+        string routerCoreText = edgeRouterMode == "Off" ? "OFF" : not routerMemoryActive ? "AWAIT PHI EVENT" :
+             routedAction == "LEARN" ? "LEARN · " + routedCohortName + " · N" + str.tostring(routedSamples) :
+             routedAction == "WAIT" ? "WAIT · " + routedCohortName + " · E" + routerEdgeText :
+             routedAction + " " + routerArrow + " · E" + routerEdgeText + " ATR · C" + str.tostring(routedConfidence * 100.0, "#") + "%"
+        string routerCompactText = edgeRouterMode == "Off" ? "ROUTE OFF" : not routerMemoryActive ? "AWAIT PHI" :
+             routedAction == "LEARN" ? "LEARN N" + str.tostring(routedSamples) :
+             routedAction + routerArrow + " E" + routerEdgeText
+        string routerHeaderText = edgeRouterMode == "Off" ? "ROUTER OFF" : not routerMemoryActive ? "EDGE ROUTER" :
+             routedAction == "FOLLOW" or routedAction == "FADE" ? routedAction + (routedDirection > 0 ? " BULL" : " BEAR") : routedAction
+        color routerColor = routerMemoryActive and routedDirection != 0 ? f_spectralColor(routerField) :
+             routerMemoryActive and routedAction == "LEARN" ? pivotColor : neutralColor
+        bool researchDashboard = dashboardMode == "Research" or researchMode
+        bool routerAuditDashboard = researchDashboard and researchDashboardPage == "Router Audit"
+        bool adaptiveLabDashboard = researchDashboard and researchDashboardPage == "Adaptive Lab"
+
+        int auditFastN = array.get(auditHorizonSamples, 0)
+        int auditMediumN = array.get(auditHorizonSamples, 1)
+        int auditFinalN = array.get(auditHorizonSamples, 2)
+        float auditFastProbability = f_hierarchicalProbability(float(array.get(auditHorizonSuccesses, 0)), float(auditFastN), auditCleanClimate, evidencePriorStrength)
+        float auditMediumProbability = f_hierarchicalProbability(float(array.get(auditHorizonSuccesses, 1)), float(auditMediumN), auditCleanClimate, evidencePriorStrength)
+        float auditFinalProbability = f_hierarchicalProbability(float(array.get(auditHorizonSuccesses, 2)), float(auditFinalN), auditCleanClimate, evidencePriorStrength)
+        int auditFollowFastN = array.get(auditActionHorizonSamples, 0)
+        int auditFollowMediumN = array.get(auditActionHorizonSamples, 1)
+        int auditFollowFinalN = array.get(auditActionHorizonSamples, 2)
+        int auditFadeFastN = array.get(auditActionHorizonSamples, 3)
+        int auditFadeMediumN = array.get(auditActionHorizonSamples, 4)
+        int auditFadeFinalN = array.get(auditActionHorizonSamples, 5)
+        float auditFollowFastProbability = f_hierarchicalProbability(float(array.get(auditActionHorizonSuccesses, 0)), float(auditFollowFastN), auditCleanClimate, evidencePriorStrength)
+        float auditFollowMediumProbability = f_hierarchicalProbability(float(array.get(auditActionHorizonSuccesses, 1)), float(auditFollowMediumN), auditCleanClimate, evidencePriorStrength)
+        float auditFollowFinalProbability = f_hierarchicalProbability(float(array.get(auditActionHorizonSuccesses, 2)), float(auditFollowFinalN), auditCleanClimate, evidencePriorStrength)
+        float auditFadeFastProbability = f_hierarchicalProbability(float(array.get(auditActionHorizonSuccesses, 3)), float(auditFadeFastN), auditCleanClimate, evidencePriorStrength)
+        float auditFadeMediumProbability = f_hierarchicalProbability(float(array.get(auditActionHorizonSuccesses, 4)), float(auditFadeMediumN), auditCleanClimate, evidencePriorStrength)
+        float auditFadeFinalProbability = f_hierarchicalProbability(float(array.get(auditActionHorizonSuccesses, 5)), float(auditFadeFinalN), auditCleanClimate, evidencePriorStrength)
+        int auditLowConfidenceN = array.get(auditConfidenceSamples, 0)
+        int auditMediumConfidenceN = array.get(auditConfidenceSamples, 1)
+        int auditHighConfidenceN = array.get(auditConfidenceSamples, 2)
+        float auditLowConfidenceProbability = f_hierarchicalProbability(float(array.get(auditConfidenceSuccesses, 0)), float(auditLowConfidenceN), auditCleanClimate, evidencePriorStrength)
+        float auditMediumConfidenceProbability = f_hierarchicalProbability(float(array.get(auditConfidenceSuccesses, 1)), float(auditMediumConfidenceN), auditCleanClimate, evidencePriorStrength)
+        float auditHighConfidenceProbability = f_hierarchicalProbability(float(array.get(auditConfidenceSuccesses, 2)), float(auditHighConfidenceN), auditCleanClimate, evidencePriorStrength)
+        bool auditCalibrationReady = auditLowConfidenceN >= minimumEvidenceSamples and auditMediumConfidenceN >= minimumEvidenceSamples and auditHighConfidenceN >= minimumEvidenceSamples
+        bool auditCalibrationMonotonic = auditLowConfidenceProbability <= auditMediumConfidenceProbability and auditMediumConfidenceProbability <= auditHighConfidenceProbability
+        string auditCalibrationState = not auditCalibrationReady ? "REL LEARN" : auditCalibrationMonotonic ? "REL OK" : "REL WEAK"
+        string routerAuditResponseSign = routerAuditAverageResponse >= 0.0 ? "+" : "−"
+        string auditPhiResponseSign = auditPhiResponse >= 0.0 ? "+" : "−"
+        string auditCouncilResponseSign = auditCouncilResponse >= 0.0 ? "+" : "−"
+        string auditPhiEdgeSign = auditEdgeVsPhi >= 0.0 ? "+" : "−"
+        string auditCouncilEdgeSign = auditEdgeVsCouncil >= 0.0 ? "+" : "−"
+        string auditSkillSign = auditBrierSkill >= 0.0 ? "+" : "−"
+        string adaptiveSkillSign = auditAdaptiveSkillVsControl >= 0.0 ? "+" : "−"
+        string auditReliabilityShort = not auditCalibrationReady ? "L" : auditCalibrationMonotonic ? "OK" : "W"
+        color routerAuditColor = routerAuditSamples > 0 ? f_spectralColor(routerAuditProbability * 2.0 - 1.0) : neutralColor
+        color adaptiveLabColor = auditBrierSamples == 0 ? neutralColor : f_spectralColor(f_tanh(auditAdaptiveSkillVsControl * 4.0))
+        string phiPermeabilityWord = nearestPhiSide == 0 ? "PIVOT" : phiPermeability >= 0.0 ? "PASS" : "HOLD"
+        string phiSideWord = nearestPhiSide > 0 ? "R" : nearestPhiSide < 0 ? "S" : "PP"
+
+        color headerColor = adaptiveLabDashboard ? adaptiveLabColor : researchDashboard ? routerColor : stateColor
+        color headerBackground = color.new(headerColor, math.min(94, math.max(72, dashboardTransparency + 38)))
+        table.cell(dashboard, 0, 0, "✦ ROM∞ 3.2g ✦",
+             text_color=pivotColor, bgcolor=headerBackground,
+             text_halign=text.align_center, text_size=size.tiny)
+        table.cell(dashboard, 2, 0, adaptiveLabDashboard ? "ADAPTIVE LAB" : researchDashboard ? routerHeaderText : marketState,
+             text_color=headerColor, bgcolor=headerBackground,
+             text_halign=text.align_center, text_size=size.small)
+
+        if adaptiveLabDashboard
+            table.cell(dashboard, 0, 1, "Control", text_color=neutralColor, text_halign=text.align_left, text_size=size.tiny)
+            table.cell(dashboard, 1, 1, auditBrierSamples > 0 ? "BS " + str.tostring(auditBrierScore, "#.###") + " · N" + str.tostring(auditBrierSamples) +
+                 " · LIVE " + str.tostring(activeRouterAudits) : "AWAIT FROZEN OUTCOMES",
+                 text_color=textColor, text_halign=text.align_right, text_size=size.tiny)
+            table.cell(dashboard, 0, 2, "Challenger", text_color=neutralColor, text_halign=text.align_left, text_size=size.tiny)
+            table.cell(dashboard, 1, 2, auditBrierSamples > 0 ? "BS " + str.tostring(auditAdaptiveBrierScore, "#.###") + " · ΔSK " +
+                 adaptiveSkillSign + str.tostring(math.abs(auditAdaptiveSkillVsControl) * 100.0, "#.#") + "%" : "FROZEN · NO CONTROL CHANGES",
+                 text_color=adaptiveLabColor, text_halign=text.align_right, text_size=size.tiny)
+            table.cell(dashboard, 0, 3, "Recent", text_color=neutralColor, text_halign=text.align_left, text_size=size.tiny)
+            table.cell(dashboard, 1, 3, "F " + str.tostring(recentFollowProbability * 100.0, "#") + "%/N" + str.tostring(recentFollowSamples, "#.#") +
+                 " · D " + str.tostring(recentFadeProbability * 100.0, "#") + "%/N" + str.tostring(recentFadeSamples, "#.#"),
+                 text_color=f_spectralColor((recentFollowProbability + recentFadeProbability) - 1.0), text_halign=text.align_right, text_size=size.tiny)
+            table.cell(dashboard, 0, 4, "PHI flow", text_color=neutralColor, text_halign=text.align_left, text_size=size.tiny)
+            table.cell(dashboard, 1, 4, phiPermeabilityWord + " " + phiSideWord + " · " +
+                 str.tostring(math.abs(phiPermeability) * 100.0, "#") + "% · W" + str.tostring(auditPermeabilityWeight * 100.0, "#") + "%",
+                 text_color=f_spectralColor(phiPermeability), text_halign=text.align_right, text_size=size.tiny)
+
+            table.cell(dashboard, 0, 5, "Cycle", text_color=neutralColor, text_halign=text.align_left, text_size=size.tiny)
+            table.cell(dashboard, 1, 5, "P", text_color=neutralColor, bgcolor=color.new(neutralColor, 88), text_halign=text.align_center, text_size=size.tiny)
+            table.cell(dashboard, 2, 5, "RAIL", text_color=neutralColor, bgcolor=color.new(neutralColor, 88), text_halign=text.align_center, text_size=size.tiny)
+            table.cell(dashboard, 3, 5, "JIT", text_color=neutralColor, bgcolor=color.new(neutralColor, 88), text_halign=text.align_center, text_size=size.tiny)
+            table.cell(dashboard, 4, 5, "VALID", text_color=neutralColor, bgcolor=color.new(neutralColor, 88), text_halign=text.align_center, text_size=size.tiny)
+            table.cell(dashboard, 0, 6, "Health", text_color=neutralColor, text_halign=text.align_left, text_size=size.tiny)
+            table.cell(dashboard, 1, 6, str.tostring(cycleLength), text_color=panelColor, bgcolor=color.new(f_spectralColor(trendScore), 22), text_halign=text.align_center, text_size=size.tiny)
+            table.cell(dashboard, 2, 6, str.tostring(cycleRailRate * 100.0, "#") + "%", text_color=panelColor, bgcolor=color.new(f_spectralColor(1.0 - 2.0 * cycleRailRate), 22), text_halign=text.align_center, text_size=size.tiny)
+            table.cell(dashboard, 3, 6, str.tostring(cycleJitterRate * 100.0, "#") + "%", text_color=panelColor, bgcolor=color.new(f_spectralColor(1.0 - 2.0 * cycleJitterRate), 22), text_halign=text.align_center, text_size=size.tiny)
+            table.cell(dashboard, 4, 6, str.tostring(cyclePhaseValidity * 100.0, "#") + "%", text_color=panelColor, bgcolor=color.new(f_spectralColor(2.0 * cyclePhaseValidity - 1.0), 22), text_halign=text.align_center, text_size=size.tiny)
+
+            table.cell(dashboard, 0, 7, "Bands", text_color=neutralColor, text_halign=text.align_left, text_size=size.tiny)
+            table.cell(dashboard, 1, 7, "L<" + str.tostring(adaptiveConfidenceLowerGate * 100.0, "#") + " · M<" +
+                 str.tostring(adaptiveConfidenceUpperGate * 100.0, "#") + " · μ" + str.tostring(auditConfidenceDistributionMean * 100.0, "#") +
+                 " σ" + str.tostring(auditConfidenceDeviation * 100.0, "#") + " · N" + str.tostring(auditConfidenceDistributionSamples),
+                 text_color=textColor, text_halign=text.align_right, text_size=size.tiny)
+            table.cell(dashboard, 0, 8, "Contract", text_color=neutralColor, text_halign=text.align_left, text_size=size.tiny)
+            table.cell(dashboard, 1, 8, "CHALLENGER ONLY · ROUTES + SIGNALS UNCHANGED",
+                 text_color=pivotColor, text_halign=text.align_right, text_size=size.tiny)
+            table.cell(dashboard, 0, 9, "Read", text_color=neutralColor, text_halign=text.align_left, text_size=size.tiny)
+            table.cell(dashboard, 1, 9, auditBrierSamples < minimumEvidenceSamples ? "COLLECTING · NEED N" + str.tostring(minimumEvidenceSamples) :
+                 auditAdaptiveSkillVsControl > 0.02 ? "ADAPTIVE AHEAD " + adaptiveSkillSign + str.tostring(math.abs(auditAdaptiveSkillVsControl) * 100.0, "#.#") + "%" :
+                 auditAdaptiveSkillVsControl < -0.02 ? "CONTROL AHEAD " + str.tostring(math.abs(auditAdaptiveSkillVsControl) * 100.0, "#.#") + "%" : "STATISTICAL TIE",
+                 text_color=adaptiveLabColor, text_halign=text.align_right, text_size=size.tiny)
+            table.cell(dashboard, 0, 10, "Latest", text_color=neutralColor, text_halign=text.align_left, text_size=size.tiny)
+            table.cell(dashboard, 1, 10, lastAdaptiveAuditText, text_color=adaptiveLabColor, text_halign=text.align_right, text_size=size.tiny)
+        else if routerAuditDashboard
+            table.cell(dashboard, 0, 1, "Samples", text_color=neutralColor, text_halign=text.align_left, text_size=size.tiny)
+            table.cell(dashboard, 1, 1, "RAW D" + str.tostring(rawRouterAuditSamples) + "/W" + str.tostring(auditWaitSamples) +
+                 " · EFF D" + str.tostring(routerAuditSamples) + "/W" + str.tostring(auditEffectiveWaitSamples) +
+                 " · LIVE " + str.tostring(activeRouterAudits),
+                 text_color=textColor, text_halign=text.align_right, text_size=size.tiny)
+            table.cell(dashboard, 0, 2, "Router", text_color=neutralColor, text_halign=text.align_left, text_size=size.tiny)
+            table.cell(dashboard, 1, 2, routerAuditSamples > 0 ? "CL" + str.tostring(routerAuditProbability * 100.0, "#") +
+                 " UT" + str.tostring(routerAuditUtility * 100.0, "#") + " · M" + str.tostring(routerAuditAverageMfe, "#.##") + " A" + str.tostring(routerAuditAverageMae, "#.##") +
+                 " · R" + routerAuditResponseSign + str.tostring(math.abs(routerAuditAverageResponse), "#.##") +
+                 " · BS" + str.tostring(auditBrierScore, "#.##") + " · SK" + auditSkillSign + str.tostring(math.abs(auditBrierSkill), "#.##") : "COLLECTING INDEPENDENT ROUTES",
+                 text_color=routerAuditColor, text_halign=text.align_right, text_size=size.tiny)
+            table.cell(dashboard, 0, 3, "Baselines", text_color=neutralColor, text_halign=text.align_left, text_size=size.tiny)
+            table.cell(dashboard, 1, 3, auditPhiSamples > 0 ? "PHI " + str.tostring(auditPhiProbability * 100.0, "#") + "%/" +
+                 auditPhiResponseSign + str.tostring(math.abs(auditPhiResponse), "#.##") + " · CNL " +
+                 (auditCouncilSamples > 0 ? str.tostring(auditCouncilProbability * 100.0, "#") + "%/" + auditCouncilResponseSign +
+                 str.tostring(math.abs(auditCouncilResponse), "#.##") + " N" + str.tostring(auditCouncilSamples) : "NO CALLS") : "AWAIT MATCHED EVENTS",
+                 text_color=textColor, text_halign=text.align_right, text_size=size.tiny)
+            table.cell(dashboard, 0, 4, "Edge", text_color=neutralColor, text_halign=text.align_left, text_size=size.tiny)
+            table.cell(dashboard, 1, 4, routerAuditSamples > 0 ? "ΔPHI " + auditPhiEdgeSign + str.tostring(math.abs(auditEdgeVsPhi), "#.##") +
+                 " · ΔCNL " + (auditCouncilSamples > 0 ? auditCouncilEdgeSign + str.tostring(math.abs(auditEdgeVsCouncil), "#.##") : "—") + " ATR" : "UNPROVEN",
+                 text_color=routerAuditSamples > 0 ? f_spectralColor(f_tanh(auditEdgeVsPhi / math.max(researchTargetAtr, 0.10))) : neutralColor,
+                 text_halign=text.align_right, text_size=size.tiny)
+
+            table.cell(dashboard, 0, 5, "Action", text_color=neutralColor, text_halign=text.align_left, text_size=size.tiny)
+            table.cell(dashboard, 1, 5, "FOLLOW", text_color=neutralColor, bgcolor=color.new(neutralColor, 88), text_halign=text.align_center, text_size=size.tiny)
+            table.cell(dashboard, 2, 5, "FADE", text_color=neutralColor, bgcolor=color.new(neutralColor, 88), text_halign=text.align_center, text_size=size.tiny)
+            table.cell(dashboard, 3, 5, "WAIT", text_color=neutralColor, bgcolor=color.new(neutralColor, 88), text_halign=text.align_center, text_size=size.tiny)
+            table.cell(dashboard, 4, 5, "TOTAL", text_color=neutralColor, bgcolor=color.new(neutralColor, 88), text_halign=text.align_center, text_size=size.tiny)
+            table.cell(dashboard, 0, 6, "Outcome", text_color=neutralColor, text_halign=text.align_left, text_size=size.tiny)
+            table.cell(dashboard, 1, 6, auditFollowSamples > 0 ? "CL" + str.tostring(auditFollowProbability * 100.0, "#") + " UT" + str.tostring(auditFollowUtility * 100.0, "#") + " E" + str.tostring(auditFollowSamples) : "—",
+                 text_color=panelColor, bgcolor=color.new(f_spectralColor(auditFollowProbability * 2.0 - 1.0), 22), text_halign=text.align_center, text_size=size.tiny)
+            table.cell(dashboard, 2, 6, auditFadeSamples > 0 ? "CL" + str.tostring(auditFadeProbability * 100.0, "#") + " UT" + str.tostring(auditFadeUtility * 100.0, "#") + " E" + str.tostring(auditFadeSamples) : "—",
+                 text_color=panelColor, bgcolor=color.new(f_spectralColor(auditFadeProbability * 2.0 - 1.0), 22), text_halign=text.align_center, text_size=size.tiny)
+            table.cell(dashboard, 3, 6, auditEffectiveWaitSamples > 0 ? "GOOD " + str.tostring(auditWaitGoodProbability * 100.0, "#") + "% E" + str.tostring(auditEffectiveWaitSamples) : "—",
+                 text_color=panelColor, bgcolor=color.new(f_spectralColor(auditWaitGoodProbability * 2.0 - 1.0), 22), text_halign=text.align_center, text_size=size.tiny)
+            table.cell(dashboard, 4, 6, "E" + str.tostring(routerAuditSamples + auditEffectiveWaitSamples),
+                 text_color=textColor, bgcolor=color.new(neutralColor, 86), text_halign=text.align_center, text_size=size.tiny)
+
+            table.cell(dashboard, 0, 7, "Integrity", text_color=neutralColor, text_halign=text.align_left, text_size=size.tiny)
+            table.cell(dashboard, 1, 7, "CL " + str.tostring(auditCleanCount) + " · RT " + str.tostring(auditRoundTripCount) +
+                 " P" + str.tostring(auditProfitableRoundTrips) + "/D" + str.tostring(auditDamagingRoundTrips) +
+                 " · LS " + str.tostring(auditLossCount) + " · W " + str.tostring(auditWhipsawCount) +
+                 " · Q " + str.tostring(auditQuietCount) + (auditFirstPassSamples > 0 ? " · FP" + str.tostring(auditAverageFirstPassBars, "#.#") + "b" : ""),
+                 text_color=pivotColor, text_halign=text.align_right, text_size=size.tiny)
+            table.cell(dashboard, 0, 8, "Horizon", text_color=neutralColor, text_halign=text.align_left, text_size=size.tiny)
+            table.cell(dashboard, 1, 8, "F " + (auditFollowFastN > 0 ? str.tostring(auditFollowFastProbability * 100.0, "#") : "—") + "›" +
+                 (auditFollowMediumN > 0 ? str.tostring(auditFollowMediumProbability * 100.0, "#") : "—") + "›" +
+                 (auditFollowFinalN > 0 ? str.tostring(auditFollowFinalProbability * 100.0, "#") : "—") + " · D " +
+                 (auditFadeFastN > 0 ? str.tostring(auditFadeFastProbability * 100.0, "#") : "—") + "›" +
+                 (auditFadeMediumN > 0 ? str.tostring(auditFadeMediumProbability * 100.0, "#") : "—") + "›" +
+                 (auditFadeFinalN > 0 ? str.tostring(auditFadeFinalProbability * 100.0, "#") : "—") + " · " +
+                 str.tostring(researchFastHorizon) + "/" + str.tostring(researchMediumHorizon) + "/" + str.tostring(researchHorizon) + "b",
+                 text_color=textColor, text_halign=text.align_right, text_size=size.tiny)
+            table.cell(dashboard, 0, 9, "Forecast", text_color=neutralColor, text_halign=text.align_left, text_size=size.tiny)
+            table.cell(dashboard, 1, 9, auditBrierSamples > 0 ? "P/A CL" + str.tostring(auditForecastClean * 100.0, "#") + "/" + str.tostring(auditActualClean * 100.0, "#") +
+                 " · RT" + str.tostring(auditForecastRoundTrip * 100.0, "#") + "/" + str.tostring(auditActualRoundTrip * 100.0, "#") +
+                 " · LS" + str.tostring(auditForecastLoss * 100.0, "#") + "/" + str.tostring(auditActualLoss * 100.0, "#") +
+                 " · BASE" + str.tostring(auditCleanClimate * 100.0, "#") + " · MC" + str.tostring(auditMulticlassBrierScore, "#.##") + " · REL-" + auditReliabilityShort : "P/A AWAIT",
+                 text_color=auditCalibrationReady and auditCalibrationMonotonic ? bullColor : auditCalibrationReady ? bearColor : textColor,
+                 text_halign=text.align_right, text_size=size.tiny)
+            table.cell(dashboard, 0, 10, "Latest", text_color=neutralColor, text_halign=text.align_left, text_size=size.tiny)
+            table.cell(dashboard, 1, 10, lastRouterAuditText, text_color=routerAuditColor, text_halign=text.align_right, text_size=size.tiny)
+        else if researchDashboard
+            table.cell(dashboard, 0, 1, "Events", text_color=neutralColor, text_halign=text.align_left, text_size=size.tiny)
+            table.cell(dashboard, 1, 1, "T" + str.tostring(researchTouches) + " · R" + str.tostring(researchRejections) +
+                 " · B" + str.tostring(researchBreakouts) + " · RT" + str.tostring(researchRetests),
+                 text_color=textColor, text_halign=text.align_right, text_size=size.tiny)
+            table.cell(dashboard, 0, 2, "Evidence", text_color=neutralColor, text_halign=text.align_left, text_size=size.tiny)
+            table.cell(dashboard, 1, 2, "Adj " + reactionProbabilityText + " · Raw " + rawReactionProbabilityText + " · N" +
+                 str.tostring(researchSamples), text_color=f_spectralColor(reactionEvidenceField), text_halign=text.align_right, text_size=size.tiny)
+            table.cell(dashboard, 0, 3, "Excursion", text_color=neutralColor, text_halign=text.align_left, text_size=size.tiny)
+            table.cell(dashboard, 1, 3, "MFE " + str.tostring(averageMfe, "#.##") + " · MAE " +
+                 str.tostring(averageMae, "#.##") + " ATR", text_color=pivotColor, text_halign=text.align_right, text_size=size.tiny)
+            table.cell(dashboard, 0, 4, "Quality", text_color=neutralColor, text_halign=text.align_left, text_size=size.tiny)
+            table.cell(dashboard, 1, 4, calibratedEvidenceTier + " · Q" +
+                 (calibratedEvidenceQuality >= 0.0 ? "+" : "−") + str.tostring(math.abs(calibratedEvidenceQuality) * 100.0, "#") + " · LB " +
+                 (researchSamples > 0 ? str.tostring(calibratedWilsonLower * 100.0, "#") + "%" : "—"),
+                 text_color=f_spectralColor(calibratedEvidenceQuality), text_halign=text.align_right, text_size=size.tiny)
+
+            table.cell(dashboard, 0, 5, "Horizon", text_color=neutralColor, text_halign=text.align_left, text_size=size.tiny)
+            table.cell(dashboard, 1, 5, str.tostring(researchFastHorizon) + "b " + (fastHorizonN > 0 ? str.tostring(fastHorizonProbability * 100.0, "#") + "%" : "—"), text_color=panelColor, bgcolor=color.new(f_spectralColor(fastHorizonProbability * 2.0 - 1.0), 22), text_halign=text.align_center, text_size=size.tiny)
+            table.cell(dashboard, 2, 5, str.tostring(researchMediumHorizon) + "b " + (mediumHorizonN > 0 ? str.tostring(mediumHorizonProbability * 100.0, "#") + "%" : "—"), text_color=panelColor, bgcolor=color.new(f_spectralColor(mediumHorizonProbability * 2.0 - 1.0), 22), text_halign=text.align_center, text_size=size.tiny)
+            table.cell(dashboard, 3, 5, str.tostring(researchHorizon) + "b " + (finalHorizonN > 0 ? str.tostring(finalHorizonProbability * 100.0, "#") + "%" : "—"), text_color=panelColor, bgcolor=color.new(f_spectralColor(finalHorizonProbability * 2.0 - 1.0), 22), text_halign=text.align_center, text_size=size.tiny)
+            table.cell(dashboard, 4, 5, "N" + str.tostring(finalHorizonN), text_color=textColor, bgcolor=color.new(neutralColor, 86), text_halign=text.align_center, text_size=size.tiny)
+
+            table.cell(dashboard, 0, 6, "Regime", text_color=neutralColor, text_halign=text.align_left, text_size=size.tiny)
+            table.cell(dashboard, 1, 6, "TREND", text_color=textColor, bgcolor=color.new(neutralColor, 86), text_halign=text.align_center, text_size=size.tiny)
+            table.cell(dashboard, 2, 6, (trendSamples > 0 ? str.tostring(trendProbability * 100.0, "#") + "%" : "—"), text_color=panelColor, bgcolor=color.new(f_spectralColor(trendEvidenceField), 22), text_halign=text.align_center, text_size=size.tiny)
+            table.cell(dashboard, 3, 6, "CHOP", text_color=textColor, bgcolor=color.new(neutralColor, 86), text_halign=text.align_center, text_size=size.tiny)
+            table.cell(dashboard, 4, 6, (chopSamples > 0 ? str.tostring(chopProbability * 100.0, "#") + "%" : "—"), text_color=panelColor, bgcolor=color.new(f_spectralColor(chopEvidenceField), 22), text_halign=text.align_center, text_size=size.tiny)
+
+            table.cell(dashboard, 0, 7, "Grid avg", text_color=neutralColor, text_halign=text.align_left, text_size=size.tiny)
+            table.cell(dashboard, 1, 7, "ROM " + romResponseText + " · Canonical " +
+                 canonicalResponseText + " ATR", text_color=textColor, text_halign=text.align_right, text_size=size.tiny)
+            table.cell(dashboard, 0, 8, "0.728", text_color=neutralColor, text_halign=text.align_left, text_size=size.tiny)
+            table.cell(dashboard, 1, 8, gem728ProbabilityText + " · " +
+                 str.tostring(gem728Samples) + " studies · " + gem728ResponseText + " ATR",
+                 text_color=f_spectralColor(gem728EvidenceField), text_halign=text.align_right, text_size=size.tiny)
+            table.cell(dashboard, 0, 9, "1.328", text_color=neutralColor, text_halign=text.align_left, text_size=size.tiny)
+            table.cell(dashboard, 1, 9, gem1328ProbabilityText + " · " +
+                 str.tostring(gem1328Samples) + " studies · " + gem1328ResponseText + " ATR",
+                 text_color=f_spectralColor(gem1328EvidenceField), text_halign=text.align_right, text_size=size.tiny)
+            table.cell(dashboard, 0, 10, researchActive ? "Study" : "Route", text_color=neutralColor, text_halign=text.align_left, text_size=size.tiny)
+            table.cell(dashboard, 1, 10, researchActive ? researchStatus : routerCoreText, text_color=researchActive ? pivotColor : routerColor, text_halign=text.align_right, text_size=size.tiny)
+        else if dashboardMode == "Diagnostic"
+            string diagnosticPhi = fibReady ? phiLevelShort + " " + str.tostring(nearestFibRatio, "#.###") + " · φ" + str.tostring(phiCoordinate, "#.###") : phiLevelShort
+            table.cell(dashboard, 0, 1, "PHI", text_color=neutralColor, text_halign=text.align_left, text_size=size.tiny)
+            table.cell(dashboard, 1, 1, diagnosticPhi, text_color=f_spectralColor(phiBias), text_halign=text.align_right, text_size=size.tiny)
+            table.cell(dashboard, 0, 2, "INT", text_color=neutralColor, text_halign=text.align_left, text_size=size.tiny)
+            table.cell(dashboard, 1, 2, interactionWord + " · R" + str.tostring(resonanceStrength * 100.0, "#") + " · " + clusterWord, text_color=interactionColor, text_halign=text.align_right, text_size=size.tiny)
+            table.cell(dashboard, 0, 3, "FLD", text_color=neutralColor, text_halign=text.align_left, text_size=size.tiny)
+            table.cell(dashboard, 1, 3, (councilVisualField >= 0.0 ? "F+" : "F−") + str.tostring(math.abs(councilVisualField) * 100.0, "#"), text_color=f_spectralColor(councilVisualField), text_halign=text.align_right, text_size=size.tiny)
+            table.cell(dashboard, 0, 4, "CNL", text_color=neutralColor, text_halign=text.align_left, text_size=size.tiny)
+            table.cell(dashboard, 1, 4, councilShort + str.tostring(math.abs(councilRaw) * 100.0, "#") + " · " + str.tostring(dominantAgreement) + "/4", text_color=stateColor, text_halign=text.align_right, text_size=size.tiny)
+            table.cell(dashboard, 0, 5, "FAM", text_color=neutralColor, text_halign=text.align_left, text_size=size.tiny)
+            table.cell(dashboard, 1, 5, "T", text_color=neutralColor, text_halign=text.align_center, text_size=size.tiny)
+            table.cell(dashboard, 2, 5, "F", text_color=neutralColor, text_halign=text.align_center, text_size=size.tiny)
+            table.cell(dashboard, 3, 5, "A", text_color=neutralColor, text_halign=text.align_center, text_size=size.tiny)
+            table.cell(dashboard, 4, 5, "G", text_color=neutralColor, text_halign=text.align_center, text_size=size.tiny)
+            table.cell(dashboard, 0, 6, "VOTE", text_color=neutralColor, text_halign=text.align_left, text_size=size.tiny)
+            table.cell(dashboard, 1, 6, f_voteText(cycleFamily), text_color=panelColor, bgcolor=color.new(f_spectralColor(cycleFamily), 22), text_halign=text.align_center, text_size=size.tiny)
+            table.cell(dashboard, 2, 6, f_voteText(flowFamily), text_color=panelColor, bgcolor=color.new(f_spectralColor(flowFamily), 22), text_halign=text.align_center, text_size=size.tiny)
+            table.cell(dashboard, 3, 6, f_voteText(atrFamily), text_color=panelColor, bgcolor=color.new(f_spectralColor(atrFamily), 22), text_halign=text.align_center, text_size=size.tiny)
+            table.cell(dashboard, 4, 6, f_voteText(geometryFamily), text_color=panelColor, bgcolor=color.new(f_spectralColor(geometryFamily), 22), text_halign=text.align_center, text_size=size.tiny)
+            table.cell(dashboard, 0, 7, "SYS", text_color=neutralColor, text_halign=text.align_left, text_size=size.tiny)
+            table.cell(dashboard, 1, 7, "CYC " + (trendState > 0 ? "UP" : trendState < 0 ? "DN" : "FL") + " P" + str.tostring(cycleLength) + " · FLW " + str.tostring(pressureScore * 100.0, "#"), text_color=textColor, text_halign=text.align_right, text_size=size.tiny)
+            table.cell(dashboard, 0, 8, "GEO", text_color=neutralColor, text_halign=text.align_left, text_size=size.tiny)
+            table.cell(dashboard, 1, 8, geometryText, text_color=confluenceActive ? pivotColor : textColor, text_halign=text.align_right, text_size=size.tiny)
+            table.cell(dashboard, 0, 9, "Q", text_color=neutralColor, text_halign=text.align_left, text_size=size.tiny)
+            table.cell(dashboard, 1, 9, "C" + str.tostring(councilConfidence * 100.0, "#") + " H" + str.tostring(councilCoherence * 100.0, "#") + " · " + integrityWord, text_color=textColor, text_halign=text.align_right, text_size=size.tiny)
+            table.cell(dashboard, 0, 10, "RTE", text_color=neutralColor, text_halign=text.align_left, text_size=size.tiny)
+            table.cell(dashboard, 1, 10, routerCompactText + " · N" + str.tostring(researchSamples) + " A" + str.tostring(reactionProbability * 100.0, "#") + "% LB" + str.tostring(calibratedWilsonLower * 100.0, "#") + "%", text_color=routerColor, text_halign=text.align_right, text_size=size.tiny)
+        else
+            bool compactDashboard = dashboardMode == "Compact"
+            table.cell(dashboard, 0, 1, compactDashboard ? "Bias" : "Location", text_color=neutralColor, text_halign=text.align_left, text_size=size.tiny)
+            table.cell(dashboard, 1, 1, compactDashboard ? fieldDirection + " " + str.tostring(math.abs(councilVisualField) * 100.0, "#") + "% · " + councilGuided : locationText, text_color=compactDashboard ? stateColor : f_spectralColor(phiBias), text_halign=text.align_right, text_size=size.tiny)
+            table.cell(dashboard, 0, 2, "Interaction", text_color=neutralColor, text_halign=text.align_left, text_size=size.tiny)
+            table.cell(dashboard, 1, 2, compactDashboard ? interactionWord + " · R" + str.tostring(resonanceStrength * 100.0, "#") + " · " + phiLevelShort : interactionText, text_color=interactionColor, text_halign=text.align_right, text_size=size.tiny)
+            table.cell(dashboard, 0, 3, compactDashboard ? "Quality" : "Council", text_color=neutralColor, text_halign=text.align_left, text_size=size.tiny)
+            table.cell(dashboard, 1, 3, compactDashboard ? "Conf " + str.tostring(councilConfidence * 100.0, "#") + "% · Coh " + str.tostring(councilCoherence * 100.0, "#") + "% · " + integrityWord : councilGuided, text_color=stateColor, text_halign=text.align_right, text_size=size.tiny)
+            table.cell(dashboard, 0, 4, compactDashboard ? "Route" : "Quality", text_color=neutralColor, text_halign=text.align_left, text_size=size.tiny)
+            table.cell(dashboard, 1, 4, compactDashboard ? routerCompactText + " · A" + reactionProbabilityText : qualityGuided, text_color=compactDashboard ? routerColor : stateColor, text_halign=text.align_right, text_size=size.tiny)
+
+            table.cell(dashboard, 0, 5, "Engines", text_color=neutralColor, text_halign=text.align_left, text_size=size.tiny)
+            table.cell(dashboard, 1, 5, "CYCLE", text_color=neutralColor, bgcolor=color.new(neutralColor, 88), text_halign=text.align_center, text_size=size.tiny)
+            table.cell(dashboard, 2, 5, "FLOW", text_color=neutralColor, bgcolor=color.new(neutralColor, 88), text_halign=text.align_center, text_size=size.tiny)
+            table.cell(dashboard, 3, 5, "ATR", text_color=neutralColor, bgcolor=color.new(neutralColor, 88), text_halign=text.align_center, text_size=size.tiny)
+            table.cell(dashboard, 4, 5, "PHI", text_color=neutralColor, bgcolor=color.new(neutralColor, 88), text_halign=text.align_center, text_size=size.tiny)
+            table.cell(dashboard, 0, 6, "Strength", text_color=neutralColor, text_halign=text.align_left, text_size=size.tiny)
+            table.cell(dashboard, 1, 6, f_voteText(cycleFamily), text_color=panelColor, bgcolor=color.new(f_spectralColor(cycleFamily), 18), text_halign=text.align_center, text_size=size.tiny)
+            table.cell(dashboard, 2, 6, f_voteText(flowFamily), text_color=panelColor, bgcolor=color.new(f_spectralColor(flowFamily), 18), text_halign=text.align_center, text_size=size.tiny)
+            table.cell(dashboard, 3, 6, f_voteText(atrFamily), text_color=panelColor, bgcolor=color.new(f_spectralColor(atrFamily), 18), text_halign=text.align_center, text_size=size.tiny)
+            table.cell(dashboard, 4, 6, f_voteText(geometryFamily), text_color=panelColor, bgcolor=color.new(f_spectralColor(geometryFamily), 18), text_halign=text.align_center, text_size=size.tiny)
+
+            table.cell(dashboard, 0, 7, compactDashboard ? "Geometry" : "Evidence", text_color=neutralColor, text_halign=text.align_left, text_size=size.tiny)
+            table.cell(dashboard, 1, 7, compactDashboard ? geometryText : evidenceText, text_color=compactDashboard ? textColor : f_spectralColor(reactionEvidenceField), text_halign=text.align_right, text_size=size.tiny)
+            if not compactDashboard
+                table.cell(dashboard, 0, 8, "Geometry", text_color=neutralColor, text_halign=text.align_left, text_size=size.tiny)
+                table.cell(dashboard, 1, 8, geometryText, text_color=confluenceActive ? pivotColor : textColor, text_halign=text.align_right, text_size=size.tiny)
+                table.cell(dashboard, 0, 9, "Route", text_color=neutralColor, text_halign=text.align_left, text_size=size.tiny)
+                table.cell(dashboard, 1, 9, routerCoreText, text_color=routerColor, text_halign=text.align_right, text_size=size.tiny)
+                table.cell(dashboard, 0, 10, "Field", text_color=neutralColor, text_halign=text.align_left, text_size=size.tiny)
+                table.cell(dashboard, 1, 10, fieldGuided, text_color=f_spectralColor(councilVisualField), text_halign=text.align_right, text_size=size.tiny)
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Final alerts — two named council conditions plus plot-free dynamic detail
+// ─────────────────────────────────────────────────────────────────────────────
+
+alertcondition(alertsEnabled and alertCouncilSignals and bullCouncilSignal, title="ROM Council Buy", message="ROM V3.2g: confirmed multi-family BUY council event")
+alertcondition(alertsEnabled and alertCouncilSignals and bearCouncilSignal, title="ROM Council Sell", message="ROM V3.2g: confirmed multi-family SELL council event")
+
+string dynamicAlertMessage = ""
+if alertsEnabled and barstate.isconfirmed
+    if alertFibRejections and phiBullReject
+        dynamicAlertMessage := dynamicAlertMessage + "ROM 3.2g · PHI BULL REJECTION\n"
+    if alertFibRejections and phiBearReject
+        dynamicAlertMessage := dynamicAlertMessage + "ROM 3.2g · PHI BEAR REJECTION\n"
+    if alertFibAcceptance and phiBullAccept
+        dynamicAlertMessage := dynamicAlertMessage + "ROM 3.2g · PHI BULL ACCEPTANCE\n"
+    if alertFibAcceptance and phiBearAccept
+        dynamicAlertMessage := dynamicAlertMessage + "ROM 3.2g · PHI BEAR ACCEPTANCE\n"
+    if alertFibAcceptance and phiBullRetest
+        dynamicAlertMessage := dynamicAlertMessage + "ROM 3.2g · PHI BULL RETEST\n"
+    if alertFibAcceptance and phiBearRetest
+        dynamicAlertMessage := dynamicAlertMessage + "ROM 3.2g · PHI BEAR RETEST\n"
+    if alertTrendTurns and trendBullTurn
+        dynamicAlertMessage := dynamicAlertMessage + "ROM 3.2g · CYCLE TREND BULL TURN\n"
+    if alertTrendTurns and trendBearTurn
+        dynamicAlertMessage := dynamicAlertMessage + "ROM 3.2g · CYCLE TREND BEAR TURN\n"
+    if alertAtrTurns and atrBullTurn
+        dynamicAlertMessage := dynamicAlertMessage + "ROM 3.2g · ATR BULL TURN\n"
+    if alertAtrTurns and atrBearTurn
+        dynamicAlertMessage := dynamicAlertMessage + "ROM 3.2g · ATR BEAR TURN\n"
+    if alertCouncilSignals and bullCouncilSignal
+        dynamicAlertMessage := dynamicAlertMessage + "ROM 3.2g · COUNCIL BUY | C=" + str.tostring(councilConfidence * 100.0, "#") + "%\n"
+    if alertCouncilSignals and bearCouncilSignal
+        dynamicAlertMessage := dynamicAlertMessage + "ROM 3.2g · COUNCIL SELL | C=" + str.tostring(councilConfidence * 100.0, "#") + "%\n"
+    if alertResearchResults and researchStudyCompleted
+        dynamicAlertMessage := dynamicAlertMessage + researchCompletionMessage + "\n"
+    if alertEvidenceEdges and newEvidenceEdge
+        dynamicAlertMessage := dynamicAlertMessage + evidenceEdgeMessage + "\n"
+    if alertRouterAuditResults and routerAuditCompleted
+        dynamicAlertMessage := dynamicAlertMessage + routerAuditCompletionMessage
+    if alertEvidenceRoutes and routerDecisionEvent
+        dynamicAlertMessage := dynamicAlertMessage + "ROM 3.2g · " + routedAction + " " +
+             (routedDirection > 0 ? "BULL" : "BEAR") + " | " + routedCohortName + " | " + routedLevelName +
+             " | " + routedRegimeName + " | E=" + str.tostring(routedExpectancyAtr, "#.##") +
+             " ATR | C=" + str.tostring(routedConfidence * 100.0, "#") + "%\n"
+
+if str.length(dynamicAlertMessage) > 0
+    alert(dynamicAlertMessage, alert.freq_once_per_bar_close)
+
+// Plot-budget integrity: Research data lives in arrays, objects and table cells.
+// Only two named alertcondition slots remain; all detailed alerts use alert().

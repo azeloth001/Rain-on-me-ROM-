@@ -1,0 +1,590 @@
+//@version=6
+indicator("ROM∞ PHI Prospective Validator · MACRO",
+     shorttitle="ROM PV1 X",
+     overlay=true,
+     max_bars_back=1500,
+     max_lines_count=100,
+     max_labels_count=20)
+
+// ╔════════════════════════════════════════════════════════════════════════════╗
+// ║  ROM 3.2h5g1-PV1 — FROZEN PERSONALITY WALK-FORWARD VALIDATOR             ║
+// ║                                                                            ║
+// ║  Question (Astra hypothesis):                                              ║
+// ║  Did WALL / GATE / MAGNET know its personality BEFORE the next untouched  ║
+// ║  reaction happened, or did later evidence merely make history look good?  ║
+// ║                                                                            ║
+// ║  Integrity contract                                                        ║
+// ║  • Existing audits settle first.                                           ║
+// ║  • A new touch then freezes personality + probability from PRIOR evidence. ║
+// ║  • The new event cannot edit its own frozen forecast.                      ║
+// ║  • At the Structural clock, forecast is scored BEFORE evidence is updated. ║
+// ║  • Only H24-separated independent births enter evidence / walk-forward.    ║
+// ║  • Current H5g1 personality math and ROM Legacy PHI ratios are preserved.  ║
+// ║                                                                            ║
+// ║  Champion geometry: 1W/1M, Structural 96h.          ║
+// ╚════════════════════════════════════════════════════════════════════════════╝
+
+const string PROFILE_NAME = "MACRO"
+const string PRIMARY_TF = "1W"
+const string SECONDARY_TF = "1M"
+const float STRUCTURAL_HOURS = 96.0
+const float EXPECTED_CHART_SECONDS = 14400
+
+const int RATIO_COUNT = 10
+const int BIN_COUNT = 11
+const int OUT_HOLD = 1
+const int OUT_PASS = 2
+const int OUT_WHIP = 3
+const int OUT_STALL = 4
+const int CLS_NONE = 0
+const int CLS_WALL = 1
+const int CLS_GATE = 2
+const int CLS_MAGNET = 3
+
+string GROUP_TEST = "PV1 · Prospective Test"
+bool confirmedEventsOnly = input.bool(true, "Confirm Touch Births On Bar Close", group=GROUP_TEST)
+int atrLength = input.int(14, "ATR Length", minval=2, maxval=100, group=GROUP_TEST)
+float zoneAtrWidth = input.float(0.08, "Touch Zone Half-Width × ATR", minval=0.01, maxval=0.50, step=0.01, group=GROUP_TEST)
+float barrierAtr = input.float(0.35, "Meaningful Barrier × Entry ATR", minval=0.10, maxval=2.00, step=0.05, group=GROUP_TEST)
+int touchCooldown = input.int(2, "Touch Re-entry Cooldown (bars)", minval=0, maxval=50, group=GROUP_TEST)
+int independentBars = input.int(24, "Independent Birth Spacing (bars)", minval=4, maxval=200,
+     tooltip="Keep at 24 for the normalized walk-forward test.", group=GROUP_TEST)
+int personalityMinSamples = input.int(20, "Personality Minimum Samples", minval=5, maxval=200, group=GROUP_TEST)
+int personalityTrustedSamples = input.int(55, "Personality Trusted Samples", minval=20, maxval=300, group=GROUP_TEST)
+bool trackSecondary = input.bool(true, "Include Secondary Anchor", group=GROUP_TEST)
+int maxActiveAudits = input.int(80, "Maximum Live Audits", minval=10, maxval=200, group=GROUP_TEST)
+bool showPrimary = input.bool(true, "Show Primary PHI", group=GROUP_TEST)
+bool showSecondary = input.bool(true, "Show Secondary PHI", group=GROUP_TEST)
+bool showDashboard = input.bool(true, "Show Validator Dashboard", group=GROUP_TEST)
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Minimal helpers
+// ─────────────────────────────────────────────────────────────────────────────
+f_safeDiv(float numerator, float denominator, float fallback) =>
+    math.abs(denominator) > 1e-10 ? numerator / denominator : fallback
+
+f_clamp(float value, float low, float high) =>
+    math.max(low, math.min(high, value))
+
+f_structuralOutcome(int rejectHitBar, int passHitBar) =>
+    bool sameBar = rejectHitBar >= 0 and passHitBar >= 0 and rejectHitBar == passHitBar
+    bool holdFirst = rejectHitBar >= 0 and (passHitBar < 0 or rejectHitBar < passHitBar)
+    bool passFirst = passHitBar >= 0 and (rejectHitBar < 0 or passHitBar < rejectHitBar)
+    sameBar ? OUT_WHIP : holdFirst ? OUT_HOLD : passFirst ? OUT_PASS : OUT_STALL
+
+f_className(int classCode) =>
+    classCode == CLS_WALL ? "WALL" : classCode == CLS_GATE ? "GATE" : classCode == CLS_MAGNET ? "MAGNET" : "—"
+
+f_ratioName(int ratioBin, array<float> ratios) =>
+    ratioBin == 0 ? "PP" : str.tostring(array.get(ratios, ratioBin - 1), "#.###")
+
+f_eventGate(bool condition) =>
+    confirmedEventsOnly ? condition and barstate.isconfirmed : condition
+
+f_levelForIndex(int index, float pivot, float scale, array<float> ratios) =>
+    float result = pivot
+    if index > 0 and index <= 10
+        result := pivot + scale * array.get(ratios, index - 1)
+    else if index > 10
+        result := pivot - scale * array.get(ratios, index - 11)
+    result
+
+f_ratioForIndex(int index, array<float> ratios) =>
+    index == 0 ? 0.0 : index <= 10 ? array.get(ratios, index - 1) : array.get(ratios, index - 11)
+
+f_touchedCandidate(float pivot, float scale, array<float> ratios, float zoneWidth,
+     float barHigh, float barLow, float referencePrice) =>
+    int bestIndex = -1
+    float bestLevel = na
+    float bestRatio = na
+    float bestDistance = 1e20
+    for index = 0 to 20
+        float level = f_levelForIndex(index, pivot, scale, ratios)
+        bool touched = barHigh >= level - zoneWidth and barLow <= level + zoneWidth
+        float distance = math.abs(referencePrice - level)
+        if touched and distance < bestDistance
+            bestDistance := distance
+            bestIndex := index
+            bestLevel := level
+            bestRatio := f_ratioForIndex(index, ratios)
+    [bestIndex, bestLevel, bestRatio]
+
+f_nextLevelInDirection(float sourceLevel, int direction, float pivot, float scale, array<float> ratios) =>
+    float result = na
+    float bestGap = 1e20
+    for index = 0 to 20
+        float candidate = f_levelForIndex(index, pivot, scale, ratios)
+        float directedGap = float(direction) * (candidate - sourceLevel)
+        if directedGap > syminfo.mintick and directedGap < bestGap
+            bestGap := directedGap
+            result := candidate
+    result
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Fixed ROM Legacy ratio family used by the H5g personality experiment.
+// ─────────────────────────────────────────────────────────────────────────────
+var array<float> ratios = array.new_float()
+if barstate.isfirst
+    array.push(ratios, 0.235)
+    array.push(ratios, 0.382)
+    array.push(ratios, 0.500)
+    array.push(ratios, 0.618)
+    array.push(ratios, 0.728)
+    array.push(ratios, 1.000)
+    array.push(ratios, 1.235)
+    array.push(ratios, 1.328)
+    array.push(ratios, 1.500)
+    array.push(ratios, 1.618)
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Confirmed frozen PHI geometry: previous completed anchor only.
+// ─────────────────────────────────────────────────────────────────────────────
+float atr = ta.atr(atrLength)
+float safeAtr = math.max(nz(atr, syminfo.mintick), syminfo.mintick)
+float zoneWidth = math.max(safeAtr * zoneAtrWidth, syminfo.mintick * 2.0)
+
+[pHigh, pLow, pClose] = request.security(
+     syminfo.tickerid, PRIMARY_TF, [high[1], low[1], close[1]],
+     gaps=barmerge.gaps_off, lookahead=barmerge.lookahead_on)
+[sHigh, sLow, sClose] = request.security(
+     syminfo.tickerid, SECONDARY_TF, [high[1], low[1], close[1]],
+     gaps=barmerge.gaps_off, lookahead=barmerge.lookahead_on)
+
+float pScale = math.max(nz(pHigh - pLow, syminfo.mintick), syminfo.mintick)
+float sScale = math.max(nz(sHigh - sLow, syminfo.mintick), syminfo.mintick)
+float pPivot = (pHigh + pLow + pClose) / 3.0
+float sPivot = (sHigh + sLow + sClose) / 3.0
+bool pReady = not na(pPivot) and pScale > syminfo.mintick
+bool sReady = not na(sPivot) and sScale > syminfo.mintick
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Completed Structural-clock evidence used by H5g1 personality.
+// R/S share absolute ratio identity; PP remains its own bin.
+// ─────────────────────────────────────────────────────────────────────────────
+var array<int> evN = array.new_int(BIN_COUNT, 0)
+var array<int> evHold = array.new_int(BIN_COUNT, 0)
+var array<int> evPass = array.new_int(BIN_COUNT, 0)
+var array<int> evWhip = array.new_int(BIN_COUNT, 0)
+var array<int> evStall = array.new_int(BIN_COUNT, 0)
+var array<int> evRetained = array.new_int(BIN_COUNT, 0)
+var array<int> evNext = array.new_int(BIN_COUNT, 0)
+
+f_phiStats(int ratioBin) =>
+    int n = array.get(evN, ratioBin)
+    int holdCount = array.get(evHold, ratioBin)
+    int passCount = array.get(evPass, ratioBin)
+    int whipCount = array.get(evWhip, ratioBin)
+    int stallCount = array.get(evStall, ratioBin)
+    int retainedCount = array.get(evRetained, ratioBin)
+    int nextCount = array.get(evNext, ratioBin)
+
+    float holdRate = f_safeDiv(float(holdCount), float(n), 0.0)
+    float passRate = f_safeDiv(float(passCount), float(n), 0.0)
+    float whipRate = f_safeDiv(float(whipCount), float(n), 0.0)
+    float stallRate = f_safeDiv(float(stallCount), float(n), 0.0)
+    float retainedRate = f_safeDiv(float(retainedCount), float(n), 0.0)
+    float nextRate = f_safeDiv(float(nextCount), float(passCount), 0.0)
+    float noiseRate = f_clamp(whipRate + stallRate, 0.0, 1.0)
+    float balance = 1.0 - math.min(math.abs(holdRate - passRate), 1.0)
+
+    float wallStrength = holdRate * (0.60 + 0.40 * retainedRate) * (1.0 - 0.45 * noiseRate)
+    float gateStrength = passRate * (0.55 + 0.45 * nextRate) * (0.60 + 0.40 * retainedRate) * (1.0 - 0.45 * noiseRate)
+    float magnetStrength = noiseRate * (0.60 + 0.40 * balance)
+    float rawStrength = math.max(wallStrength, math.max(gateStrength, magnetStrength))
+    float maturity = n > 0 ? math.min(1.0, math.sqrt(float(n) / float(math.max(personalityTrustedSamples, 1)))) : 0.0
+    float importance = 100.0 * rawStrength * (0.35 + 0.65 * maturity)
+
+    int classCode = CLS_NONE
+    string personality = n < personalityMinSamples ? "EARLY" : "MIXED"
+    if n >= personalityMinSamples
+        bool wallCandidate = holdRate >= passRate + 0.05 and wallStrength >= 0.28
+        bool gateCandidate = passRate >= holdRate + 0.05 and gateStrength >= 0.28
+        bool magnetCandidate = noiseRate >= 0.34 and magnetStrength >= wallStrength and magnetStrength >= gateStrength
+        if wallCandidate and wallStrength >= gateStrength and wallStrength >= magnetStrength
+            personality := "WALL"
+            classCode := CLS_WALL
+        else if gateCandidate and gateStrength >= wallStrength and gateStrength >= magnetStrength
+            personality := "GATE"
+            classCode := CLS_GATE
+        else if magnetCandidate
+            personality := "MAGNET"
+            classCode := CLS_MAGNET
+        else if rawStrength < 0.24
+            personality := "WEAK"
+
+    float modelProbability = classCode == CLS_WALL ? holdRate :
+         classCode == CLS_GATE ? passRate :
+         classCode == CLS_MAGNET ? noiseRate : 0.50
+
+    [personality, classCode, importance, modelProbability, holdRate, passRate, retainedRate, nextRate, noiseRate, n]
+
+f_globalClassRate(int classCode) =>
+    int totalN = 0
+    int targetN = 0
+    for b = 0 to BIN_COUNT - 1
+        int n = array.get(evN, b)
+        totalN += n
+        targetN += classCode == CLS_WALL ? array.get(evHold, b) :
+             classCode == CLS_GATE ? array.get(evPass, b) :
+             classCode == CLS_MAGNET ? array.get(evWhip, b) + array.get(evStall, b) : 0
+    f_clamp(f_safeDiv(float(targetN), float(totalN), 0.50), 0.02, 0.98)
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Prospective scorebooks.
+// index 0 = ALL actionable forecasts, 1 WALL, 2 GATE, 3 MAGNET.
+// ─────────────────────────────────────────────────────────────────────────────
+var array<int> pvClassN = array.new_int(4, 0)
+var array<int> pvClassHit = array.new_int(4, 0)
+var array<int> pvClassStrictHit = array.new_int(4, 0)
+var array<float> pvClassModelBrier = array.new_float(4, 0.0)
+var array<float> pvClassBaseBrier = array.new_float(4, 0.0)
+
+var array<int> pvRatioN = array.new_int(BIN_COUNT, 0)
+var array<int> pvRatioHit = array.new_int(BIN_COUNT, 0)
+var array<int> pvRatioStrictHit = array.new_int(BIN_COUNT, 0)
+var array<float> pvRatioModelBrier = array.new_float(BIN_COUNT, 0.0)
+var array<float> pvRatioBaseBrier = array.new_float(BIN_COUNT, 0.0)
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Active untouched events. Forecast fields are frozen at birth.
+// ─────────────────────────────────────────────────────────────────────────────
+var array<int> aStartBar = array.new_int()
+var array<int> aStartTime = array.new_int()
+var array<int> aAnchor = array.new_int()
+var array<int> aRatio = array.new_int()
+var array<float> aLevel = array.new_float()
+var array<float> aNextLevel = array.new_float()
+var array<int> aApproach = array.new_int()
+var array<float> aEntryAtr = array.new_float()
+var array<float> aZoneWidth = array.new_float()
+var array<int> aRejectHit = array.new_int()
+var array<int> aPassHit = array.new_int()
+var array<int> aLastSide = array.new_int()
+var array<bool> aNextHit = array.new_bool()
+var array<bool> aIndependent = array.new_bool()
+var array<int> aFrozenClass = array.new_int()
+var array<float> aFrozenModelP = array.new_float()
+var array<float> aFrozenBaseP = array.new_float()
+var array<float> aFrozenImportance = array.new_float()
+var array<int> aFrozenEvidenceN = array.new_int()
+
+// [last raw primary, last raw secondary, last independent primary, last independent secondary]
+var array<int> stateBars = array.new_int(4, na)
+var string latestSettled = "AWAIT FROZEN FORECAST"
+var array<string> pvText = array.new_string(1, "AWAIT ACTIONABLE PERSONALITY")
+
+int structuralMs = int(math.round(STRUCTURAL_HOURS * 60.0 * 60.0 * 1000.0))
+
+
+f_birthAudit(int anchorType, int touchIndex, float touchLevel, float pivot, float scale,
+     float referencePriceNow, float entryAtrNow, float zoneWidthNow) =>
+    int rawStateIndex = anchorType
+    int independentStateIndex = 2 + anchorType
+    int lastRaw = array.get(stateBars, rawStateIndex)
+    bool cooldownReady = na(lastRaw) or bar_index - lastRaw > touchCooldown
+    if cooldownReady and array.size(aStartBar) < maxActiveAudits
+        int approachSide = referencePriceNow > touchLevel ? 1 :
+             referencePriceNow < touchLevel ? -1 : open >= touchLevel ? 1 : -1
+        int passDirection = -approachSide
+        int ratioBin = touchIndex == 0 ? 0 : touchIndex <= 10 ? touchIndex : touchIndex - 10
+        float nextLevel = f_nextLevelInDirection(touchLevel, passDirection, pivot, scale, ratios)
+
+        int lastIndependent = array.get(stateBars, independentStateIndex)
+        bool independent = na(lastIndependent) or bar_index - lastIndependent >= independentBars
+        if independent
+            array.set(stateBars, independentStateIndex, bar_index)
+        array.set(stateBars, rawStateIndex, bar_index)
+
+        [personality, frozenClass, importance, modelP0, _h, _p, _r, _nxt, _noise, evidenceN] = f_phiStats(ratioBin)
+        float modelP = f_clamp(modelP0, 0.02, 0.98)
+        float baseP = frozenClass > CLS_NONE ? f_globalClassRate(frozenClass) : 0.50
+
+        array.push(aStartBar, bar_index)
+        array.push(aStartTime, time_close)
+        array.push(aAnchor, anchorType)
+        array.push(aRatio, ratioBin)
+        array.push(aLevel, touchLevel)
+        array.push(aNextLevel, nextLevel)
+        array.push(aApproach, approachSide)
+        array.push(aEntryAtr, entryAtrNow)
+        array.push(aZoneWidth, zoneWidthNow)
+        array.push(aRejectHit, -1)
+        array.push(aPassHit, -1)
+        array.push(aLastSide, approachSide)
+        array.push(aNextHit, false)
+        array.push(aIndependent, independent)
+        array.push(aFrozenClass, frozenClass)
+        array.push(aFrozenModelP, modelP)
+        array.push(aFrozenBaseP, baseP)
+        array.push(aFrozenImportance, importance)
+        array.push(aFrozenEvidenceN, evidenceN)
+
+        if independent and frozenClass > CLS_NONE
+            array.set(pvText, 0, f_ratioName(ratioBin, ratios) + " FREEZE " + personality +
+                 " · N" + str.tostring(evidenceN) +
+                 " · p" + str.tostring(modelP * 100.0, "#") + "% vs base " + str.tostring(baseP * 100.0, "#") + "%")
+    0
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 1) Settle OLD events first. Frozen forecast is scored before evidence update.
+// ─────────────────────────────────────────────────────────────────────────────
+if array.size(aStartBar) > 0
+    for i = array.size(aStartBar) - 1 to 0
+        int startBar = array.get(aStartBar, i)
+        if bar_index > startBar
+            int startTime = array.get(aStartTime, i)
+            int ratioBin = array.get(aRatio, i)
+            float levelPrice = array.get(aLevel, i)
+            float nextPrice = array.get(aNextLevel, i)
+            int approachSide = array.get(aApproach, i)
+            int passDirection = -approachSide
+            float barrierDistance = array.get(aEntryAtr, i) * barrierAtr
+            float eventZoneWidth = array.get(aZoneWidth, i)
+            float rejectBarrier = levelPrice + float(approachSide) * barrierDistance
+            float passBarrier = levelPrice + float(passDirection) * barrierDistance
+            int elapsed = bar_index - startBar
+
+            int rejectHit = array.get(aRejectHit, i)
+            int passHit = array.get(aPassHit, i)
+            bool rejectReached = approachSide > 0 ? high >= rejectBarrier : low <= rejectBarrier
+            bool passReached = passDirection > 0 ? high >= passBarrier : low <= passBarrier
+            if rejectHit < 0 and rejectReached
+                rejectHit := elapsed
+                array.set(aRejectHit, i, rejectHit)
+            if passHit < 0 and passReached
+                passHit := elapsed
+                array.set(aPassHit, i, passHit)
+
+            int lastSide = array.get(aLastSide, i)
+            int currentSide = close > levelPrice + syminfo.mintick ? 1 :
+                 close < levelPrice - syminfo.mintick ? -1 : lastSide
+            if currentSide != 0
+                array.set(aLastSide, i, currentSide)
+
+            bool nextHit = array.get(aNextHit, i)
+            if not nextHit and passHit >= 0 and not na(nextPrice)
+                bool nextReached = passDirection > 0 ? high >= nextPrice : low <= nextPrice
+                if nextReached
+                    nextHit := true
+                    array.set(aNextHit, i, true)
+
+            bool due = time_close >= startTime + structuralMs
+            if due
+                int outcome = f_structuralOutcome(rejectHit, passHit)
+                int terminalSide = close > levelPrice + eventZoneWidth ? 1 :
+                     close < levelPrice - eventZoneWidth ? -1 : 0
+                bool retained = (outcome == OUT_HOLD and terminalSide == approachSide) or
+                     (outcome == OUT_PASS and terminalSide == passDirection)
+                bool independent = array.get(aIndependent, i)
+                int frozenClass = array.get(aFrozenClass, i)
+                float modelP = array.get(aFrozenModelP, i)
+                float baseP = array.get(aFrozenBaseP, i)
+
+                if independent
+                    // Prospective score comes FIRST.
+                    if frozenClass > CLS_NONE
+                        bool classHit = frozenClass == CLS_WALL ? outcome == OUT_HOLD :
+                             frozenClass == CLS_GATE ? outcome == OUT_PASS :
+                             outcome == OUT_WHIP or outcome == OUT_STALL
+                        bool strictHit = frozenClass == CLS_WALL ? outcome == OUT_HOLD and retained :
+                             frozenClass == CLS_GATE ? outcome == OUT_PASS and nextHit :
+                             classHit
+                        float y = classHit ? 1.0 : 0.0
+                        float modelLoss = math.pow(modelP - y, 2.0)
+                        float baseLoss = math.pow(baseP - y, 2.0)
+
+                        array.set(pvClassN, 0, array.get(pvClassN, 0) + 1)
+                        array.set(pvClassHit, 0, array.get(pvClassHit, 0) + (classHit ? 1 : 0))
+                        array.set(pvClassStrictHit, 0, array.get(pvClassStrictHit, 0) + (strictHit ? 1 : 0))
+                        array.set(pvClassModelBrier, 0, array.get(pvClassModelBrier, 0) + modelLoss)
+                        array.set(pvClassBaseBrier, 0, array.get(pvClassBaseBrier, 0) + baseLoss)
+
+                        array.set(pvClassN, frozenClass, array.get(pvClassN, frozenClass) + 1)
+                        array.set(pvClassHit, frozenClass, array.get(pvClassHit, frozenClass) + (classHit ? 1 : 0))
+                        array.set(pvClassStrictHit, frozenClass, array.get(pvClassStrictHit, frozenClass) + (strictHit ? 1 : 0))
+                        array.set(pvClassModelBrier, frozenClass, array.get(pvClassModelBrier, frozenClass) + modelLoss)
+                        array.set(pvClassBaseBrier, frozenClass, array.get(pvClassBaseBrier, frozenClass) + baseLoss)
+
+                        array.set(pvRatioN, ratioBin, array.get(pvRatioN, ratioBin) + 1)
+                        array.set(pvRatioHit, ratioBin, array.get(pvRatioHit, ratioBin) + (classHit ? 1 : 0))
+                        array.set(pvRatioStrictHit, ratioBin, array.get(pvRatioStrictHit, ratioBin) + (strictHit ? 1 : 0))
+                        array.set(pvRatioModelBrier, ratioBin, array.get(pvRatioModelBrier, ratioBin) + modelLoss)
+                        array.set(pvRatioBaseBrier, ratioBin, array.get(pvRatioBaseBrier, ratioBin) + baseLoss)
+
+                        latestSettled := f_ratioName(ratioBin, ratios) + " " + f_className(frozenClass) +
+                             " → " + (classHit ? "HIT" : "MISS") + (strictHit ? " ✓STRICT" : "") +
+                             " · p" + str.tostring(modelP * 100.0, "#") + "%"
+
+                    // Only AFTER scoring does this event join H5g1 history.
+                    array.set(evN, ratioBin, array.get(evN, ratioBin) + 1)
+                    array.set(evHold, ratioBin, array.get(evHold, ratioBin) + (outcome == OUT_HOLD ? 1 : 0))
+                    array.set(evPass, ratioBin, array.get(evPass, ratioBin) + (outcome == OUT_PASS ? 1 : 0))
+                    array.set(evWhip, ratioBin, array.get(evWhip, ratioBin) + (outcome == OUT_WHIP ? 1 : 0))
+                    array.set(evStall, ratioBin, array.get(evStall, ratioBin) + (outcome == OUT_STALL ? 1 : 0))
+                    array.set(evRetained, ratioBin, array.get(evRetained, ratioBin) + (retained ? 1 : 0))
+                    array.set(evNext, ratioBin, array.get(evNext, ratioBin) + (outcome == OUT_PASS and nextHit ? 1 : 0))
+
+                array.remove(aStartBar, i)
+                array.remove(aStartTime, i)
+                array.remove(aAnchor, i)
+                array.remove(aRatio, i)
+                array.remove(aLevel, i)
+                array.remove(aNextLevel, i)
+                array.remove(aApproach, i)
+                array.remove(aEntryAtr, i)
+                array.remove(aZoneWidth, i)
+                array.remove(aRejectHit, i)
+                array.remove(aPassHit, i)
+                array.remove(aLastSide, i)
+                array.remove(aNextHit, i)
+                array.remove(aIndependent, i)
+                array.remove(aFrozenClass, i)
+                array.remove(aFrozenModelP, i)
+                array.remove(aFrozenBaseP, i)
+                array.remove(aFrozenImportance, i)
+                array.remove(aFrozenEvidenceN, i)
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 2) Detect NEW touches after old events were settled/committed.
+//    Therefore classification below cannot see its own future.
+// ─────────────────────────────────────────────────────────────────────────────
+float referencePrice = nz(close[1], close)
+[pTouchIndex, pTouchLevel, _pTouchRatio] = f_touchedCandidate(pPivot, pScale, ratios, zoneWidth, high, low, referencePrice)
+[sTouchIndex, sTouchLevel, _sTouchRatio] = f_touchedCandidate(sPivot, sScale, ratios, zoneWidth, high, low, referencePrice)
+
+bool pTouchNow = pReady and pTouchIndex >= 0
+bool sTouchNow = trackSecondary and sReady and sTouchIndex >= 0
+bool pPulse = f_eventGate(pTouchNow and
+     (not pTouchNow[1] or pTouchIndex != pTouchIndex[1] or
+      math.abs(pTouchLevel - nz(pTouchLevel[1], pTouchLevel)) > zoneWidth))
+bool sPulse = f_eventGate(sTouchNow and
+     (not sTouchNow[1] or sTouchIndex != sTouchIndex[1] or
+      math.abs(sTouchLevel - nz(sTouchLevel[1], sTouchLevel)) > zoneWidth))
+
+
+if pPulse
+    f_birthAudit(0, pTouchIndex, pTouchLevel, pPivot, pScale, referencePrice, safeAtr, zoneWidth)
+if sPulse
+    f_birthAudit(1, sTouchIndex, sTouchLevel, sPivot, sScale, referencePrice, safeAtr, zoneWidth)
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Lightweight current lattice rendering. Research only; no production logic.
+// ─────────────────────────────────────────────────────────────────────────────
+color bull = #50E7ED
+color bear = #D56AF0
+color pivotColor = #FFC857
+color neutral = #8BA0B5
+color panel = color.rgb(5, 18, 28)
+color text = #DDF7FA
+
+var array<line> primaryLines = array.new_line()
+var array<line> secondaryLines = array.new_line()
+if barstate.isfirst
+    for i = 0 to 20
+        array.push(primaryLines, line.new(na, na, na, na, xloc=xloc.bar_index, extend=extend.right))
+        array.push(secondaryLines, line.new(na, na, na, na, xloc=xloc.bar_index, extend=extend.right))
+
+if barstate.islast
+    int x1 = math.max(0, bar_index - 160)
+    for i = 0 to 20
+        bool resistance = i > 0 and i <= 10
+        color sideColor = i == 0 ? pivotColor : resistance ? bull : bear
+        float pLevel = pReady ? f_levelForIndex(i, pPivot, pScale, ratios) : close
+        float sLevel = sReady ? f_levelForIndex(i, sPivot, sScale, ratios) : close
+        line pl = array.get(primaryLines, i)
+        line sl = array.get(secondaryLines, i)
+        line.set_xy1(pl, x1, pLevel)
+        line.set_xy2(pl, bar_index, pLevel)
+        line.set_style(pl, i == 0 ? line.style_dashed : line.style_solid)
+        line.set_width(pl, i == 0 ? 3 : 1)
+        line.set_color(pl, showPrimary and pReady ? color.new(sideColor, i == 0 ? 5 : 34) : color.new(sideColor, 100))
+        line.set_xy1(sl, x1, sLevel)
+        line.set_xy2(sl, bar_index, sLevel)
+        line.set_style(sl, i == 0 ? line.style_dashed : line.style_dotted)
+        line.set_width(sl, i == 0 ? 2 : 1)
+        line.set_color(sl, showSecondary and sReady ? color.new(sideColor, i == 0 ? 48 : 76) : color.new(sideColor, 100))
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Prospective dashboard.
+// Brier Gain = BASE Brier − frozen-personality Brier. POSITIVE is better.
+// HIT = class-only future outcome. STRICT adds WALL retention / GATE NEXT.
+// ─────────────────────────────────────────────────────────────────────────────
+var table dash = table.new(position.top_right, 5, 16,
+     bgcolor=color.new(panel, 18), frame_color=color.new(neutral, 55), frame_width=1,
+     border_color=color.new(neutral, 78), border_width=1)
+
+f_rate(int wins, int n) =>
+    n > 0 ? float(wins) / float(n) : 0.0
+
+f_brierGain(array<int> nArr, array<float> modelArr, array<float> baseArr, int index) =>
+    int n = array.get(nArr, index)
+    n > 0 ? (array.get(baseArr, index) - array.get(modelArr, index)) / float(n) : 0.0
+
+f_personalityColor(string personality) =>
+    personality == "WALL" ? color.new(pivotColor, 28) :
+         personality == "GATE" ? color.new(bull, 38) :
+         personality == "MAGNET" ? color.new(#B77CFF, 35) :
+         personality == "EARLY" ? color.new(neutral, 64) :
+         color.new(neutral, 50)
+
+if barstate.islast
+    table.clear(dash, 0, 0, 4, 15)
+    if showDashboard
+        int allN = array.get(pvClassN, 0)
+        float allHit = f_rate(array.get(pvClassHit, 0), allN)
+        float allStrict = f_rate(array.get(pvClassStrictHit, 0), allN)
+        float allGain = f_brierGain(pvClassN, pvClassModelBrier, pvClassBaseBrier, 0)
+        float modelBrier = allN > 0 ? array.get(pvClassModelBrier, 0) / float(allN) : 0.0
+        float baseBrier = allN > 0 ? array.get(pvClassBaseBrier, 0) / float(allN) : 0.0
+        float chartSecs = timeframe.in_seconds(timeframe.period)
+        bool tfMatch = na(chartSecs) or math.abs(chartSecs - EXPECTED_CHART_SECONDS) < 0.5
+        string verdict = allN < personalityMinSamples ? "EARLY" :
+             allGain > 0.010 ? "PREDICTIVE EDGE ✓" :
+             allGain > 0.0 ? "WEAK EDGE +" : "NO EDGE"
+        color verdictColor = allGain > 0.0 ? bull : allN < personalityMinSamples ? neutral : bear
+
+        table.cell(dash, 0, 0, "✦ ROM PV1 " + PROFILE_NAME + " ✦", text_color=pivotColor, bgcolor=color.new(panel, 5), text_size=size.tiny)
+        table.cell(dash, 1, 0, "PHI PROSPECTIVE VALIDATOR", text_color=bull, bgcolor=color.new(panel, 5), text_size=size.small)
+        table.cell(dash, 2, 0, "FREEZE", text_color=neutral, bgcolor=color.new(panel, 5), text_size=size.tiny)
+        table.cell(dash, 3, 0, "SCORE", text_color=neutral, bgcolor=color.new(panel, 5), text_size=size.tiny)
+        table.cell(dash, 4, 0, "UPDATE✓", text_color=bull, bgcolor=color.new(panel, 5), text_size=size.tiny)
+
+        table.cell(dash, 0, 1, "Design", text_color=neutral, text_size=size.tiny)
+        table.cell(dash, 1, 1, PRIMARY_TF + "/" + SECONDARY_TF + " · STRUCT " + str.tostring(STRUCTURAL_HOURS, "#.##") + "h · H" + str.tostring(independentBars), text_color=pivotColor, text_size=size.tiny)
+        table.cell(dash, 2, 1, tfMatch ? "TF ✓" : "TF MISMATCH", text_color=tfMatch ? bull : bear, text_size=size.tiny)
+        table.cell(dash, 3, 1, "LIVE " + str.tostring(array.size(aStartBar)), text_color=text, text_size=size.tiny)
+        table.cell(dash, 4, 1, "MIN " + str.tostring(personalityMinSamples), text_color=text, text_size=size.tiny)
+
+        table.cell(dash, 0, 2, "Walk-Fwd", text_color=neutral, text_size=size.tiny)
+        table.cell(dash, 1, 2, "N" + str.tostring(allN) + " · HIT " + str.tostring(allHit * 100.0, "#") + "% · STRICT " + str.tostring(allStrict * 100.0, "#") + "%", text_color=text, text_size=size.tiny)
+        table.cell(dash, 2, 2, "M " + (allN > 0 ? str.tostring(modelBrier, "#.###") : "—"), text_color=text, text_size=size.tiny)
+        table.cell(dash, 3, 2, "B " + (allN > 0 ? str.tostring(baseBrier, "#.###") : "—"), text_color=text, text_size=size.tiny)
+        table.cell(dash, 4, 2, "Δ " + (allGain >= 0 ? "+" : "") + str.tostring(allGain * 1000.0, "#.0"), text_color=verdictColor, text_size=size.tiny)
+
+        table.cell(dash, 0, 3, "Verdict", text_color=neutral, text_size=size.tiny)
+        table.cell(dash, 1, 3, verdict, text_color=verdictColor, text_size=size.tiny)
+        table.cell(dash, 2, 3, array.get(pvText, 0), text_color=neutral, text_size=size.tiny)
+        table.cell(dash, 3, 3, latestSettled, text_color=text, text_size=size.tiny)
+        table.cell(dash, 4, 3, "ΔB ×10⁻³", text_color=neutral, text_size=size.tiny)
+
+        table.cell(dash, 0, 4, "LEVEL", text_color=neutral, bgcolor=color.new(neutral, 86), text_size=size.tiny)
+        table.cell(dash, 1, 4, "NOW", text_color=neutral, bgcolor=color.new(neutral, 86), text_size=size.tiny)
+        table.cell(dash, 2, 4, "PV N", text_color=neutral, bgcolor=color.new(neutral, 86), text_size=size.tiny)
+        table.cell(dash, 3, 4, "HIT/STRICT", text_color=neutral, bgcolor=color.new(neutral, 86), text_size=size.tiny)
+        table.cell(dash, 4, 4, "ΔBRIER", text_color=neutral, bgcolor=color.new(neutral, 86), text_size=size.tiny)
+
+        for b = 0 to BIN_COUNT - 1
+            [pName, _class, _imp, _pM, _hh, _pp, _ret, _next, _noise, currentN] = f_phiStats(b)
+            int n = array.get(pvRatioN, b)
+            float hitRate = f_rate(array.get(pvRatioHit, b), n)
+            float strictRate = f_rate(array.get(pvRatioStrictHit, b), n)
+            float gain = n > 0 ? (array.get(pvRatioBaseBrier, b) - array.get(pvRatioModelBrier, b)) / float(n) : 0.0
+            int row = 5 + b
+            color pColor = f_personalityColor(pName)
+            color gainColor = n == 0 ? neutral : gain > 0.0 ? bull : bear
+            table.cell(dash, 0, row, f_ratioName(b, ratios), text_color=text, text_size=size.tiny)
+            table.cell(dash, 1, row, pName + " N" + str.tostring(currentN), text_color=text, bgcolor=pColor, text_size=size.tiny)
+            table.cell(dash, 2, row, str.tostring(n), text_color=text, text_size=size.tiny)
+            table.cell(dash, 3, row, n > 0 ? str.tostring(hitRate * 100.0, "#") + "/" + str.tostring(strictRate * 100.0, "#") : "—", text_color=text, text_size=size.tiny)
+            table.cell(dash, 4, row, n > 0 ? (gain >= 0 ? "+" : "") + str.tostring(gain * 1000.0, "#.0") : "—", text_color=gainColor, text_size=size.tiny)

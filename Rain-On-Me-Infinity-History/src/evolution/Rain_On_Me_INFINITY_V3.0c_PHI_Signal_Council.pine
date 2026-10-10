@@ -1,0 +1,835 @@
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+// If a copy of the MPL was not distributed with this file, You can obtain one at
+// https://mozilla.org/MPL/2.0/
+//
+// Original concept: © RickSimpson — "Rain On Me V2"
+// V3.0c reconstruction: adaptive PHI signal-council expansion.
+//
+// This derivative preserves the ROM legacy Fibonacci ratios as an explicit mode.
+// Rebuilt sections are marked and are not intended to imply endorsement by the
+// original author.
+
+//@version=6
+indicator(title="Rain On Me ∞ V3.0c — PHI Signal Council",
+     shorttitle="ROM 3.0c",
+     overlay=true,
+     max_bars_back=1500,
+     max_lines_count=200,
+     max_labels_count=100,
+     max_boxes_count=100)
+
+// ╔════════════════════════════════════════════════════════════════════════════╗
+// ║ V3.0c — PHI SIGNAL COUNCIL                                                ║
+// ║ • Preserves every V3.0a integrity and PHI-foundation contract.            ║
+// ║ • Adds confirmed primary/secondary PHI geometry and cluster detection.    ║
+// ║ • Gaussian resonance intensity avoids binary line-cross logic.            ║
+// ║ • Adds Approach, Touch, Reject, Accept and Retest interaction states.      ║
+// ║ • Adds persistent confluence beam plus bounded secondary-level visuals.   ║
+// ║ • Bright rose–purple bear spectra improve readability on dark charts.    ║
+// ║ • Nano-width dashboards preserve information with compact notation.      ║
+// ║ • Four independent families vote: Cycle, Flow, ATR and PHI Geometry.      ║
+// ║ • Dispersion, breadth and resonance produce a bounded confidence score.  ║
+// ║ • Council events are bar-close gated, agreement filtered and cooled down.║
+// ║ • Plot budget protected: diagnostics use Research Lab table cells.       ║
+// ║ • Separates precise touch zones from a wider Gaussian resonance radius.   ║
+// ╚════════════════════════════════════════════════════════════════════════════╝
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Constants and input groups
+// ─────────────────────────────────────────────────────────────────────────────
+
+const string GROUP_SYSTEM   = "00 — System & Integrity"
+const string GROUP_FIB      = "01 — PHI Lattice"
+const string GROUP_RESONANCE = "02 — MTF Resonance Field"
+const string GROUP_TREND    = "03 — Dominant-Cycle Trend"
+const string GROUP_PRESSURE = "04 — Pressure Flow"
+const string GROUP_ATR      = "05 — ATR Trail"
+const string GROUP_COUNCIL  = "06 — Adaptive Signal Council"
+const string GROUP_VISUAL   = "07 — Visual Spectrum"
+const string GROUP_ALERTS   = "08 — Events & Alerts"
+
+displayMode = input.string("Spectrum", "Display Mode",
+     options=["Focus", "Spectrum", "Legacy ROM", "Research Lab"],
+     tooltip="Focus shows the structural PHI levels. Spectrum shows the complete field. Legacy ROM preserves the old red/green lattice identity. Research Lab exposes diagnostics.",
+     group=GROUP_SYSTEM)
+theme = input.string("Ocean Deep", "Theme",
+     options=["Aurora", "Ocean Deep", "Ocean Neon", "Royal Gold", "Zeiierman Night"],
+     tooltip="Aurora and Ocean Deep are multi-stop spectral palettes. Colors transition continuously with field strength.", group=GROUP_SYSTEM)
+dashboardEnabled = input.bool(true, "Dashboard", group=GROUP_SYSTEM)
+dashboardMode = input.string("Professional", "Dashboard Mode",
+     options=["Compact", "Professional"], group=GROUP_SYSTEM)
+dashboardTransparency = input.int(28, "Dashboard Transparency", minval=0, maxval=90,
+     tooltip="Both modes now use tiny typography and short notation. Higher transparency reveals more chart behind the panel.", group=GROUP_SYSTEM)
+confirmedEventsOnly = input.bool(true, "Confirm Events On Bar Close",
+     tooltip="Recommended integrity setting. Visual calculations may develop intrabar, but event markers and alerts wait for bar close.",
+     group=GROUP_SYSTEM)
+
+showFib = input.bool(true, "Show PHI Lattice", group=GROUP_FIB)
+fibTimeframe = input.timeframe("D", "Anchor Period",
+     tooltip="For BTC/ETH intraday use, D is the primary default. The anchor period must not be lower than the chart timeframe.",
+     group=GROUP_FIB)
+ratioMode = input.string("ROM Legacy", "Ratio Family",
+     options=["ROM Legacy", "Canonical", "Hybrid"],
+     tooltip="ROM Legacy preserves 0.235/0.728/1.235/1.328 exactly. Canonical uses common Fibonacci ratios. Hybrid keeps the strongest shared and experimental levels.",
+     group=GROUP_FIB)
+rangeMode = input.string("Previous Range", "Lattice Scale",
+     options=["Previous Range", "Previous True Range", "Robust Blend"],
+     tooltip="Previous Range reproduces the original geometry. Robust Blend takes the median of prior range, prior true range and the remembered average range.",
+     group=GROUP_FIB)
+rangeMemory = input.int(20, "Robust Range Memory", minval=5, maxval=100, group=GROUP_FIB)
+showFibZones = input.bool(true, "Show ATR Resonance Zones", group=GROUP_FIB)
+zoneAtrWidth = input.float(0.08, "Zone Half-Width × ATR", minval=0.01, maxval=0.50, step=0.01, group=GROUP_FIB)
+showFibLabels = input.bool(true, "Show Level Labels", group=GROUP_FIB)
+fibLabelOffset = input.int(16, "Label Offset (bars)", minval=2, maxval=100, group=GROUP_FIB)
+
+secondaryTimeframe = input.timeframe("W", "Secondary Anchor Period",
+     tooltip="D/W is the primary intraday resonance pair. The secondary anchor must be higher than the primary PHI anchor.",
+     group=GROUP_RESONANCE)
+secondaryDisplay = input.string("Major Levels", "Secondary Lattice Display",
+     options=["Confluence Only", "Major Levels", "All Levels"], group=GROUP_RESONANCE)
+showConfluenceBeam = input.bool(true, "Show MTF Confluence Beam", group=GROUP_RESONANCE)
+confluenceAtrDistance = input.float(0.22, "Cluster Distance × ATR", minval=0.05, maxval=1.00, step=0.01, group=GROUP_RESONANCE)
+secondaryResonanceWeight = input.float(0.70, "Secondary Resonance Weight", minval=0.10, maxval=1.00, step=0.05, group=GROUP_RESONANCE)
+resonanceRadiusAtr = input.float(0.85, "Resonance Radius × ATR", minval=0.15, maxval=3.00, step=0.05,
+     tooltip="Continuous Gaussian influence radius. This is intentionally wider than the precise PHI touch zone.", group=GROUP_RESONANCE)
+approachZoneMultiple = input.float(3.0, "Approach Radius × Zone", minval=1.25, maxval=8.0, step=0.25, group=GROUP_RESONANCE)
+acceptanceBuffer = input.float(0.35, "Acceptance Buffer × Zone", minval=0.0, maxval=2.0, step=0.05, group=GROUP_RESONANCE)
+retestMemoryBars = input.int(40, "Retest Memory (bars)", minval=5, maxval=200, group=GROUP_RESONANCE)
+
+showCycleTrend = input.bool(true, "Show Dominant-Cycle Trend", group=GROUP_TREND)
+trendTimeframe = input.timeframe("", "Trend Timeframe (blank = chart)", group=GROUP_TREND)
+trendMtfMode = input.string("Confirmed", "MTF Integrity Mode",
+     options=["Confirmed", "Developing"],
+     tooltip="Confirmed uses the last completed higher-timeframe value. Developing is more responsive but can change before the HTF candle closes.",
+     group=GROUP_TREND)
+trendDeadbandAtr = input.float(0.06, "Trend Deadband × ATR", minval=0.0, maxval=0.50, step=0.01, group=GROUP_TREND)
+
+showPressure = input.bool(true, "Show Pressure Guide", group=GROUP_PRESSURE)
+pressureFlowLength = input.int(14, "Flow Detrend Length", minval=3, maxval=100, group=GROUP_PRESSURE)
+pressureZLength = input.int(28, "Flow Normalization Length", minval=10, maxval=200, group=GROUP_PRESSURE)
+pressureVolumeLength = input.int(34, "Relative Volume Length", minval=5, maxval=200, group=GROUP_PRESSURE)
+pressureGuideLength = input.int(8, "Price Guide Smoothing", minval=1, maxval=50, group=GROUP_PRESSURE)
+pressurePriceScale = input.float(0.75, "Guide Displacement × ATR", minval=0.10, maxval=3.00, step=0.05, group=GROUP_PRESSURE)
+
+showAtrTrail = input.bool(true, "Show ATR Trail", group=GROUP_ATR)
+atrLength = input.int(14, "ATR Length", minval=1, maxval=200, group=GROUP_ATR)
+atrMultiplier = input.float(2.0, "ATR Multiplier", minval=0.25, maxval=20.0, step=0.05, group=GROUP_ATR)
+
+showCouncilGuide = input.bool(true, "Show Council Guide", group=GROUP_COUNCIL)
+showCouncilSignals = input.bool(true, "Show Council Signals", group=GROUP_COUNCIL)
+councilPreset = input.string("Balanced", "Council Weighting",
+     options=["Balanced", "PHI First", "Trend First"],
+     tooltip="Balanced avoids duplicate dominance. PHI First emphasizes lattice interaction. Trend First emphasizes cycle and ATR structure.", group=GROUP_COUNCIL)
+councilTrigger = input.float(0.42, "Signal Threshold", minval=0.15, maxval=0.85, step=0.01, group=GROUP_COUNCIL)
+councilStrong = input.float(0.68, "Strong Signal Threshold", minval=0.35, maxval=0.95, step=0.01, group=GROUP_COUNCIL)
+councilMinAgreement = input.int(3, "Minimum Family Agreement", minval=2, maxval=4, group=GROUP_COUNCIL)
+councilMinConfidence = input.float(0.52, "Minimum Confidence", minval=0.20, maxval=0.90, step=0.01, group=GROUP_COUNCIL)
+councilCooldown = input.int(8, "Signal Cooldown (bars)", minval=0, maxval=100, group=GROUP_COUNCIL)
+interactionMemory = input.int(13, "PHI Event Memory (bars)", minval=2, maxval=100, group=GROUP_COUNCIL)
+
+showFieldAura = input.bool(true, "PHI Resonance Aura", group=GROUP_VISUAL)
+colorCandles = input.bool(true, "Theme-Color Candles", group=GROUP_VISUAL)
+candleColorMode = input.string("Spectral Flow", "Candle Theme Mode",
+     options=["Spectral Flow", "Soft Spectral Flow"],
+     tooltip="Both modes use all seven theme colors. Soft Spectral Flow adds transparency near the neutral center without becoming binary.",
+     group=GROUP_VISUAL)
+gradientLength = input.int(5, "Color Transition Smoothing", minval=1, maxval=34,
+     tooltip="Smooths movement through the seven-color spectrum. Higher values create slower, silkier transitions.", group=GROUP_VISUAL)
+showTrendTurns = input.bool(false, "Show Cycle Trend Turns", group=GROUP_VISUAL)
+showAtrTurns = input.bool(false, "Show ATR Turns", group=GROUP_VISUAL)
+showFibInteractions = input.bool(true, "Show PHI Interaction Pulses", group=GROUP_VISUAL)
+
+alertsEnabled = input.bool(true, "Enable Event Conditions", group=GROUP_ALERTS)
+alertFibRejections = input.bool(true, "PHI Rejections", group=GROUP_ALERTS)
+alertFibAcceptance = input.bool(true, "PHI Acceptance & Retests", group=GROUP_ALERTS)
+alertTrendTurns = input.bool(true, "Cycle Trend Turns", group=GROUP_ALERTS)
+alertAtrTurns = input.bool(false, "ATR Trail Turns", group=GROUP_ALERTS)
+alertCouncilSignals = input.bool(true, "Signal Council Events", group=GROUP_ALERTS)
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Utility functions
+// ─────────────────────────────────────────────────────────────────────────────
+
+f_clamp(float value, float lower, float upper) =>
+    math.min(math.max(value, lower), upper)
+
+f_safeDiv(float numerator, float denominator, float fallback) =>
+    math.abs(denominator) > 1e-10 ? numerator / denominator : fallback
+
+f_tanh(float value) =>
+    float bounded = f_clamp(value, -10.0, 10.0)
+    float exp2x = math.exp(2.0 * bounded)
+    (exp2x - 1.0) / (exp2x + 1.0)
+
+f_median3(float a, float b, float c) =>
+    float av = nz(a, nz(b, c))
+    float bv = nz(b, av)
+    float cv = nz(c, av)
+    av + bv + cv - math.min(av, math.min(bv, cv)) - math.max(av, math.max(bv, cv))
+
+f_isNear(float value, float target) =>
+    math.abs(value - target) <= 0.002
+
+f_isMajorRatio(float ratio) =>
+    f_isNear(ratio, 0.382) or f_isNear(ratio, 0.500) or
+     f_isNear(ratio, 0.618) or f_isNear(ratio, 1.000) or
+     f_isNear(ratio, 1.618)
+
+f_eventGate(bool condition) =>
+    condition and (not confirmedEventsOnly or barstate.isconfirmed)
+
+f_loadRatios(array<float> ratios, string mode) =>
+    array.clear(ratios)
+    if mode == "ROM Legacy"
+        array.push(ratios, 0.235)
+        array.push(ratios, 0.382)
+        array.push(ratios, 0.500)
+        array.push(ratios, 0.618)
+        array.push(ratios, 0.728)
+        array.push(ratios, 1.000)
+        array.push(ratios, 1.235)
+        array.push(ratios, 1.328)
+        array.push(ratios, 1.500)
+        array.push(ratios, 1.618)
+    else if mode == "Canonical"
+        array.push(ratios, 0.236)
+        array.push(ratios, 0.382)
+        array.push(ratios, 0.500)
+        array.push(ratios, 0.618)
+        array.push(ratios, 0.786)
+        array.push(ratios, 1.000)
+        array.push(ratios, 1.272)
+        array.push(ratios, 1.382)
+        array.push(ratios, 1.618)
+        array.push(ratios, 2.000)
+    else
+        array.push(ratios, 0.236)
+        array.push(ratios, 0.382)
+        array.push(ratios, 0.500)
+        array.push(ratios, 0.618)
+        array.push(ratios, 0.728)
+        array.push(ratios, 0.786)
+        array.push(ratios, 1.000)
+        array.push(ratios, 1.272)
+        array.push(ratios, 1.500)
+        array.push(ratios, 1.618)
+
+f_levelForIndex(int index, float pivot, float scale, array<float> ratios) =>
+    float result = pivot
+    if index > 0 and index <= 10
+        result := pivot + scale * array.get(ratios, index - 1)
+    else if index > 10
+        result := pivot - scale * array.get(ratios, index - 11)
+    result
+
+f_ratioForIndex(int index, array<float> ratios) =>
+    index == 0 ? 0.0 : index <= 10 ? array.get(ratios, index - 1) : array.get(ratios, index - 11)
+
+f_levelTag(int index, float ratio) =>
+    string prefix = index == 0 ? "PP" : index <= 10 ? "R" + str.tostring(index) : "S" + str.tostring(index - 10)
+    index == 0 ? prefix : prefix + "  " + str.tostring(ratio, "#.###")
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Theme
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Seven ordered stops: extreme bear → soft bear → transition → neutral →
+// transition → soft bull → extreme bull.  The original directional endpoints
+// remain intact, while the intermediate stops restore the gradual personality
+// of the Ultra Candles palette model.
+[theme0, theme1, theme2, theme3, theme4, theme5, theme6] = switch theme
+    "Aurora" => [#FF78B7, #F06BDB, #C56CFF, #8790D8, #42BFE8, #3DE7F2, #78FFD6]
+    "Ocean Deep" => [#FF68A9, #EA68DA, #B96CFF, #7187A3, #2B9EB3, #22D3EE, #70FFF0]
+    "Royal Gold" => [#FF315F, #FF6B5B, #F59E42, #A6997E, #E9C46A, #72D6A0, #2ADC96]
+    "Zeiierman Night" => [#FF367E, #D946EF, #8B5CF6, #8097B2, #22A6F2, #00E8FF, #6EFFF2]
+    => [#FF487E, #D946EF, #7C4DFF, #8097B2, #00A6B8, #00E0BE, #7DFFCF]
+
+f_spectralColor(float value) =>
+    float v = f_clamp(value, -1.0, 1.0)
+    v <= -0.6666667 ? color.from_gradient(v, -1.0, -0.6666667, theme0, theme1) :
+     v <= -0.3333333 ? color.from_gradient(v, -0.6666667, -0.3333333, theme1, theme2) :
+     v <= 0.0 ? color.from_gradient(v, -0.3333333, 0.0, theme2, theme3) :
+     v <= 0.3333333 ? color.from_gradient(v, 0.0, 0.3333333, theme3, theme4) :
+     v <= 0.6666667 ? color.from_gradient(v, 0.3333333, 0.6666667, theme4, theme5) :
+     color.from_gradient(v, 0.6666667, 1.0, theme5, theme6)
+
+color bearColor = theme0
+color neutralColor = theme3
+color bullColor = theme6
+color pivotColor = theme == "Aurora" ? #FFD166 : theme == "Ocean Deep" ? #FFC857 : theme == "Royal Gold" ? #FFC440 : theme == "Zeiierman Night" ? #FFCE54 : #FFBF40
+color panelColor = theme == "Aurora" ? #090716 : theme == "Ocean Deep" ? #03131C : color.rgb(10, 16, 28)
+color textColor = theme == "Aurora" ? #E8F8FF : theme == "Ocean Deep" ? #D9F7FA : color.rgb(224, 235, 247)
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Shared volatility foundation
+// ─────────────────────────────────────────────────────────────────────────────
+
+float atrValue = ta.atr(atrLength)
+float safeAtr = math.max(nz(atrValue, syminfo.mintick), syminfo.mintick)
+float resonanceRadius = math.max(safeAtr * resonanceRadiusAtr, safeAtr * zoneAtrWidth * 2.0)
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 01 — Confirmed PHI lattice
+// ─────────────────────────────────────────────────────────────────────────────
+
+[previousOpen, previousHigh, previousLow, previousClose, previousTrueRange, previousMeanRange] = request.security(
+     syminfo.tickerid,
+     fibTimeframe,
+     [open[1], high[1], low[1], close[1], ta.tr(true)[1], ta.rma(high - low, rangeMemory)[1]],
+     gaps=barmerge.gaps_off,
+     lookahead=barmerge.lookahead_on)
+
+float chartSeconds = timeframe.in_seconds(timeframe.period)
+float fibSeconds = timeframe.in_seconds(fibTimeframe)
+bool fibTimeframeValid = na(chartSeconds) or na(fibSeconds) or fibSeconds >= chartSeconds
+float previousRange = previousHigh - previousLow
+float robustRange = f_median3(previousRange, previousTrueRange, previousMeanRange)
+float selectedRange = rangeMode == "Previous True Range" ? previousTrueRange : rangeMode == "Robust Blend" ? robustRange : previousRange
+float fibScale = math.max(nz(selectedRange, previousRange), syminfo.mintick)
+float fibPivot = (previousHigh + previousLow + previousClose) / 3.0
+bool fibReady = fibTimeframeValid and not na(fibPivot) and not na(fibScale) and fibScale > syminfo.mintick
+float fibZoneWidth = math.max(safeAtr * zoneAtrWidth, syminfo.mintick * 2.0)
+
+[secondaryHigh, secondaryLow, secondaryClose, secondaryTrueRange, secondaryMeanRange] = request.security(
+     syminfo.tickerid,
+     secondaryTimeframe,
+     [high[1], low[1], close[1], ta.tr(true)[1], ta.rma(high - low, rangeMemory)[1]],
+     gaps=barmerge.gaps_off,
+     lookahead=barmerge.lookahead_on)
+
+float secondarySeconds = timeframe.in_seconds(secondaryTimeframe)
+bool secondaryTimeframeValid = (na(secondarySeconds) or na(fibSeconds) or secondarySeconds > fibSeconds) and
+     (na(secondarySeconds) or na(chartSeconds) or secondarySeconds >= chartSeconds)
+float secondaryRange = secondaryHigh - secondaryLow
+float secondaryRobustRange = f_median3(secondaryRange, secondaryTrueRange, secondaryMeanRange)
+float secondarySelectedRange = rangeMode == "Previous True Range" ? secondaryTrueRange : rangeMode == "Robust Blend" ? secondaryRobustRange : secondaryRange
+float secondaryScale = math.max(nz(secondarySelectedRange, secondaryRange), syminfo.mintick)
+float secondaryPivot = (secondaryHigh + secondaryLow + secondaryClose) / 3.0
+bool secondaryReady = secondaryTimeframeValid and not na(secondaryPivot) and not na(secondaryScale) and secondaryScale > syminfo.mintick
+
+var array<float> fibRatios = array.new<float>()
+if barstate.isfirst
+    f_loadRatios(fibRatios, ratioMode)
+
+var int fibStartBar = bar_index
+if timeframe.change(fibTimeframe)
+    fibStartBar := bar_index
+
+var int secondaryStartBar = bar_index
+if timeframe.change(secondaryTimeframe)
+    secondaryStartBar := bar_index
+
+var array<line> fibLines = array.new<line>()
+var array<box> fibZones = array.new<box>()
+var array<label> fibLabels = array.new<label>()
+var array<line> secondaryLines = array.new<line>()
+
+var line confluenceLine = line.new(bar_index, close, bar_index + 1, close,
+     xloc=xloc.bar_index, extend=extend.right, color=color.new(pivotColor, 100), width=3)
+var box confluenceBox = box.new(left=bar_index, top=close, right=bar_index + 1, bottom=close,
+     xloc=xloc.bar_index, border_color=color.new(pivotColor, 100), bgcolor=color.new(pivotColor, 100))
+var label confluenceLabel = label.new(bar_index, close, "", xloc=xloc.bar_index, yloc=yloc.price,
+     style=label.style_label_left, color=color.new(panelColor, 100), textcolor=color.new(pivotColor, 100), size=size.tiny)
+
+if barstate.isfirst
+    for index = 0 to 20
+        line newLine = line.new(bar_index, close, bar_index + 1, close,
+             xloc=xloc.bar_index, extend=extend.right, color=color.new(neutralColor, 100))
+        box newZone = box.new(left=bar_index, top=close, right=bar_index + 1, bottom=close,
+             xloc=xloc.bar_index, border_color=color.new(neutralColor, 100), bgcolor=color.new(neutralColor, 100))
+        label newLabel = label.new(bar_index, close, "", xloc=xloc.bar_index, yloc=yloc.price,
+             style=label.style_label_left, color=color.new(panelColor, 100), textcolor=color.new(textColor, 100), size=size.tiny)
+        array.push(fibLines, newLine)
+        array.push(fibZones, newZone)
+        array.push(fibLabels, newLabel)
+        line secondaryLine = line.new(bar_index, close, bar_index + 1, close,
+             xloc=xloc.bar_index, extend=extend.right, color=color.new(neutralColor, 100), style=line.style_dotted)
+        array.push(secondaryLines, secondaryLine)
+
+bool focusMode = displayMode == "Focus"
+bool legacyVisual = displayMode == "Legacy ROM"
+bool researchMode = displayMode == "Research Lab"
+
+if barstate.islast
+    for index = 0 to 20
+        float level = fibReady ? f_levelForIndex(index, fibPivot, fibScale, fibRatios) : close
+        float ratio = f_ratioForIndex(index, fibRatios)
+        bool isPivot = index == 0
+        bool isResistance = index > 0 and index <= 10
+        bool majorLevel = isPivot or f_isMajorRatio(ratio)
+        bool levelVisible = showFib and fibReady and (not focusMode or majorLevel)
+        float spectralCoordinate = isPivot ? 0.0 : (isResistance ? 1.0 : -1.0) * math.min(ratio / 1.618, 1.0)
+        color sideColor = isPivot ? pivotColor : f_spectralColor(spectralCoordinate)
+        color legacyColor = isPivot ? color.gray : isResistance ? color.green : color.red
+        color levelColor = legacyVisual ? legacyColor : sideColor
+        int lineTransparency = isPivot ? 4 : majorLevel ? 14 : 48
+        int zoneTransparency = majorLevel ? 88 : 94
+        int lineWidth = isPivot ? 3 : majorLevel ? 2 : 1
+        line levelLine = array.get(fibLines, index)
+        box levelZone = array.get(fibZones, index)
+        label levelLabel = array.get(fibLabels, index)
+
+        line.set_xy1(levelLine, fibStartBar, level)
+        line.set_xy2(levelLine, bar_index + fibLabelOffset, level)
+        line.set_extend(levelLine, extend.right)
+        line.set_style(levelLine, isPivot ? line.style_dashed : line.style_solid)
+        line.set_width(levelLine, lineWidth)
+        line.set_color(levelLine, levelVisible ? color.new(levelColor, lineTransparency) : color.new(levelColor, 100))
+
+        box.set_left(levelZone, fibStartBar)
+        box.set_right(levelZone, bar_index + fibLabelOffset)
+        box.set_top(levelZone, level + fibZoneWidth)
+        box.set_bottom(levelZone, level - fibZoneWidth)
+        box.set_border_color(levelZone, color.new(levelColor, 100))
+        box.set_bgcolor(levelZone, levelVisible and showFibZones and not legacyVisual ? color.new(levelColor, zoneTransparency) : color.new(levelColor, 100))
+
+        string levelText = f_levelTag(index, ratio) + "  ·  " + str.tostring(level, format.mintick)
+        label.set_x(levelLabel, bar_index + fibLabelOffset)
+        label.set_y(levelLabel, level)
+        label.set_text(levelLabel, levelVisible and showFibLabels ? levelText : "")
+        label.set_color(levelLabel, levelVisible and showFibLabels ? color.new(panelColor, 18) : color.new(panelColor, 100))
+        label.set_textcolor(levelLabel, levelVisible and showFibLabels ? color.new(levelColor, 0) : color.new(levelColor, 100))
+
+    for index = 0 to 20
+        float secondaryLevel = secondaryReady ? f_levelForIndex(index, secondaryPivot, secondaryScale, fibRatios) : close
+        float secondaryRatio = f_ratioForIndex(index, fibRatios)
+        bool secondaryPivotLevel = index == 0
+        bool secondaryResistance = index > 0 and index <= 10
+        bool secondaryMajor = secondaryPivotLevel or f_isMajorRatio(secondaryRatio)
+        bool secondaryVisible = showFib and secondaryReady and secondaryDisplay != "Confluence Only" and
+             (secondaryDisplay == "All Levels" or secondaryMajor)
+        float secondarySpectralCoordinate = secondaryPivotLevel ? 0.0 : (secondaryResistance ? 1.0 : -1.0) * math.min(secondaryRatio / 1.618, 1.0)
+        color secondaryThemeColor = secondaryPivotLevel ? pivotColor : f_spectralColor(secondarySpectralCoordinate)
+        color secondaryLegacyColor = secondaryPivotLevel ? color.gray : secondaryResistance ? color.green : color.red
+        color secondarySideColor = legacyVisual ? secondaryLegacyColor : secondaryThemeColor
+        line secondaryLevelLine = array.get(secondaryLines, index)
+        line.set_xy1(secondaryLevelLine, secondaryStartBar, secondaryLevel)
+        line.set_xy2(secondaryLevelLine, bar_index + fibLabelOffset, secondaryLevel)
+        line.set_extend(secondaryLevelLine, extend.right)
+        line.set_style(secondaryLevelLine, secondaryPivotLevel ? line.style_dashed : line.style_dotted)
+        line.set_width(secondaryLevelLine, secondaryPivotLevel ? 2 : 1)
+        line.set_color(secondaryLevelLine, secondaryVisible ? color.new(secondarySideColor, secondaryMajor ? 66 : 82) : color.new(secondarySideColor, 100))
+
+// Nearest-level geometry and PHI interaction state.
+float nearestFibLevel = na
+float nearestFibRatio = na
+float nearestFibDistance = 1e20
+int nearestFibIndex = 0
+float primaryResonance = 0.0
+
+if fibReady
+    for index = 0 to 20
+        float candidateLevel = f_levelForIndex(index, fibPivot, fibScale, fibRatios)
+        float candidateDistance = math.abs(close - candidateLevel)
+        float candidateRatio = f_ratioForIndex(index, fibRatios)
+        float candidateWeight = index == 0 ? 1.20 : f_isMajorRatio(candidateRatio) ? 1.00 : 0.72
+        float candidateAffinity = math.exp(-0.5 * math.pow(f_safeDiv(candidateDistance, resonanceRadius, 10.0), 2.0)) * candidateWeight
+        primaryResonance := math.max(primaryResonance, candidateAffinity)
+        if candidateDistance < nearestFibDistance
+            nearestFibDistance := candidateDistance
+            nearestFibLevel := candidateLevel
+            nearestFibRatio := candidateRatio
+            nearestFibIndex := index
+
+float nearestSecondaryLevel = na
+float nearestSecondaryRatio = na
+float nearestSecondaryDistance = 1e20
+int nearestSecondaryIndex = 0
+float secondaryResonance = 0.0
+
+if secondaryReady
+    for index = 0 to 20
+        float candidateLevel = f_levelForIndex(index, secondaryPivot, secondaryScale, fibRatios)
+        float candidateDistance = math.abs(close - candidateLevel)
+        float candidateRatio = f_ratioForIndex(index, fibRatios)
+        float candidateWeight = index == 0 ? 1.20 : f_isMajorRatio(candidateRatio) ? 1.00 : 0.72
+        float candidateAffinity = math.exp(-0.5 * math.pow(f_safeDiv(candidateDistance, resonanceRadius, 10.0), 2.0)) * candidateWeight
+        secondaryResonance := math.max(secondaryResonance, candidateAffinity)
+        if candidateDistance < nearestSecondaryDistance
+            nearestSecondaryDistance := candidateDistance
+            nearestSecondaryLevel := candidateLevel
+            nearestSecondaryRatio := candidateRatio
+            nearestSecondaryIndex := index
+
+float phiCoordinate = fibReady ? f_safeDiv(close - fibPivot, fibScale, 0.0) : 0.0
+float phiBias = fibReady ? f_tanh(phiCoordinate) : 0.0
+float phiAffinity = fibReady ? math.exp(-0.5 * math.pow(f_safeDiv(nearestFibDistance, resonanceRadius, 10.0), 2.0)) : 0.0
+bool phiTouch = fibReady and high >= nearestFibLevel - fibZoneWidth and low <= nearestFibLevel + fibZoneWidth
+bool secondaryTouch = secondaryReady and high >= nearestSecondaryLevel - fibZoneWidth and low <= nearestSecondaryLevel + fibZoneWidth
+float confluenceThreshold = safeAtr * confluenceAtrDistance
+float clusterDistance = fibReady and secondaryReady ? math.abs(nearestFibLevel - nearestSecondaryLevel) : 1e20
+bool confluenceActive = fibReady and secondaryReady and clusterDistance <= confluenceThreshold
+float confluencePrice = confluenceActive ? (nearestFibLevel + nearestSecondaryLevel) / 2.0 : na
+float confluenceStrength = confluenceActive ? math.exp(-0.5 * math.pow(f_safeDiv(clusterDistance, confluenceThreshold, 10.0), 2.0)) : 0.0
+float resonanceStrength = f_clamp(math.max(primaryResonance, secondaryResonance * secondaryResonanceWeight) + confluenceStrength * 0.35, 0.0, 1.0)
+bool phiApproach = fibReady and not phiTouch and nearestFibDistance <= fibZoneWidth * approachZoneMultiple
+
+if barstate.islast
+    bool beamVisible = showConfluenceBeam and confluenceActive
+    float beamPrice = beamVisible ? confluencePrice : close
+    float beamHalfWidth = beamVisible ? math.max(fibZoneWidth, clusterDistance * 0.5 + fibZoneWidth * 0.35) : fibZoneWidth
+    int beamStart = math.max(fibStartBar, secondaryStartBar)
+    line.set_xy1(confluenceLine, beamStart, beamPrice)
+    line.set_xy2(confluenceLine, bar_index + fibLabelOffset, beamPrice)
+    line.set_extend(confluenceLine, extend.right)
+    line.set_color(confluenceLine, beamVisible ? color.new(pivotColor, 10) : color.new(pivotColor, 100))
+    box.set_left(confluenceBox, beamStart)
+    box.set_right(confluenceBox, bar_index + fibLabelOffset)
+    box.set_top(confluenceBox, beamPrice + beamHalfWidth)
+    box.set_bottom(confluenceBox, beamPrice - beamHalfWidth)
+    box.set_border_color(confluenceBox, color.new(pivotColor, 100))
+    box.set_bgcolor(confluenceBox, beamVisible ? color.new(pivotColor, 86) : color.new(pivotColor, 100))
+    label.set_x(confluenceLabel, bar_index + fibLabelOffset)
+    label.set_y(confluenceLabel, beamPrice)
+    label.set_text(confluenceLabel, beamVisible ? "MTF PHI  ·  " + str.tostring(beamPrice, format.mintick) : "")
+    label.set_color(confluenceLabel, beamVisible ? color.new(panelColor, 15) : color.new(panelColor, 100))
+    label.set_textcolor(confluenceLabel, beamVisible ? pivotColor : color.new(pivotColor, 100))
+
+float candleBody = math.abs(close - open)
+float lowerWick = math.min(open, close) - low
+float upperWick = high - math.max(open, close)
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 02 — Repaired dominant-cycle trendline
+// ─────────────────────────────────────────────────────────────────────────────
+
+float trendSourceConfirmed = request.security(syminfo.tickerid, trendTimeframe, hl2[1],
+     gaps=barmerge.gaps_off, lookahead=barmerge.lookahead_on)
+float trendSourceDeveloping = request.security(syminfo.tickerid, trendTimeframe, hl2,
+     gaps=barmerge.gaps_off, lookahead=barmerge.lookahead_off)
+float trendSource = trendTimeframe == "" ? hl2 : trendMtfMode == "Confirmed" ? trendSourceConfirmed : trendSourceDeveloping
+
+var float dominantPeriod = 20.0
+float priorDominantPeriod = nz(dominantPeriod[1], 20.0)
+float cycleSmooth = (4.0 * trendSource + 3.0 * nz(trendSource[1], trendSource) + 2.0 * nz(trendSource[2], trendSource) + nz(trendSource[3], trendSource)) / 10.0
+float cycleScale = 0.075 * priorDominantPeriod + 0.54
+float detrender = (0.0962 * cycleSmooth + 0.5769 * nz(cycleSmooth[2]) - 0.5769 * nz(cycleSmooth[4]) - 0.0962 * nz(cycleSmooth[6])) * cycleScale
+float quadrature1 = (0.0962 * detrender + 0.5769 * nz(detrender[2]) - 0.5769 * nz(detrender[4]) - 0.0962 * nz(detrender[6])) * cycleScale
+float inPhase1 = nz(detrender[3])
+float jInPhase = (0.0962 * inPhase1 + 0.5769 * nz(inPhase1[2]) - 0.5769 * nz(inPhase1[4]) - 0.0962 * nz(inPhase1[6])) * cycleScale
+float jQuadrature = (0.0962 * quadrature1 + 0.5769 * nz(quadrature1[2]) - 0.5769 * nz(quadrature1[4]) - 0.0962 * nz(quadrature1[6])) * cycleScale
+float inPhase2Raw = inPhase1 - jQuadrature
+float quadrature2Raw = quadrature1 + jInPhase
+var float inPhase2 = 0.0
+var float quadrature2 = 0.0
+inPhase2 := 0.2 * inPhase2Raw + 0.8 * nz(inPhase2[1])
+quadrature2 := 0.2 * quadrature2Raw + 0.8 * nz(quadrature2[1])
+
+float realRaw = inPhase2 * nz(inPhase2[1]) + quadrature2 * nz(quadrature2[1])
+float imagRaw = inPhase2 * nz(quadrature2[1]) - quadrature2 * nz(inPhase2[1])
+var float realPart = 0.0
+var float imagPart = 0.0
+realPart := 0.2 * realRaw + 0.8 * nz(realPart[1])
+imagPart := 0.2 * imagRaw + 0.8 * nz(imagPart[1])
+
+float phaseAngle = math.abs(realPart) > 1e-10 ? math.atan(imagPart / realPart) : 0.0
+float rawDominantPeriod = math.abs(phaseAngle) > 1e-6 ? 2.0 * math.pi / math.abs(phaseAngle) : priorDominantPeriod
+float relativeLimitedPeriod = math.min(math.max(rawDominantPeriod, 0.67 * priorDominantPeriod), 1.50 * priorDominantPeriod)
+float absoluteLimitedPeriod = f_clamp(relativeLimitedPeriod, 6.0, 50.0)
+dominantPeriod := 0.2 * absoluteLimitedPeriod + 0.8 * priorDominantPeriod
+
+var float smoothedDominantPeriod = 20.0
+smoothedDominantPeriod := 0.33 * dominantPeriod + 0.67 * nz(smoothedDominantPeriod[1], dominantPeriod)
+int cycleLength = int(f_clamp(math.round(smoothedDominantPeriod), 6.0, 50.0))
+
+float cycleSum = 0.0
+int cycleCount = 0
+for lookback = 0 to 49
+    if lookback < cycleLength and not na(trendSource[lookback])
+        cycleSum += trendSource[lookback]
+        cycleCount += 1
+
+float cycleMean = cycleCount > 0 ? cycleSum / cycleCount : trendSource
+float cycleTrend = (4.0 * cycleMean + 3.0 * nz(cycleMean[1], cycleMean) + 2.0 * nz(cycleMean[2], cycleMean) + nz(cycleMean[3], cycleMean)) / 10.0
+float trendDistance = f_safeDiv(trendSource - cycleTrend, safeAtr, 0.0)
+float trendSlope = f_safeDiv(cycleTrend - nz(cycleTrend[1], cycleTrend), safeAtr, 0.0)
+float trendScore = f_tanh(1.35 * trendDistance + 2.25 * trendSlope)
+float trendDeadband = trendDeadbandAtr
+int trendState = trendDistance > trendDeadband ? 1 : trendDistance < -trendDeadband ? -1 : 0
+color trendColor = f_spectralColor(trendScore)
+
+bool trendBullTurnRaw = ta.crossover(trendScore, 0.0)
+bool trendBearTurnRaw = ta.crossunder(trendScore, 0.0)
+bool trendBullTurn = f_eventGate(trendBullTurnRaw)
+bool trendBearTurn = f_eventGate(trendBearTurnRaw)
+
+plot(showCycleTrend ? cycleTrend : na, "Cycle Trend — Aura", color=color.new(trendColor, 91), linewidth=4)
+plot(showCycleTrend ? cycleTrend : na, "Cycle Trend — Glow", color=color.new(trendColor, 70), linewidth=3)
+plot(showCycleTrend ? cycleTrend : na, "Cycle Trend — Core", color=color.new(trendColor, 2), linewidth=2)
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 03 — Safe Pressure Flow
+// ─────────────────────────────────────────────────────────────────────────────
+
+float candleRange = math.max(high - low, syminfo.mintick)
+float bodyPressure = f_safeDiv(close - open, candleRange, 0.0)
+float closeLocationPressure = f_safeDiv(2.0 * close - high - low, candleRange, 0.0)
+bool hasUsableVolume = not na(volume) and volume > 0
+float volumeBase = ta.ema(volume, pressureVolumeLength)
+float relativeVolume = hasUsableVolume ? f_safeDiv(volume, volumeBase, 1.0) : 1.0
+float volumeImpulse = math.log(1.0 + math.max(relativeVolume, 0.0))
+float rawPressure = (0.55 * bodyPressure + 0.45 * closeLocationPressure) * volumeImpulse
+float cumulativePressure = ta.cum(nz(rawPressure))
+float pressureBaseline = ta.ema(cumulativePressure, pressureFlowLength)
+float pressureResidual = cumulativePressure - pressureBaseline
+float pressureDeviation = ta.stdev(pressureResidual, pressureZLength)
+float pressureZ = f_clamp(f_safeDiv(pressureResidual, pressureDeviation, 0.0), -4.0, 4.0)
+float pressureScore = f_tanh(pressureZ / 1.75)
+float pressureGuideRaw = hl2 + pressureScore * safeAtr * pressurePriceScale
+float pressureGuide = ta.ema(pressureGuideRaw, pressureGuideLength)
+color pressureColor = f_spectralColor(pressureScore)
+
+plot(showPressure ? pressureGuide : na, "Pressure Guide — Glow", color=color.new(pressureColor, 84), linewidth=4)
+plot(showPressure ? pressureGuide : na, "Pressure Guide — Core", color=color.new(pressureColor, 12), linewidth=2)
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 04 — Clean ATR trail
+// ─────────────────────────────────────────────────────────────────────────────
+
+float atrLoss = atrMultiplier * safeAtr
+var float atrTrail = na
+float previousAtrTrail = nz(atrTrail[1], close)
+
+if na(atrTrail[1])
+    atrTrail := close - atrLoss
+else if close > previousAtrTrail and close[1] > previousAtrTrail
+    atrTrail := math.max(previousAtrTrail, close - atrLoss)
+else if close < previousAtrTrail and close[1] < previousAtrTrail
+    atrTrail := math.min(previousAtrTrail, close + atrLoss)
+else
+    atrTrail := close > previousAtrTrail ? close - atrLoss : close + atrLoss
+
+var int atrDirection = 0
+atrDirection := close > atrTrail ? 1 : close < atrTrail ? -1 : nz(atrDirection[1], 0)
+float atrTrailScore = f_tanh(2.0 * f_safeDiv(close - atrTrail, safeAtr, 0.0))
+color atrTrailColor = f_spectralColor(atrTrailScore)
+bool atrBullTurn = f_eventGate(ta.crossover(close, atrTrail))
+bool atrBearTurn = f_eventGate(ta.crossunder(close, atrTrail))
+
+plot(showAtrTrail ? atrTrail : na, "ATR Trail — Glow", color=color.new(atrTrailColor, 86), linewidth=4)
+plot(showAtrTrail ? atrTrail : na, "ATR Trail — Core", color=color.new(atrTrailColor, 10), linewidth=2)
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Foundation field — continuous council input
+// ─────────────────────────────────────────────────────────────────────────────
+
+float foundationField = f_clamp(0.50 * trendScore + 0.35 * pressureScore + 0.15 * phiBias, -1.0, 1.0)
+float resonanceField = f_clamp(foundationField * (1.0 + 0.25 * resonanceStrength), -1.0, 1.0)
+float spectralField = ta.ema(resonanceField, gradientLength)
+
+bool phiBullRejectRaw = phiTouch and low <= nearestFibLevel and close > nearestFibLevel + fibZoneWidth * 0.15 and close > open and lowerWick >= candleBody * 0.35 and foundationField > -0.25
+bool phiBearRejectRaw = phiTouch and high >= nearestFibLevel and close < nearestFibLevel - fibZoneWidth * 0.15 and close < open and upperWick >= candleBody * 0.35 and foundationField < 0.25
+bool phiBullReject = f_eventGate(phiBullRejectRaw and not phiBullRejectRaw[1])
+bool phiBearReject = f_eventGate(phiBearRejectRaw and not phiBearRejectRaw[1])
+
+float acceptanceDistance = fibZoneWidth * acceptanceBuffer
+bool phiBullLevelCross = ta.crossover(close, nearestFibLevel + acceptanceDistance)
+bool phiBearLevelCross = ta.crossunder(close, nearestFibLevel - acceptanceDistance)
+bool phiBullAcceptRaw = fibReady and phiBullLevelCross and (phiTouch or phiTouch[1]) and foundationField > 0.10
+bool phiBearAcceptRaw = fibReady and phiBearLevelCross and (phiTouch or phiTouch[1]) and foundationField < -0.10
+bool phiBullAccept = f_eventGate(phiBullAcceptRaw)
+bool phiBearAccept = f_eventGate(phiBearAcceptRaw)
+
+var float acceptedFibLevel = na
+var int acceptedDirection = 0
+var int acceptedBar = na
+
+if phiBullAccept
+    acceptedFibLevel := nearestFibLevel
+    acceptedDirection := 1
+    acceptedBar := bar_index
+else if phiBearAccept
+    acceptedFibLevel := nearestFibLevel
+    acceptedDirection := -1
+    acceptedBar := bar_index
+
+bool acceptanceMemoryActive = acceptedDirection != 0 and not na(acceptedBar) and bar_index - acceptedBar <= retestMemoryBars
+bool phiBullRetestRaw = acceptanceMemoryActive and acceptedDirection == 1 and bar_index > acceptedBar and
+     low <= acceptedFibLevel + fibZoneWidth and close > acceptedFibLevel and close > open and foundationField > 0.0
+bool phiBearRetestRaw = acceptanceMemoryActive and acceptedDirection == -1 and bar_index > acceptedBar and
+     high >= acceptedFibLevel - fibZoneWidth and close < acceptedFibLevel and close < open and foundationField < 0.0
+bool phiBullRetest = f_eventGate(phiBullRetestRaw and not phiBullRetestRaw[1])
+bool phiBearRetest = f_eventGate(phiBearRetestRaw and not phiBearRetestRaw[1])
+
+if phiBullRetest or phiBearRetest or (acceptanceMemoryActive and bar_index - acceptedBar >= retestMemoryBars)
+    acceptedDirection := 0
+    acceptedFibLevel := na
+    acceptedBar := na
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 06 — Adaptive four-family signal council
+// ─────────────────────────────────────────────────────────────────────────────
+
+float phiEventImpulse = phiBullRetest ? 1.00 : phiBearRetest ? -1.00 :
+     phiBullAccept ? 0.86 : phiBearAccept ? -0.86 :
+     phiBullReject ? 0.68 : phiBearReject ? -0.68 : 0.0
+float phiMemoryDecay = math.exp(-1.0 / interactionMemory)
+var float phiEventMemory = 0.0
+phiEventMemory := phiEventImpulse != 0.0 ? phiEventImpulse : nz(phiEventMemory[1], 0.0) * phiMemoryDecay
+
+float phiLevelVote = fibReady ? f_tanh(1.25 * f_safeDiv(close - nearestFibLevel, resonanceRadius, 0.0)) : 0.0
+float geometryFamily = f_clamp((0.55 * phiLevelVote + 0.45 * phiEventMemory) * (0.55 + 0.45 * resonanceStrength), -1.0, 1.0)
+float cycleFamily = trendScore
+float flowFamily = pressureScore
+float atrFamily = atrTrailScore
+
+float weightCycle = councilPreset == "Trend First" ? 0.40 : councilPreset == "PHI First" ? 0.25 : 0.30
+float weightFlow = councilPreset == "Trend First" ? 0.20 : councilPreset == "PHI First" ? 0.20 : 0.25
+float weightAtr = councilPreset == "Trend First" ? 0.25 : councilPreset == "PHI First" ? 0.15 : 0.20
+float weightGeometry = councilPreset == "Trend First" ? 0.15 : councilPreset == "PHI First" ? 0.40 : 0.25
+
+float councilRaw = f_clamp(weightCycle * cycleFamily + weightFlow * flowFamily + weightAtr * atrFamily + weightGeometry * geometryFamily, -1.0, 1.0)
+float familyDeadband = 0.10
+int bullAgreement = (cycleFamily > familyDeadband ? 1 : 0) + (flowFamily > familyDeadband ? 1 : 0) +
+     (atrFamily > familyDeadband ? 1 : 0) + (geometryFamily > familyDeadband ? 1 : 0)
+int bearAgreement = (cycleFamily < -familyDeadband ? 1 : 0) + (flowFamily < -familyDeadband ? 1 : 0) +
+     (atrFamily < -familyDeadband ? 1 : 0) + (geometryFamily < -familyDeadband ? 1 : 0)
+int dominantAgreement = math.max(bullAgreement, bearAgreement)
+float agreementBreadth = dominantAgreement / 4.0
+
+float councilVariance = weightCycle * math.pow(cycleFamily - councilRaw, 2.0) +
+     weightFlow * math.pow(flowFamily - councilRaw, 2.0) +
+     weightAtr * math.pow(atrFamily - councilRaw, 2.0) +
+     weightGeometry * math.pow(geometryFamily - councilRaw, 2.0)
+float councilDispersion = math.sqrt(math.max(councilVariance, 0.0))
+float councilCoherence = f_clamp(1.0 - councilDispersion / 1.25, 0.0, 1.0)
+float councilConfidence = f_clamp(0.50 * math.abs(councilRaw) + 0.25 * agreementBreadth +
+     0.15 * councilCoherence + 0.10 * resonanceStrength, 0.0, 1.0)
+float effectiveStrongThreshold = math.max(councilStrong, councilTrigger + 0.05)
+
+bool bullCouncilSetup = councilRaw >= councilTrigger and bullAgreement >= councilMinAgreement and councilConfidence >= councilMinConfidence
+bool bearCouncilSetup = councilRaw <= -councilTrigger and bearAgreement >= councilMinAgreement and councilConfidence >= councilMinConfidence
+bool strongBullCouncil = bullCouncilSetup and councilRaw >= effectiveStrongThreshold
+bool strongBearCouncil = bearCouncilSetup and councilRaw <= -effectiveStrongThreshold
+
+var int lastCouncilSignalBar = na
+bool councilCooldownReady = na(lastCouncilSignalBar) or bar_index - lastCouncilSignalBar > councilCooldown
+bool bullCouncilSignal = f_eventGate(bullCouncilSetup and not bullCouncilSetup[1] and councilCooldownReady)
+bool bearCouncilSignal = f_eventGate(bearCouncilSetup and not bearCouncilSetup[1] and councilCooldownReady)
+
+if bullCouncilSignal or bearCouncilSignal
+    lastCouncilSignalBar := bar_index
+
+string councilShort = strongBullCouncil ? "B++" : bullCouncilSetup ? "B+" :
+     strongBearCouncil ? "S--" : bearCouncilSetup ? "S-" : "N"
+float councilGuide = hl2 + councilRaw * safeAtr * 0.45
+color councilColor = f_spectralColor(councilRaw)
+float councilVisualField = f_clamp(0.65 * spectralField + 0.35 * councilRaw, -1.0, 1.0)
+
+plot(showCouncilGuide ? councilGuide : na, "Council Guide — Glow", color=color.new(councilColor, 72), linewidth=3)
+plot(showCouncilGuide ? councilGuide : na, "Council Guide — Core", color=color.new(councilColor, 5), linewidth=1)
+
+int auraTransparency = int(math.round(f_clamp(97.0 - resonanceStrength * 4.0 - councilConfidence * 3.0, 89.0, 97.0)))
+color spectralCandle = f_spectralColor(councilVisualField)
+int softCandleTransparency = int(math.round((1.0 - math.abs(councilVisualField)) * 18.0))
+color themedCandle = candleColorMode == "Soft Spectral Flow" ? color.new(spectralCandle, softCandleTransparency) : spectralCandle
+
+bgcolor(showFieldAura and not legacyVisual ? color.new(f_spectralColor(councilVisualField), researchMode ? math.max(87, auraTransparency - 2) : auraTransparency) : na, title="PHI Council Aura")
+barcolor(colorCandles ? themedCandle : na, title="Theme Resonance Candles")
+
+plotshape(showTrendTurns and trendBullTurn, title="Cycle Trend Bull Turn", style=shape.circle, location=location.belowbar, color=color.new(bullColor, 5), size=size.tiny)
+plotshape(showTrendTurns and trendBearTurn, title="Cycle Trend Bear Turn", style=shape.circle, location=location.abovebar, color=color.new(bearColor, 5), size=size.tiny)
+plotshape(showAtrTurns and atrBullTurn, title="ATR Bull Turn", style=shape.triangleup, location=location.belowbar, color=color.new(bullColor, 0), size=size.tiny)
+plotshape(showAtrTurns and atrBearTurn, title="ATR Bear Turn", style=shape.triangledown, location=location.abovebar, color=color.new(bearColor, 0), size=size.tiny)
+plotshape(showFibInteractions and phiBullReject, title="PHI Bull Rejection", style=shape.diamond, location=location.belowbar, color=color.new(pivotColor, 0), size=size.tiny)
+plotshape(showFibInteractions and phiBearReject, title="PHI Bear Rejection", style=shape.diamond, location=location.abovebar, color=color.new(pivotColor, 0), size=size.tiny)
+plotshape(showFibInteractions and phiBullAccept, title="PHI Bull Acceptance", style=shape.square, location=location.belowbar, color=color.new(bullColor, 0), size=size.tiny)
+plotshape(showFibInteractions and phiBearAccept, title="PHI Bear Acceptance", style=shape.square, location=location.abovebar, color=color.new(bearColor, 0), size=size.tiny)
+plotshape(showFibInteractions and phiBullRetest, title="PHI Bull Retest", style=shape.circle, location=location.belowbar, color=color.new(bullColor, 0), size=size.tiny)
+plotshape(showFibInteractions and phiBearRetest, title="PHI Bear Retest", style=shape.circle, location=location.abovebar, color=color.new(bearColor, 0), size=size.tiny)
+plotshape(showCouncilSignals and bullCouncilSignal, title="Council Bull Halo", style=shape.circle, location=location.belowbar, color=color.new(bullColor, 70), size=size.small)
+plotshape(showCouncilSignals and bearCouncilSignal, title="Council Bear Halo", style=shape.circle, location=location.abovebar, color=color.new(bearColor, 70), size=size.small)
+plotshape(showCouncilSignals and bullCouncilSignal, title="Council Buy", text="C", textcolor=panelColor, style=shape.triangleup, location=location.belowbar, color=color.new(bullColor, 0), size=size.tiny)
+plotshape(showCouncilSignals and bearCouncilSignal, title="Council Sell", text="C", textcolor=panelColor, style=shape.triangledown, location=location.abovebar, color=color.new(bearColor, 0), size=size.tiny)
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Dashboard
+// ─────────────────────────────────────────────────────────────────────────────
+
+var table dashboard = table.new(position.top_right, 2, 11,
+     bgcolor=color.new(panelColor, dashboardTransparency), frame_color=color.new(neutralColor, 60), frame_width=1,
+     border_color=color.new(neutralColor, 78), border_width=1)
+
+if barstate.isfirst
+    table.merge_cells(dashboard, 0, 0, 1, 0)
+
+if barstate.islast
+    table.clear(dashboard, 0, 0, 1, 10)
+    if dashboardEnabled
+        string phiLevelShort = not fibTimeframeValid ? "TF!" : not fibReady ? "..." : nearestFibIndex == 0 ? "PP" : nearestFibIndex <= 10 ? "R" + str.tostring(nearestFibIndex) : "S" + str.tostring(nearestFibIndex - 10)
+        string phiText = fibReady ? phiLevelShort + " " + str.tostring(nearestFibRatio, "#.###") + " · " + str.tostring(phiCoordinate, "#.###") + "R" : phiLevelShort
+        string interactionShort = phiBullRetest ? "BRT" : phiBearRetest ? "SRT" :
+             phiBullAccept ? "BAC" : phiBearAccept ? "SAC" :
+             phiBullReject ? "BRJ" : phiBearReject ? "SRJ" :
+             confluenceActive and (phiTouch or secondaryTouch) ? "MTF" :
+             phiTouch ? "TCH" : secondaryTouch ? "HTF" : phiApproach ? "APR" : "FREE"
+        string trendShort = trendState > 0 ? "UP" : trendState < 0 ? "DN" : "FL"
+        string pressureShort = pressureScore > 0.08 ? "P+" : pressureScore < -0.08 ? "P-" : "P0"
+        string fieldShort = councilVisualField > 0.18 ? "F+" : councilVisualField < -0.18 ? "F-" : "F0"
+        string clusterShort = confluenceActive ? "CL" : secondaryReady ? "SEP" : "..."
+        string integrityShort = not fibTimeframeValid ? "PTF!" : not secondaryTimeframeValid ? "STF!" : trendMtfMode == "Confirmed" ? "CFM" : "DEV"
+        string ratioShort = ratioMode == "ROM Legacy" ? "ROM" : ratioMode == "Canonical" ? "CAN" : "HYB"
+        string rangeShort = rangeMode == "Previous Range" ? "PR" : rangeMode == "Previous True Range" ? "TR" : "RB"
+        string resonanceText = "R" + str.tostring(resonanceStrength * 100.0, "#") + " " + clusterShort
+        string fieldText = fieldShort + str.tostring(math.abs(councilVisualField) * 100.0, "#")
+        string cycleText = trendShort + " P" + str.tostring(cycleLength)
+        string flowText = pressureShort + str.tostring(math.abs(pressureScore) * 100.0, "#")
+        string geometryText = ratioShort + "/" + rangeShort + " · " + fibTimeframe + "/" + secondaryTimeframe
+        string councilText = councilShort + str.tostring(math.abs(councilRaw) * 100.0, "#") + " · " + str.tostring(dominantAgreement) + "/4"
+        string qualityText = "C" + str.tostring(councilConfidence * 100.0, "#") + " H" + str.tostring(councilCoherence * 100.0, "#") + " · " + integrityShort
+        string cycleVoteText = (cycleFamily >= 0.0 ? "+" : "-") + str.tostring(math.abs(cycleFamily) * 100.0, "#")
+        string flowVoteText = (flowFamily >= 0.0 ? "+" : "-") + str.tostring(math.abs(flowFamily) * 100.0, "#")
+        string atrVoteText = (atrFamily >= 0.0 ? "+" : "-") + str.tostring(math.abs(atrFamily) * 100.0, "#")
+        string geometryVoteText = (geometryFamily >= 0.0 ? "+" : "-") + str.tostring(math.abs(geometryFamily) * 100.0, "#")
+
+        table.cell(dashboard, 0, 0, "ROM∞ 3.0c", text_color=pivotColor, bgcolor=color.new(panelColor, math.max(4, dashboardTransparency - 18)), text_size=size.tiny)
+        table.cell(dashboard, 0, 1, "PHI", text_color=neutralColor, text_halign=text.align_left, text_size=size.tiny)
+        table.cell(dashboard, 1, 1, phiText, text_color=f_spectralColor(phiBias), text_halign=text.align_right, text_size=size.tiny)
+        table.cell(dashboard, 0, 2, "INT", text_color=neutralColor, text_halign=text.align_left, text_size=size.tiny)
+        table.cell(dashboard, 1, 2, interactionShort + " · " + resonanceText, text_color=phiTouch or phiApproach ? pivotColor : textColor, text_halign=text.align_right, text_size=size.tiny)
+
+        if dashboardMode == "Professional"
+            table.cell(dashboard, 0, 3, "FLD", text_color=neutralColor, text_halign=text.align_left, text_size=size.tiny)
+            table.cell(dashboard, 1, 3, fieldText, text_color=f_spectralColor(councilVisualField), text_halign=text.align_right, text_size=size.tiny)
+            table.cell(dashboard, 0, 4, "CYC", text_color=neutralColor, text_halign=text.align_left, text_size=size.tiny)
+            table.cell(dashboard, 1, 4, cycleText, text_color=trendColor, text_halign=text.align_right, text_size=size.tiny)
+            table.cell(dashboard, 0, 5, "FLW", text_color=neutralColor, text_halign=text.align_left, text_size=size.tiny)
+            table.cell(dashboard, 1, 5, flowText, text_color=pressureColor, text_halign=text.align_right, text_size=size.tiny)
+            table.cell(dashboard, 0, 6, "GEO", text_color=neutralColor, text_halign=text.align_left, text_size=size.tiny)
+            table.cell(dashboard, 1, 6, geometryText, text_color=confluenceActive ? pivotColor : textColor, text_halign=text.align_right, text_size=size.tiny)
+            table.cell(dashboard, 0, 7, "CNL", text_color=neutralColor, text_halign=text.align_left, text_size=size.tiny)
+            table.cell(dashboard, 1, 7, councilText, text_color=councilColor, text_halign=text.align_right, text_size=size.tiny)
+            table.cell(dashboard, 0, 8, "Q", text_color=neutralColor, text_halign=text.align_left, text_size=size.tiny)
+            table.cell(dashboard, 1, 8, qualityText, text_color=integrityShort == "CFM" ? bullColor : pivotColor, text_halign=text.align_right, text_size=size.tiny)
+            if researchMode
+                table.cell(dashboard, 0, 9, "FAM", text_color=neutralColor, text_halign=text.align_left, text_size=size.tiny)
+                table.cell(dashboard, 1, 9, "T" + cycleVoteText + " F" + flowVoteText + " A" + atrVoteText + " G" + geometryVoteText, text_color=councilColor, text_halign=text.align_right, text_size=size.tiny)
+                table.cell(dashboard, 0, 10, "DBG", text_color=neutralColor, text_halign=text.align_left, text_size=size.tiny)
+                table.cell(dashboard, 1, 10, "φ" + str.tostring(phiCoordinate, "#.##") + " R" + str.tostring(resonanceStrength * 100.0, "#") + " D" + str.tostring(councilDispersion * 100.0, "#"), text_color=textColor, text_halign=text.align_right, text_size=size.tiny)
+        else
+            table.cell(dashboard, 0, 3, "FLD", text_color=neutralColor, text_halign=text.align_left, text_size=size.tiny)
+            table.cell(dashboard, 1, 3, fieldText + " · " + cycleText + "/" + flowText, text_color=f_spectralColor(councilVisualField), text_halign=text.align_right, text_size=size.tiny)
+            table.cell(dashboard, 0, 4, "GEO", text_color=neutralColor, text_halign=text.align_left, text_size=size.tiny)
+            table.cell(dashboard, 1, 4, geometryText, text_color=confluenceActive ? pivotColor : textColor, text_halign=text.align_right, text_size=size.tiny)
+            table.cell(dashboard, 0, 5, "CNL", text_color=neutralColor, text_halign=text.align_left, text_size=size.tiny)
+            table.cell(dashboard, 1, 5, councilText + " C" + str.tostring(councilConfidence * 100.0, "#") + " · " + integrityShort, text_color=councilColor, text_halign=text.align_right, text_size=size.tiny)
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Alerts — event conditions remain independent of display toggles
+// ─────────────────────────────────────────────────────────────────────────────
+
+alertcondition(alertsEnabled and alertFibRejections and phiBullReject, title="ROM PHI Bull Rejection", message="ROM V3.0c: confirmed bullish PHI rejection")
+alertcondition(alertsEnabled and alertFibRejections and phiBearReject, title="ROM PHI Bear Rejection", message="ROM V3.0c: confirmed bearish PHI rejection")
+alertcondition(alertsEnabled and alertFibAcceptance and phiBullAccept, title="ROM PHI Bull Acceptance", message="ROM V3.0c: confirmed bullish PHI acceptance")
+alertcondition(alertsEnabled and alertFibAcceptance and phiBearAccept, title="ROM PHI Bear Acceptance", message="ROM V3.0c: confirmed bearish PHI acceptance")
+alertcondition(alertsEnabled and alertFibAcceptance and phiBullRetest, title="ROM PHI Bull Retest", message="ROM V3.0c: confirmed bullish PHI retest")
+alertcondition(alertsEnabled and alertFibAcceptance and phiBearRetest, title="ROM PHI Bear Retest", message="ROM V3.0c: confirmed bearish PHI retest")
+alertcondition(alertsEnabled and alertTrendTurns and trendBullTurn, title="ROM Cycle Trend Bull Turn", message="ROM V3.0c: dominant-cycle trend turned bullish")
+alertcondition(alertsEnabled and alertTrendTurns and trendBearTurn, title="ROM Cycle Trend Bear Turn", message="ROM V3.0c: dominant-cycle trend turned bearish")
+alertcondition(alertsEnabled and alertAtrTurns and atrBullTurn, title="ROM ATR Bull Turn", message="ROM V3.0c: ATR trail turned bullish")
+alertcondition(alertsEnabled and alertAtrTurns and atrBearTurn, title="ROM ATR Bear Turn", message="ROM V3.0c: ATR trail turned bearish")
+alertcondition(alertsEnabled and alertCouncilSignals and bullCouncilSignal, title="ROM Council Buy", message="ROM V3.0c: confirmed multi-family BUY council event")
+alertcondition(alertsEnabled and alertCouncilSignals and bearCouncilSignal, title="ROM Council Sell", message="ROM V3.0c: confirmed multi-family SELL council event")
+
+// Plot-budget integrity: detailed diagnostics remain calculated and are shown
+// in the Research Lab dashboard without consuming hidden plot slots.
